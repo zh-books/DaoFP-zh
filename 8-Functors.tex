@@ -1,502 +1,551 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{7}
+    \setcounter{chapter}{7}
 
-\chapter{Functors}
-\section{Categories}
+    \chapter{Functors\\函子}
 
-So far we've only seen only one category---that of types and functions. So let's quickly gather the essential info about a category.
+    \section{Categories\\范畴}
 
-A category is a collection of objects and arrows that go between them. Every pair of composable arrows can be composed. The composition is associative, and there is an identity arrow looping back on every object.
+    到目前为止，我们只看到了一个范畴——即$types$（类型）和$functions$（函数）的范畴。让我们快速总结一下关于范畴的基本信息。
 
-The fact that types and functions form a category can be expressed in Haskell by defining composition as:
-\begin{haskell}
-(.) :: (b -> c) -> (a -> b) -> (a -> c)
-g . f = \x -> g (f x)
-\end{haskell}
-The composition of two functions \hask{g} after \hask{f} is a new function that first applies \hask{f} to its argument and then applies \hask{g} to the result.
+    范畴是一个$objects$（对象）和在它们之间的$arrows$（箭头）的集合。每一对可组合的箭头都可以进行组合。组合是$associative$（结合律的），并且每个对象都有一个自身环绕的$identity$（单位箭头）。
 
-The identity is a polymorphic ``do nothing'' function:
-\begin{haskell}
-id :: a -> a
-id x = x
-\end{haskell}
-You can easily convince yourself that such composition is associative, and composing with \hask{id} does nothing to a function.
+    类型和函数形成范畴的事实可以通过在$Haskell$中定义组合来表达：
 
-Based on the definition of a category, we can come up with all kinds of weird categories. For instance, there is a category that has no objects and no arrows. It satisfies all the condition of a category vacuously. There's another one that contains a single object and a single arrow (can you guess what arrow it is?). There's one with two unconnected objects, and one where the two objects are connected by a single arrow (plus two identity arrows), and so on. These are example of what I call \index{stick-figure category}stick-figure categories---categories with a small handful of objects and arrows.
-\subsection{Category of sets}
+    \begin{haskell}
+    (.) :: (b -> c) -> (a -> b) -> (a -> c)
+    g . f = \x -> g (f x)
+    \end{haskell}
 
-We can also strip a category of all arrows (except for the identity arrows). Such a bare-object category is called a \index{discrete category}\emph{discrete} category or a set\footnote{Ignoring ``size'' issues.}. Since we associate arrows with structure, a set is a category with no structure. 
+    两个函数$g$和$f$的组合是一个新的函数，它首先将$f$应用于其参数，然后将$g$应用于结果。
 
-Sets form their own category called $\mathbf{Set}$\footnote{Again, ignoring ``size'' issues, in particular the non-existence of the set of all sets.}. The objects in that category are sets, and the arrows are functions between sets. Such functions are defined as special kind of relations, which themselves are defined as sets of pairs.
+    $identity$（单位箭头）是一个多态的“无操作”函数：
 
-To the lowest approximation, we can model programming in the category of sets. We often think of types as sets of values, and functions as set-theoretical functions. There's nothing wrong with that. In fact all of categorical constructions we've described so far have their set-theoretical roots. The categorical product is a generalization of the cartesian product of sets, the sum is the disjoint union, and so on. 
+    \begin{haskell}
+        id :: a -> a
+        id x = x
+    \end{haskell}
 
-What category theory offers is more precision: the fine distinction between the structure that is absolutely necessary, and the superfluous details. 
+    你可以很容易地验证这种组合是结合律的，并且与$id$组合不会改变函数的行为。
 
-A set-theoretical function, for instance, doesn't fit the definition of a function we work with as programmers. Our functions must have underlying algorithms because they have to be computable by some physical systems, be it computers or a human brains. 
+    基于范畴的定义，我们可以想到各种奇怪的范畴。例如，有一个范畴没有对象也没有箭头。它满足所有范畴的条件，只是内容为空。还有一个范畴只包含一个对象和一个箭头（你能猜出那个箭头是什么吗？）。有一个范畴包含两个不相连的对象，还有一个范畴的两个对象通过一个箭头（加上两个单位箭头）连接，等等。这些是我称之为“stick-figure categories”（简易范畴）的例子——只包含少量对象和箭头的范畴。
 
-\subsection{Opposite categories}
-In programming, the focus is on the category of types and functions, but we can use this category as a starting point to construct other categories. 
- 
-One such category is called the \emph{opposite} category. This is the category in which all the original arrows are inverted: what is called the source of an arrow in the original category is now called its target, and vice versa. 
+    \subsection{Category of Sets\\集合的范畴}
 
-The opposite of a category $\mathcal{C}$ is called $\mathcal{C}^{op}$. We've had a glimpse of this category when we discussed duality. The objects of $\mathcal{C}^{op}$ are the same as those of $\mathcal{C}$. 
+    我们还可以将一个范畴剥离掉所有的箭头（除了单位箭头）。这样的纯对象范畴称为$discrete category$（离散范畴）或集合。因为我们将箭头与结构关联，因此集合是一个没有结构的范畴。
 
-Whenever there is an arrow $f \colon a \to b$ in $\mathcal{C}$, there is a corresponding arrow $f^{op} \colon b \to a$ in $\mathcal{C}^{op}$. 
+    集合形成了它们自己的范畴，称为$\mathbf{Set}$。在这个范畴中的对象是集合，而箭头是集合之间的函数。这些函数被定义为一种特殊的关系，而关系本身被定义为成对的集合。
 
-The composition $g^{op} \circ f^{op}$ of two such arrows $f^{op} \colon a \to b$ and $g^{op} \colon b \to c$ is given by the arrow $(f \circ g)^{op}$ (notice the reversed order).
+    在最低的近似下，我们可以在集合的范畴中建模编程。我们通常将类型视为值的集合，将函数视为集合论函数。这没有什么问题。事实上，迄今为止我们描述的所有范畴学构造都有其集合论的根源。范畴积是集合笛卡尔积的推广，和则是并集的推广，等等。
 
-The terminal object in  $\mathcal{C}$ is the initial object in $\mathcal{C}^{op}$, the product in  $\mathcal{C}$ is the sum in $\mathcal{C}^{op}$, and so on. 
+    范畴论提供了更高的精确性：它在绝对必要的结构和多余细节之间进行了细致的区分。
 
-\subsection{Product categories}
+    例如，一个集合论函数不符合我们作为程序员所处理的函数定义。我们的函数必须具有底层算法，因为它们必须能够通过某些物理系统（无论是计算机还是人脑）进行计算。
 
-Given two categories $\mathcal{C}$ and $\mathcal{D}$, we can construct a product category $\mathcal{C} \times \mathcal{D}$. The objects in this category are pairs of objects $\langle c, d \rangle $, and the arrows are pairs of arrows. 
+    \subsection{Opposite Categories\\对偶范畴}
 
-If we have an arrow $f \colon c \to c'$ in $\mathcal{C}$ and an arrow $g \colon d \to d'$ in $\mathcal{D}$ then there is a corresponding arrow $\langle f, g \rangle$ in $\mathcal{C} \times \mathcal{D}$.  This arrow goes from $\langle c, d \rangle $ to $\langle c', d' \rangle $, both being objects in $\mathcal{C} \times \mathcal{D}$. Two such arrows can be composed if their components are composable in, respectively, $\mathcal{C}$ and $\mathcal{D}$. An identity arrow is a pair of identity arrows.
+    在编程中，重点是类型和函数的范畴，但我们可以使用这个范畴作为构建其他范畴的起点。
 
-The two product categories we're most interested in are $\mathcal{C} \times \mathcal{C}$ and $\mathcal{C}^{op} \times \mathcal{C}$, where $\mathcal{C}$ is our familiar category of types and functions.
+    其中一个范畴称为$opposite category$（对偶范畴）。这是一个所有原始箭头都被反转的范畴：在原始范畴中称为箭头源的部分现在称为目标，反之亦然。
 
-In both of these categories, objects are pairs of objects from $\mathcal{C}$. In the first category, $\mathcal{C} \times \mathcal{C}$, a morphism from $\langle a, b \rangle $ to $\langle a', b' \rangle $ is a pair $\langle f \colon a \to a', g \colon b \to b' \rangle $. In the second category, $\mathcal{C}^{op} \times \mathcal{C}$, a morphism is a pair $\langle f \colon a' \to a, g \colon b \to b' \rangle $, in which the first arrow goes in the opposite direction.
+    范畴$\mathcal{C}$的对偶称为$\mathcal{C}^{op}$。当我们讨论$duality$（对偶性）时，我们已经窥见过这个范畴。$\mathcal{C}^{op}$的对象与$\mathcal{C}$的对象相同。
 
-\subsection{Slice categories}
+    每当在$\mathcal{C}$中有一个箭头$f \colon a \to b$时，在$\mathcal{C}^{op}$中会有一个对应的箭头$f^{op} \colon b \to a$。
 
-In a neatly organized universe, objects are always objects and arrows are always arrows. Except that sometimes sets of arrows can be thought of as objects. But slice categories break this neat separation: they turn individual arrows into objects. 
+    两个这样的箭头$f^{op} \colon a \to b$和$g^{op} \colon b \to c$的组合$g^{op} \circ f^{op}$由箭头$(f \circ g)^{op}$给出（注意顺序的反转）。
 
-A slice category $\cat C/c$ describes how a particular object $c$ is seen from the perspective of its category $\cat C$. It's the totality of arrows pointing at $c$. But to specify an arrow we need to specify both of its ends. Since one of these ends is fixed to be $c$, we only have to specify the other.
+    $\mathcal{C}$中的$terminal object$（终端对象）是$\mathcal{C}^{op}$中的$initial object$（初始对象），$product$（积）在$\mathcal{C}$中对应于$sum$（和）在$\mathcal{C}^{op}$中，等等。
 
-An object in the  \index{slice category}\emph{slice category} $\mathcal{C}/c$ (also known as an \index{over category}over-category) is a pair $\langle e, p \rangle$, with $p \colon e \to c$.  
+    \subsection{Product Categories\\积范畴}
 
-An arrow between two objects $\langle e, p \rangle$ and $\langle e', p' \rangle$ is an arrow $f \colon e \to e'$ of $\cat C$, which makes the following triangle commute:
+    给定两个范畴$\mathcal{C}$和$\mathcal{D}$，我们可以构造一个$product category$（积范畴）$\mathcal{C} \times \mathcal{D}$。在这个范畴中的对象是成对的对象$\langle c, d \rangle $，箭头是成对的箭头。
 
-\[
- \begin{tikzcd}
- e
- \arrow[rd, "p"']
- \arrow[rr, "f"]
- && e'
- \arrow[ld, "p'"]
- \\
- &c
-  \end{tikzcd}
-\]
+    如果我们在$\mathcal{C}$中有一个箭头$f \colon c \to c'$，并且在$\mathcal{D}$中有一个箭头$g \colon d \to d'$，那么在$\mathcal{C} \times \mathcal{D}$中会有一个对应的箭头$\langle f, g \rangle$。该箭头从$\langle c, d \rangle $指向$\langle c', d' \rangle $，这两者都是$\mathcal{C} \times \mathcal{D}$中的对象。如果它们的组成部分在$\mathcal{C}$和$\mathcal{D}$中分别是可组合的，则可以组合两个这样的箭头。单位箭头是一对单位箭头。
 
-\subsection{Coslice categories}
+    我们最感兴趣的两个积范畴是$\mathcal{C} \times \mathcal{C}$和$\mathcal{C}^{op} \times \mathcal{C}$，其中$\mathcal{C}$是我们熟悉的类型和函数的范畴。
 
-There is a dual notion of a \index{coslice category}coslice category $c / \mathcal{C}$, also known as an \index{under-category}under-category. It's a category of arrows emanating from a fixed object $c$. Objects in this category are pairs $\langle a, i \colon c \to a \rangle$. Morphisms in $c / \mathcal{C}$ are arrows that make the relevant  triangles commute.
-\[
- \begin{tikzcd}
-& c
- \arrow[rd, "j"]
- \arrow[ld, "i"']
- \\
-a
-\arrow[rr, "f"']
-&& b
-  \end{tikzcd}
-\]
+    在这两个范畴中，对象都是$\mathcal{C}$中的成对对象。在第一个范畴$\mathcal{C} \times \mathcal{C}$中，从$\langle a, b \rangle $到$\langle a', b' \rangle $的$morphism$（态射）是一个对$\langle f \colon a \to a', g \colon b \to b' \rangle $。在第二个范畴$\mathcal{C}^{op} \times \mathcal{C}$中，态射是一个对$\langle f \colon a' \to a, g \colon b \to b' \rangle $，其中第一个箭头方向相反。
 
-In particular, if the category $\mathcal{C}$ has a terminal object $1$, then the coslice $1 / \mathcal{C}$ has, as objects, global elements of all the objects of $\mathcal{C}$. 
+    \subsection{Slice Categories\\截面范畴}
 
+    在一个组织良好的宇宙中，对象总是对象，箭头总是箭头。只是有时箭头的集合可以被视为对象。但$slice categories$（截面范畴）打破了这种整洁的分离：它们将单个箭头变成了对象。
 
-Morphisms of $1/  \mathcal{C}$ that correspond to arrows $f \colon a \to b$ map the set of global elements of $a$ to the set of global elements of $b$.
+    $Slice category$ $\cat C/c$描述了从范畴$\cat C$的角度来看特定对象$c$的方式。它是指向$c$的所有箭头的总和。但要指定一个箭头，我们需要指定它的两个端点。由于其中一个端点固定为$c$，我们只需指定另一个端点。
 
- \[
- \begin{tikzcd}
-& 1
- \arrow[rd, "y"]
- \arrow[ld, "x"']
- \\
-a
-\arrow[rr, "f"']
-&& b
-  \end{tikzcd}
-\]
-In particular, the construction of a coslice category from the category of types and functions justifies our intuition of types as sets of values, with values represented by global elements of types. 
-
-\section{Functors}
-
-We've seen examples of functoriality when discussing algebraic data types. The idea is that such a data type ``remembers'' the way it was created, and we can manipulate this memory by applying an arrow to its ``contents.'' 
-
-In some cases this intuition is very convincing: we think of a product type as a pair that ``contains'' its ingredients. After all, we can retrieve them using projections. 
-
-This is less obvious in the case of function objects. You can visualize a function object as secretly storing all possible results and using the function argument to index into them. A function from \hask{Bool} is obviously equivalent to a pair of values, one for \hask{True} and one for \hask{False}. It's a known programming trick to implement some functions as lookup tables. It's called \emph{memoization}. 
-
-Even though it's not practical to memoize functions that take, say, natural numbers as arguments; we can still conceptualize them as (infinite, or even uncountable) lookup tables.
-
-If you can think of a data type as a container of values, it makes sense to apply a function to transform all these values, and create a transformed container. When this is possible, we say that the data type is \emph{functorial}. 
-
-Again, function types require some more suspension of disbelief. You visualize a function object as a lookup table, keyed by some type. If you want to use another, related type as your key, you need a function that translates the new key to the original key. This is why functoriality of the function object has one of the arrows reversed:
-\begin{haskell}
-dimap :: (a' -> a) -> (b -> b') -> (a -> b) -> (a' -> b')
-dimap f g h = g . h . f
-\end{haskell}
-You are applying the transformation to a function \hask{h :: a -> b} that has a ``receptor'' that responds to values of type \hask{a}, and you want to use it to process input of type \hask{a'}. This is only possible if you have a converter from \hask{a'} to \hask{a}, namely \hask{f :: a' -> a}.
-
-
-The idea of a data type ``containing'' values of another type can be also expressed by saying that one data type is paremeterized by another. For instance, the type \hask{List a} is parameterized by the type \hask{a}. 
-
-In other words, \hask{List} maps the type \hask{a} to the type \hask{List a}. \hask{List} by itself, without the argument, is called a \emph{type constructor}. 
-
-\subsection{Functors between categories}
-In category theory, a type constructor is modeled as a mapping of objects to objects. It's a function on objects. This is not to be confused with arrows between objects, which are part of the structure of the category. 
-
-In fact, it's easier to imagine a mapping \emph{between} categories. Every object in the source category is mapped to an object in the target category. If $a$ is an object in $\mathcal{C}$, there is a corresponding object $F a$ in $\mathcal{D}$.
-
-A functorial mapping, or a \emph{functor}, not only maps objects but also arrows between them. Every arrow 
-\[ f \colon a \to b\]
-in the first category has a corresponding arrow in the second category:
-\[ F f \colon F a \to F b\]
-
-
-\[
- \begin{tikzcd}
- a 
- \arrow[d, blue, "f"]
-\arrow[rr, dashed]
- && F a
-  \arrow[d, red, "F f"]
- \\
- b 
- \arrow[rr, dashed]
-&& F b
-  \end{tikzcd}
-\]
-We use the same letter, here $F$, to name both, the mapping of objects and the mapping of arrows. 
-
-If categories distill the essence of \emph{structure}, then functors are mappings that preserve this structure. Objects that are related in the source category are related in the target category. 
-
-The structure of a category is defined by arrows and their composition. Therefore a functor must preserve composition. What is composed in one category:
-\[ h = g \circ f \]
-should remain composed in the second category:
-\[ F h = F (g \circ f) = F g \circ F f \]
-We can either compose two arrows in $\mathcal{C}$ and map the composite to $\mathcal{D}$, or we can map individual arrows and then compose them in $\mathcal{D}$. We demand that the result be the same.
-\[
- \begin{tikzcd}
- a 
- \arrow[d, "f"]
-\arrow[rrr, dashed]
-\arrow[dd, bend right = 70, blue, "g \circ f"']
- &&& F a
-  \arrow[d, "F f"]
-  \arrow[dd, bend left = 70, "F g \circ F f"]
-  \arrow[dd, bend right = 70, red, "F (g \circ f)"']
- \\
- b 
- \arrow[d, "g"]
-&&& F b
- \arrow[d, "F g"]
- \\
- c
- \arrow[rrr, dashed]
-&&& F c
-  \end{tikzcd}
-\]
-
-Finally, a functor must preserve identity arrows:
-\[ F\, id_a = id_{F a} \]
-
-\[
- \begin{tikzcd}
- a 
-  \arrow[loop, blue,  "id_a"']
-\arrow[rr, dashed]
- && F a
-  \arrow[loop, red, "F \, id_{a}"']
-  \arrow[loop, controls={+(2.5, 2.6) and +(-2, 2.5)}, "id_{F a}"']
-  \end{tikzcd}
-\]
-
-These conditions taken together define what it means for a functor to preserve the structure of a category.
-
-It's also important to realize what conditions are \emph{not} part of the definition. For instance, a functor is allowed to map multiple objects into the same object. It can also map multiple arrows into the same arrow, as long as the endpoints match. 
-
-In the extreme, any category can be mapped to a singleton category with one object and one arrow.
-
-Also, not all object or arrows in the target category must be covered by a functor. In the extreme, we can have a functor from the singleton category to any (non-empty) category. Such a functor picks a single object together with its identity arrow.
-
-A \index{constant functor}\emph{constant functor} $\Delta_c$ is an example of a functor that maps all objects from the source category to a single object $c$ in the target category, and all arrows from the source category to a single identity arrow $id_c$.
-
-In category theory, functors are often used to create models of one category inside another. The fact that they can merge multiple objects and arrows into one means that they produce simplified views of the source category. They ``abstract'' some aspects of the source category.
-
-The fact that they may only cover parts of the target category means that the models are embedded in a larger environment.
-
-Functors from some minimalistic, stick-figure, categories can be used to define patterns in larger categories.
-
-\begin{exercise}
-Describe a functor whose source is the \index{walking arrow}``walking arrow'' category. It's a stick-figure category with two objects and a single arrow between them (plus the mandatory identity arrows).
-\[
- \begin{tikzcd}
- a 
-  \arrow[loop,  "id_{a}"']
-\arrow[r, "f"]
- & b
-  \arrow[loop, "id_{b}"']
-  \end{tikzcd}
-\]
-\end{exercise}
-\begin{exercise}
-The ``walking iso'' category is just like the ``walking arrow'' category, plus one more arrow going back from $b$ to $a$. Show that a functor from this category always picks an isomorphism in the target category. 
-\end{exercise}
-
-\section{Functors in Programming}
-
-Endofunctors are the class of functors that are the easiest to express in a programming language. These are functors that map a category (here, the category of types and functions) to itself. 
-
-\subsection{Endofunctors}
-The first part of the endofunctor is the mapping of types to types. This is done using type constructors, which are type-level functions. 
-
-The list type constructor, \hask{List}, maps an arbitrary type \hask{a} to the type \hask{List a}.
-
-The \hask{Maybe} type constructor maps \hask{a} to \hask{Maybe a}.
-
-The second part of an endofunctor is the mapping of arrows. Given a function \hask{a -> b}, we want to be able to define a function \hask{List a -> List b}, or \hask{Maybe a -> Maybe b}. This is the ``functoriality'' property of these data types that we have discussed before. Functoriality lets us \index{lifting}\emph{lift} an arbitrary function to a function between transformed types.
-
-Functoriality can be expressed in Haskell using a \index{\hask{typeclass}}\emph{typeclass}. In this case, the typeclass is parameterized by a type constructor \hask{f} (in Haskell we use lower case names for type-constructor variables). We say that \hask{f} is a \hask{Functor} if there is a corresponding mapping of functions called \hask{fmap}:
-\begin{haskell}
-class Functor f where
-  fmap :: (a -> b) -> (f a -> f b)
-\end{haskell}
-The compiler knows that \hask{f} is a type constructor because it's applied to types, as in \hask{f a} and \hask{f b}.
-
-To prove to the compiler that a particular type constructor is a \hask{Functor}, we have to provide the implementation of \hask{fmap} for it. This is done by defining an \index{class instance}\index{\hask{instance}}\emph{instance} of the typeclass \hask{Functor}. For example:
-\begin{haskell}
-instance Functor Maybe where
-  fmap g Nothing  = Nothing
-  fmap g (Just a) = Just (g a)
-\end{haskell}
-
-A functor must also satisfy some laws: it must preserve composition and identity. These laws cannot be expressed in Haskell, but should be checked by the programmer. We have previously seen a definition of \hask{badMap} that didn't satisfy the identity laws, yet it would be accepted by the compiler. It would define an ``unlawful'' instance of \hask{Functor} for the list type constructor \hask{[]}.
-
-\begin{exercise}
-Show that \hask{WithInt} is a functor
-\begin{haskell}
-data WithInt a = WithInt a Int
-\end{haskell}
-\end{exercise}
-
-There are some elementary functors that might seem trivial, but they serve as building blocks for other functors. 
-
-We have the identity endofunctor that maps all objects to themselves, and all arrows to themselves. 
-\begin{haskell}
-data Id a = Id a
-\end{haskell}
-\begin{exercise}
-Show that \hask{Id} is a \hask{Functor}. Hint: implement the \hask{Functor} instance for it.
-\end{exercise}
-
-
-We also have a constant functor $\Delta_c$ that maps all objects to a single object $c$, and all arrows to the identity arrow on this object. In Haskell, it's a family of functors parameterized by the target object \hask{c}:
-\begin{haskell}
-data Const c a = Const c
-\end{haskell}
-This type constructor ignores its second argument.
+    在$\mathcal{C}/c$中的一个对象（也称为$over-category$）是一个对$\langle e, p \rangle$，其中$p \colon e \to c$。
 
+    在两个对象$\langle e, p \rangle$和$\langle e', p' \rangle$之间的箭头是$\cat C$的一个箭头$f \colon e \to e'$，它使得以下三角形交换：
 
-\begin{exercise}
-Show that \hask{(Const c)} is a \hask{Functor}. Hint: The type constructor takes two arguments, but in the \hask{Functor} instance it's partially applied to the first argument. It is functorial in the second argument.
-\end{exercise}
+    \[
+        \begin{tikzcd}
+            e
+            \arrow[rd, "p"']
+            \arrow[rr, "f"]
+            && e'
+            \arrow[ld, "p'"]
+            \\
+            &c
+        \end{tikzcd}
+    \]
 
+    \subsection{Coslice Categories\\余截面范畴}
 
-\subsection{Bifunctors}
+    存在一个$coslice category$（余截面范畴）$c / \mathcal{C}$的对偶概念，也称为$under-category$。它是从固定对象$c$发出的箭头的范畴。在这个范畴中的对象是成对的$\langle a, i \colon c \to a \rangle$。$c / \mathcal{C}$中的态射是使相关三角形交换的箭头。
 
-We have also seen data constructors that take two types as arguments: the product and the sum. They were functorial as well, but instead of lifting a single function, they lifted a pair of functions. In category theory, we would define these as functors from the product category $\mathcal{C} \times \mathcal{C}$ to $\mathcal{C}$.
+    \[
+        \begin{tikzcd}
+            & c
+            \arrow[rd, "j"]
+            \arrow[ld, "i"']
+            \\
+            a
+            \arrow[rr, "f"']
+            && b
+        \end{tikzcd}
+    \]
+
+    特别地，如果范畴$\mathcal{C}$有一个$terminal object$（终端对象）$1$，那么$coslice$ $1 / \mathcal{C}$中的对象就是$\mathcal{C}$中所有对象的$global elements$（全局元素）。
+
+    $1/  \mathcal{C}$的态射对应于箭头$f \colon a \to b$，它将$a$的全局元素集合映射到$b$的全局元素集合。
+
+    \[
+        \begin{tikzcd}
+            & 1
+            \arrow[rd, "y"]
+            \arrow[ld, "x"']
+            \\
+            a
+            \arrow[rr, "f"']
+            && b
+        \end{tikzcd}
+    \]
+    特别地，从类型和函数的范畴构建余截面范畴验证了我们将类型视为值的集合的直觉，其中值由类型的全局元素表示。
+
+    \section{Functors\\函子}
+
+    我们在讨论代数数据类型时已经看到了$functoriality$（函子性）的例子。其思想是这种数据类型“记住”了其创建的方式，并且我们可以通过将一个箭头应用到其“内容”上来操控这种记忆。
+
+    在某些情况下，这种直觉非常有说服力：我们将$product type$（积类型）视为一个包含其成分的对。毕竟，我们可以通过$projections$（投影）来获取它们。
+
+    在$function objects$（函数对象）的情况下，这一点不太明显。你可以将函数对象可视化为暗地里存储所有可能的结果，并使用函数参数对它们进行索引。一个从$Bool$到其他类型的函数显然等同于一个值对，一个用于$True$，另一个用于$False$。将某些函数实现为$lookup tables$（查找表）是一个众所周知的编程技巧。它称为$memoization$（备忘录化）。
 
-Such functors map a pair of objects to an object, and a pair of arrows to an arrow. 
+    尽管将以自然数作为参数的函数备忘录化并不现实；我们仍然可以将它们概念化为（无限或甚至不可数的）查找表。
 
-In Haskell, we treat such functors as members of a separate class called \hask{Bifunctor}.
+    如果你可以将数据类型视为值的容器，那么将函数应用于所有这些值并创建一个变换后的容器是有意义的。当这种可能存在时，我们称该数据类型是$functorial$（函子性的）。
 
-\begin{haskell}
-class Bifunctor f where
-  bimap :: (a -> a') -> (b -> b') -> (f a b -> f a' b')
-\end{haskell}
-Again, the compiler deduces that \hask{f} is a two-argument type constructor because it sees it applied to two types, e.g., \hask{f a b}.
+    同样，函数类型需要更多的“怀疑暂停”。你将函数对象视为一个查找表，以某种类型为键。如果你想使用另一种相关类型作为键，你需要一个将新键转换为原始键的函数。这就是为什么函数对象的函子性之一是反向箭头：
 
-To prove to the compiler that a particular type constructor is a \hask{Bifunctor}, we define an instance. For example, bifunctoriality of a pair can be defined as:
-\begin{haskell}
-instance Bifunctor (,) where
-  bimap g h (a, b) = (g a, h b)
-\end{haskell}
+    \begin{haskell}
+        dimap :: (a' -> a) -> (b -> b') -> (a -> b) -> (a' -> b')
+        dimap f g h = g . h . f
+    \end{haskell}
 
-\begin{exercise}
-Show that \hask{MoreThanA} is a bifunctor.
-\begin{haskell}
-data MoreThanA a b = More a (Maybe b)
-\end{haskell}
-\end{exercise}
+    你正在将转换应用于一个具有对类型$a$的值作出响应的“受体”的函数$h :: a -> b$，并且你希望使用它来处理$a'$类型的输入。这仅在你有一个从$a'$到$a$的转换器时可能，即$f :: a' -> a$。
+
+    一个数据类型“包含”另一个类型的值的概念也可以通过说一个数据类型被另一个数据类型参数化来表达。例如，类型$List$ $a$是由类型$a$参数化的。
+
+    换句话说，$List$将类型$a$映射为类型$List a$。没有参数的$List$本身被称为$type constructor$（类型构造子）。
+
+    \subsection{Functors between Categories\\范畴之间的函子}
+
+    在范畴论中，类型构造子被建模为对象到对象的映射。它是一个作用于对象的函数。这不要与对象之间的箭头混淆，后者是范畴结构的一部分。
+
+    事实上，想象一个$categories$（范畴之间）的映射更容易。源范畴中的每个对象都映射到目标范畴中的一个对象。如果$a$是$\mathcal{C}$中的一个对象，那么在$\mathcal{D}$中有一个对应的对象$F a$。
+
+    $Functorial mapping$（函子映射），或$functor$（函子），不仅映射对象，还映射它们之间的箭头。在第一个范畴中的每个箭头
+    $f \colon a \to b$在第二个范畴中都有一个对应的箭头：
+    $F f \colon F a \to F b$。
 
+    \[
+        \begin{tikzcd}
+            a
+            \arrow[d, blue, "f"]
+            \arrow[rr, dashed]
+            && F a
+            \arrow[d, red, "F f"]
+            \\
+            b
+            \arrow[rr, dashed]
+            && F b
+        \end{tikzcd}
+    \]
 
-\subsection{Contravariant functors}
+    我们使用相同的字母（此处为$F$）来命名对象映射和箭头映射。
 
-Functors from the opposite category $\mathcal{C}^{op}$ are called \emph{contravariant}. They have the property of lifting arrows that go in the opposite direction. Regular functors are sometimes called \index{covariant functor}\emph{covariant}.
+    如果范畴提炼出$structure$（结构）的本质，那么函子就是保留这种结构的映射。在源范畴中相关的对象在目标范畴中也相关。
 
-In Haskell, contravariant functors form the typeclass \hask{Contravariant}:
-\begin{haskell}
-class Contravariant f where
-  contramap :: (b -> a) -> (f a -> f b)
-\end{haskell}
+    范畴的结构由箭头及其组合定义。因此，函子必须保留组合。在一个范畴中组合的内容：
+    $h = g \circ f$
+    应该在第二个范畴中保持组合：
+    $F h = F (g \circ f) = F g \circ F f$
 
-It's often convenient to think of functors in terms of producers and consumers. In this analogy, a (covariant) functor is a producer. You can turn a producer of \hask{a}'s into a producer of \hask{b}'s by applying (using \hask{fmap}) a function \hask{a->b}. Conversely, to turn a consumer of \hask{a}'s to a consumer of \hask{b}'s you need a function going in the opposite direction, \hask{b->a}. 
+    我们可以在$\mathcal{C}$中组合两个箭头并将复合映射到$\mathcal{D}$，或者我们可以映射单个箭头，然后在$\mathcal{D}$中组合它们。我们要求结果相同。
 
-Example: A predicate is a function returning \hask{True} or \hask{False}:
-\begin{haskell}
-data Predicate a = Predicate (a -> Bool)
-\end{haskell}
-It's easy to see that it's a contravariant functor:
-\begin{haskell}
-instance Contravariant Predicate where
-  contramap f (Predicate h) = Predicate (h . f)
-\end{haskell}
+    \[
+        \begin{tikzcd}
+            a
+            \arrow[d, "f"]
+            \arrow[rrr, dashed]
+            \arrow[dd, bend right = 70, blue, "g \circ f"']
+            &&& F a
+            \arrow[d, "F f"]
+            \arrow[dd, bend left = 70, "F g \circ F f"]
+            \arrow[dd, bend right = 70, red, "F (g \circ f)"']
+            \\
+            b
+            \arrow[d, "g"]
+            &&& F b
+            \arrow[d, "F g"]
+            \\
+            c
+            \arrow[rrr, dashed]
+            &&& F c
+        \end{tikzcd}
+    \]
 
-In practice, the only non-trivial examples of contravariant functors are variations on the theme of function objects. 
+    最后，函子必须保留$identity arrows$（单位箭头）：
+    $F\, id_a = id_{F a}$
 
-One way to tell if a given function type is covariant or contravariant in one of the type arguments is by assigning polarities to the types used in its definition. We say that the return type of a function is in a \emph{positive} position, so it's covariant; and the argument type is in the \emph{negative} position, so it's contravariant. But if you put the whole function object in the negative position of another function, then its polarities get reversed. 
+    \[
+        \begin{tikzcd}
+            a
+            \arrow[loop, blue,  "id_a"']
+            \arrow[rr, dashed]
+            && F a
+            \arrow[loop, red, "F \, id_{a}"']
+            \arrow[loop, controls={+(2.5, 2.6) and +(-2, 2.5)}, "id_{F a}"']
+        \end{tikzcd}
+    \]
 
-Consider this data type:
-\begin{haskell}
-data Tester a = Tester ((a -> Bool) -> Bool)
-\end{haskell}
-It has \hask{a} in a double-negative, therefore a positive position. This is why it's a covariant \hask{Functor}. It acts as a producer of \hask{a}'s:
+    这些条件一起定义了什么是保持范畴结构的函子。
 
-\begin{haskell}
-instance Functor Tester where
-  fmap f (Tester g) = Tester g'
-    where g' h = g (h . f)
-\end{haskell}
+    同样重要的是要理解什么条件不属于定义的一部分。例如，允许一个函子将多个对象映射为一个对象。它还可以将多个箭头映射为一个箭头，只要它们的端点匹配。
 
-Notice that parentheses are important here. A similar function \hask{a -> Bool -> Bool} has \hask{a} in a \emph{negative} position. That's because it's a function of \hask{a} returning a function \hask{(Bool -> Bool)}. Equivalently, you may uncurry it to get a function that takes a pair: \hask{(a, Bool) -> Bool}. Either way, \hask{a} ends up in the negative position.
+    极端情况下，任何范畴都可以映射到一个只有一个对象和一个箭头的单例范畴。
 
-\subsection{Profunctors}
+    此外，目标范畴中的所有对象或箭头不一定都必须由函子覆盖。极端情况下，我们可以将一个单例范畴的函子映射到任何（非空）范畴。这样的函子选择一个单一对象及其单位箭头。
 
-We've seen before that the function type is functorial. It lifts two functions at a time, just like \hask{Bifunctor}, except that one of the functions goes in the opposite direction. 
+    $Constant functor$（常量函子）$\Delta_c$是一个函子的例子，它将源范畴中的所有对象映射到目标范畴中的一个对象$c$，并将源范畴中的所有箭头映射到该对象的单位箭头$id_c$。
 
-In category theory this corresponds to a functor from a product of two categories, one of them being the opposite category: it's a functor from $\mathcal{C}^{op} \times \mathcal{C}$. Functors from $\mathcal{C}^{op} \times \mathcal{C}$ to $\mathbf{Set}$ are called \emph{profunctors}.
+    在范畴论中，函子常用于在另一个范畴内部创建一个范畴的模型。它们能够将多个对象和箭头合并为一个，这意味着它们生成了源范畴的简化视图。它们“抽象”了源范畴的某些方面。
 
-In Haskell, profunctors form a typeclass:
-\begin{haskell}
-class Profunctor f where
-  dimap :: (a' -> a) -> (b -> b') -> (f a b -> f a' b')
-\end{haskell}
+    它们可能只覆盖目标范畴的某些部分，这意味着这些模型嵌入在一个更大的环境中。
 
-You may think of a profunctor as a type that's simultaneously a producer and a consumer. It consumes one type and produces another.
+    从某些极小的“stick-figure categories”简易范畴（例如具有两个对象和一个箭头的范畴）中导出的函子可用于定义更大范畴中的模式。
 
-The function type, which can be written as an infix operator \hask{(->)}, is an instance of \hask{Profunctor}
-\begin{haskell}
-instance Profunctor (->) where
-  dimap f g h = g . h . f
-\end{haskell}
-This is in accordance with our intuition that a function \hask{a->b} consumes arguments of the type \hask{a} and produces results of the type \hask{b}.
+    \begin{exercise}
+        描述一个源自“$walking arrow$”范畴的函子。它是一个只有两个对象和一个箭头的简易范畴（再加上必需的单位箭头）。
+        \[
+            \begin{tikzcd}
+                a
+                \arrow[loop,  "id_{a}"']
+                \arrow[r, "f"]
+                & b
+                \arrow[loop, "id_{b}"']
+            \end{tikzcd}
+        \]
+    \end{exercise}
 
-In programming, all non-trivial profunctors are variations on the function type. 
+    \begin{exercise}
+        “$walking iso$”范畴与“$walking arrow$”范畴相似，但多了一个从$b$回到$a$的箭头。证明从这个范畴出发的函子总是选择目标范畴中的一个同构。
+    \end{exercise}
 
-\section{The Hom-Functor}
+    \section{Functors in Programming\\编程中的函子}
 
-Arrows between any two objects form a set. This set is called a hom-set and is usually written using the name of the category followed by the names of the objects:
-\[ \mathcal{C}(a, b) \]
+    $Endofunctors$（自函子）是最容易在编程语言中表达的函子类。这些函子将一个范畴（此处为类型和函数的范畴）映射回自身。
 
-We can interpret the hom-set $\mathcal{C}(a, b)$ as all the ways $b$ can be observed from $a$. 
+    \subsection{Endofunctors\\自函子}
 
-Another way of looking at hom-sets is to say that they define a mapping that assigns a set $\mathcal{C}(a, b)$ to every pair of objects. Sets themselves are objects in the category $\mathbf{Set}$. So we have a mapping between categories.
+    自函子的第一部分是将类型映射到类型。这是通过类型构造子完成的，它们是类型级别的函数。
 
-This mapping is functorial. To see that, let's consider what happens when we transform the two objects $a$ and $b$. We are interested in a transformation that would map the set $\mathcal{C}(a, b)$ to the set $\mathcal{C}(a', b')$. Arrows in $\mathbf{Set}$ are regular functions, so it's enough to define their action on individual elements of a set. 
+    $List$类型构造子将一个任意类型$a$映射为类型$List a$。
 
-An element of $\mathcal{C}(a, b)$ is an arrow $h \colon a \to b$ and an element of $\mathcal{C}(a', b')$ is an arrow $h' \colon a' \to b'$. We know how to transform one into another: we need to pre-compose $h$ with an arrow $g' \colon a' \to a$ and post-compose it with an arrow $g \colon b \to b'$. 
+    $Maybe$类型构造子将$a$映射为$Maybe a$。
 
-In other words, the mapping that takes a pair $\langle a, b \rangle$ to the set $\mathcal{C}(a, b)$ is a \emph{profunctor}:
-\[ \mathcal{C}^{op} \times \mathcal{C} \to \mathbf{Set} \]
+    自函子的第二部分是箭头的映射。给定一个函数$a \to b$，我们希望能够定义一个函数$List a \to List b$或$Maybe a \to Maybe b$。这就是我们之前讨论过的数据类型的$functoriality$（函子性）。函子性使我们能够$lift$（提升）一个任意的函数到变换后的类型之间的函数。
 
-Frequently, we are interested in varying only one of the objects, keeping the other fixed. When we fix the source object and vary the target, the result is a functor  that is written as:
-\[ \mathcal{C}(a, -) \colon \mathcal{C} \to \mathbf{Set} \]
-The action of this functor on an arrow $g \colon b \to b'$ is written as:
-\[ \mathcal{C}(a, g) \colon \mathcal{C}(a, b) \to \mathcal{C}(a, b') \]
-and is given by post-composition:
-\[\mathcal{C}(a, g) = (g \circ -) \]
+    函子性可以在$Haskell$中通过一个$typeclass$（类型类）来表达。在这种情况下，类型类由类型构造子$f$参数化（在$Haskell$中我们使用小写名称作为类型构造子变量）。我们说$f$是一个$Functor$，如果存在一个相应的函数映射，称为$fmap$：
 
-Varying $b$ means switching focus from one object to another, so the complete functor $\mathcal{C}(a, -)$ combines all the arrows emanating from $a$ into a coherent view of the category from the perspective of $a$. It is ``the world according to $a$.''
+    \begin{haskell}
+        class Functor f where
+        fmap :: (a -> b) -> (f a -> f b)
+    \end{haskell}
 
-Conversely, when we fix the target and vary the source of the hom-functor, we get a contravariant functor:
-\[ \mathcal{C}(-, b) \colon \mathcal{C}^{op} \to \mathbf{Set} \]
-whose action on an arrow $g' \colon a' \to a$ is written as:
-\[ \mathcal{C}(g', b) \colon \mathcal{C}(a, b) \to \mathcal{C}(a', b) \]
-and is given by pre-composition:
-\[\mathcal{C}(g', b) = (- \circ g') \]
+    编译器知道$f$是一个类型构造子，因为它被应用于类型，例如$f a$和$f b$。
 
-The functor $\mathcal{C}(-, b)$ organizes all the arrows pointing at $b$ into one coherent view. It is the picture of $b$ ``as it's seen by the world.''
+    要向编译器证明特定类型构造子是一个$Functor$，我们必须为其提供$fmap$的实现。这通过定义类型类$Functor$的一个$instance$（实例）来实现。例如：
 
-We can now reformulate the results from the chapter on isomorphisms. If two objects $a$ and $b$ are isomorphic, then their hom-sets are also isomorphic. In particular:
-\[\mathcal{C}(a, x) \cong \mathcal{C}(b, x)\]
-and 
-\[\mathcal{C}(x, a) \cong \mathcal{C}(x, b)\]
-We'll discuss naturality conditions in the next chapter.
+    \begin{haskell}
+        instance Functor Maybe where
+        fmap g Nothing  = Nothing
+        fmap g (Just a) = Just (g a)
+    \end{haskell}
 
-Another way of looking at the hom-functor $\cat C(a, -)$ is as an oracle that  provides answers to the question: ``Is $a$ connected to me?'' If the set $\cat C(a, x)$ is empty, the answer is negative: ``$a$ is not connected to $x$.'' Otherwise, every element of the set $\cat C(a, x)$ is a proof that such connection exists. 
+    一个函子还必须满足一些定律：它必须保持组合性和单位性。这些定律不能在$Haskell$中表达，但应该由程序员检查。我们之前已经看到过一个$badMap$的定义，它不满足单位定律，但它仍然会被编译器接受。它为列表类型构造子$[]$定义了一个“非法”的$Functor$实例。
 
-Conversely, the contravariant functor $\cat C (-, a)$ answers the question: ``Am I connected to $a$?''
+    \begin{exercise}
+        证明$WithInt$是一个函子：
+        \begin{haskell}
+            data WithInt a = WithInt a Int
+        \end{haskell}
+    \end{exercise}
 
-Taken together, the profunctor $\cat C(x, y)$ establishes a \index{proof-relevant relation}\emph{proof-relevant} relation between objects. Every element of the set $\cat C(x, y)$ is a proof that $x$ is connected to $y$. If the set is empty, the two objects are unrelated. 
+    有一些基本的函子可能看起来很简单，但它们作为其他函子的构建块发挥了作用。
 
-\section{Functor Composition}
+    我们有一个$identity endofunctor$（恒等自函子），它将所有对象映射到自身，并将所有箭头映射到自身。
 
-Just like we can compose functions, we can compose functors. Two functors are composable if the target category of one is the source category of the other.
+    \begin{haskell}
+        data Id a = Id a
+    \end{haskell}
 
- On objects, functor composition of $G$ after $F$ first applies $F$ to an object, then applies $G$ to the result; and similarly on arrows.
- 
- Obviously, you can only compose composable functors. However all \emph{endofunctors} are composable, since their target category is the same as the source category.
- 
- In Haskell, a functor is a parameterized data type, so the composition of two functors is again a parameterized data type. On objects, we define:
- \begin{haskell}
-data Compose g f a = Compose (g (f a))
-\end{haskell}
-The compiler figures out that \hask{f} and \hask{g} must be type constructors because they are applied to types: \hask{f} is applied to the type parameter \hask{a}, and \hask{g} is applied to the resulting type.
+    \begin{exercise}
+        证明$Id$是一个$Functor$。提示：为其实现$Functor$实例。
+    \end{exercise}
 
-Alternatively, you can tell the compiler that the first two arguments to \hask{Compose} are type constructors. You do this by providing a \index{kind signatures}\emph{kind signature}, which requires a language extension \hask{KindSignatures} that you put at the top of the source file:
-\begin{haskell}
-{-# language KindSignatures #-}
-\end{haskell}
-You should also import the \hask{Data.Kind} library that defines \hask{Type}:
-\begin{haskell}
-import Data.Kind
-\end{haskell}
+    我们还有一个常量函子$\Delta_c$，它将所有对象映射到一个单一对象$c$，并将所有箭头映射到该对象的单位箭头$id_c$。在$Haskell$中，它是一个以目标对象$c$为参数的函子族：
 
-A kind signature is just like a type signature, except that it can be used to describe functions operating on types. 
+    \begin{haskell}
+        data Const c a = Const c
+    \end{haskell}
 
-Regular types have the kind \hask{Type}. Type constructors have the kind \hask{Type -> Type}, since they map types to types. 
+    这个类型构造子忽略了其第二个参数。
 
-\hask{Compose} takes two type constructors and produces a type constructor, so its kind signature is:
-\begin{haskell}
-(Type -> Type) -> (Type -> Type) -> (Type -> Type) 
-\end{haskell}
-and the full definition is:
-\begin{haskell}
-data Compose :: (Type -> Type) -> (Type -> Type) -> (Type -> Type) 
-  where
-    Compose :: (g (f a)) -> Compose g f a
-\end{haskell}
+    \begin{exercise}
+        证明$(Const c)$是一个$Functor$。提示：该类型构造子接受两个参数，但在$Functor$实例中，它只对第一个参数部分应用。在第二个参数中，它是函子性的。
+    \end{exercise}
 
-Any two type constructors can be composed this way. There is no requirement, at this point, that they be functors. 
+    \subsection{Bifunctors\\双函子}
 
-However, if we want to lift a function using the composition of type constructors, \hask{g} after \hask{f}, then they must be functors. This requirement is encoded as a constraint in the instance declaration:
-\begin{haskell}
-instance (Functor g, Functor f) => Functor (Compose g f) where
-  fmap h (Compose gfa) = Compose (fmap (fmap h) gfa)
-\end{haskell}
-The constraint \hask{(Functor g, Functor f)} expresses the condition that both type constructors be instances of the \hask{Functor} class. The constraints are followed by a double arrow. 
+    我们还看到了一些类型构造子，它们接受两个类型作为参数：如积和和类型。它们也是函子性的，但它们提升一对函数而不是一个函数。在范畴论中，我们将这些定义为从积范畴$\mathcal{C} \times \mathcal{C}$到$\mathcal{C}$的函子。
 
-The type constructor whose functoriality we are establishing is \hask{Compose f g}, which is a partial application of \hask{Compose} to two functors. 
+    这样的函子将一对对象映射到一个对象，并将一对箭头映射到一个箭头。
 
-In the implementation of \hask{fmap}, we pattern match on the data constructor \hask{Compose}. Its argument \hask{gfa} is of the type \hask{g (f a)}. We use one \hask{fmap} to ``get under'' \hask{g}. Then we use \hask{(fmap h)} to get under \hask{f}. The compiler knows which \hask{fmap} to use by analyzing the types. 
+    在$Haskell$中，我们将这样的函子视为$Bifunctor$类型类的成员。
 
-You may visualize a composite functor as a container of containers. For instance, the composition of \hask{[]} with \hask{Maybe} is a list of optional values. 
+    \begin{haskell}
+        class Bifunctor f where
+        bimap :: (a -> a') -> (b -> b') -> (f a b -> f a' b')
+    \end{haskell}
 
-\begin{exercise}
-Define a composition of a \hask{Functor} after \hask{Contravariant}. Hint: You can reuse \hask{Compose}, but you have to provide a different instance declaration.
-\end{exercise}
+    编译器通过查看它被应用于两个类型（例如$f a b$）来推断$f$是一个两个参数的类型构造子。
 
+    要向编译器证明特定类型构造子是一个$Bifunctor$，我们需要定义一个实例。例如，可以这样定义一个对的双函子性：
 
-\subsection{Category of categories}
+    \begin{haskell}
+        instance Bifunctor (,) where
+        bimap g h (a, b) = (g a, h b)
+    \end{haskell}
 
-We can view functors as arrows between categories. As we've just seen, functors are composable and it's easy to check that this composition is associative. We also have an identity (endo-) functor for every category. So categories themselves seem to form a category, let's call it $\mathbf{Cat}$. 
+    \begin{exercise}
+        证明$MoreThanA$是一个双函子：
+        \begin{haskell}
+            data MoreThanA a b = More a (Maybe b)
+        \end{haskell}
+    \end{exercise}
 
-And this is where mathematicians start worrying about ``size'' issues. It's a shorthand for saying that there are paradoxes lurking around. So the correct incantation is that $\mathbf{Cat}$ is a category of \emph{small} categories. But as long as we are not engaged in proofs of existence, we can ignore size problems.
+    \subsection{Contravariant Functors\\逆变函子}
+
+    从对偶范畴$\mathcal{C}^{op}$出发的函子称为$contravariant$（逆变）的。它们的特点是提升箭头的方向相反。通常的函子有时称为$covariant$（协变）的。
+
+    在$Haskell$中，逆变函子构成了一个类型类$Contravariant$：
+
+    \begin{haskell}
+        class Contravariant f where
+        contramap :: (b -> a) -> (f a -> f b)
+    \end{haskell}
+
+    将函子分为生产者和消费者有时很方便。在这个类比中，协变函子是一个生产者。你可以通过应用$fmap$一个$a -> b$的函数，将一个$a$的生产者转变为一个$b$的生产者。相反，要将一个$a$的消费者转变为一个$b$的消费者，你需要一个反向的函数$b -> a$。
+
+    例子：一个谓词是一个返回$True$或$False$的函数：
+
+    \begin{haskell}
+        data Predicate a = Predicate (a -> Bool)
+    \end{haskell}
+
+    很容易看出它是一个逆变函子：
+
+    \begin{haskell}
+        instance Contravariant Predicate where
+        contramap f (Predicate h) = Predicate (h . f)
+    \end{haskell}
+
+    实际上，逆变函子的唯一非平凡例子是函数对象的各种变体。
+
+    一种判断给定函数类型在其类型参数上是协变还是逆变的方法是通过分配极性。我们说函数的返回类型处于正位置，因此它是协变的；参数类型处于负位置，因此它是逆变的。但是，如果你将整个函数对象放在另一个函数的负位置上，那么它的极性就会反转。
+
+    考虑这个数据类型：
+
+    \begin{haskell}
+        data Tester a = Tester ((a -> Bool) -> Bool)
+    \end{haskell}
+
+    它将$a$放在双负位置上，因此是正位置。因此它是一个协变的$Functor$。它作为$a$的生产者：
+
+    \begin{haskell}
+        instance Functor Tester where
+        fmap f (Tester g) = Tester g'
+        where g' h = g (h . f)
+    \end{haskell}
+
+    注意这里的括号是重要的。类似的函数$a -> Bool -> Bool$将$a$放在负位置上。因为它是一个从$a$返回函数$(Bool -> Bool)$的函数。等价地，你可以将其变为一个接受对的函数：$(a, Bool) -> Bool$。无论哪种方式，$a$最终都在负位置上。
+
+    \subsection{Profunctors\\变截函子}
+
+    我们之前看到函数类型是函子性的。它一次提升两个函数，就像$Bifunctor$一样，只不过其中一个函数的方向相反。
+
+    在范畴论中，这对应于一个从$\mathcal{C}^{op} \times \mathcal{C}$到$\mathbf{Set}$的函子。这样的函子称为$Profunctors$（变截函子）。
+
+    在$Haskell$中，变截函子形成了一个类型类$Profunctor$：
+
+    \begin{haskell}
+        class Profunctor f where
+        dimap :: (a' -> a) -> (b -> b') -> (f a b -> f a' b')
+    \end{haskell}
+
+    你可以将一个变截函子视为一个同时是生产者和消费者的类型。它消耗一种类型并产生另一种类型。
+
+    函数类型$a -> b$可以写成中缀运算符$->$，它是$Profunctor$的一个实例：
+
+    \begin{haskell}
+        instance Profunctor (->) where
+        dimap f g h = g . h . f
+    \end{haskell}
+
+    这与我们的直觉一致，即一个函数$a -> b$消耗类型$a$的参数并产生类型$b$的结果。
+
+    在编程中，所有非平凡的变截函子都是函数类型的变体。
+
+    \section{The Hom-Functor\\Hom函子}
+
+    两个对象之间的箭头形成一个集合。这个集合称为$hom-set$（同态集），通常写作$\mathcal{C}(a, b)$。
+
+    我们可以将$hom-set$ $\mathcal{C}(a, b)$解释为从$a$观察$b$的所有方式。
+
+    另一种看待$hom-sets$的方式是将它们视为一个映射，它将一个集合$\mathcal{C}(a, b)$分配给每对对象。集合本身是$\mathbf{Set}$范畴中的对象。所以我们有一个范畴之间的映射。
+
+    这个映射是函子性的。要看到这一点，让我们考虑当我们转换两个对象$a$和$b$时会发生什么。我们感兴趣的是一个将集合$\mathcal{C}(a, b)$映射到集合$\mathcal{C}(a', b')$的转换。$\mathbf{Set}$中的箭头是常规函数，因此只需定义它们在集合上对单个元素的操作。
+
+    $\mathcal{C}(a, b)$的元素是一个箭头$h \colon a \to b$，$\mathcal{C}(a', b')$的元素是一个箭头$h' \colon a' \to b'$。我们知道如何将一个转换为另一个：我们需要用箭头$g' \colon a' \to a$对$h$进行前组合，并用箭头$g \colon b \to b'$对它进行后组合。
+
+    换句话说，将对$\langle a, b \rangle$的一对对象映射为集合$\mathcal{C}(a, b)$的映射是一个$profunctor$：
+
+    $\mathcal{C}^{op} \times \mathcal{C} \to \mathbf{Set}$
+
+    我们经常感兴趣的是在保持一个对象固定的情况下变换另一个对象。当我们固定源对象并变换目标对象时，结果是一个函子，写作：
+
+    $\mathcal{C}(a, -) \colon \mathcal{C} \to \mathbf{Set}$
+
+    这个函子在箭头$g \colon b \to b'$上的作用写作：
+
+    $\mathcal{C}(a, g) \colon \mathcal{C}(a, b) \to \mathcal{C}(a, b')$
+
+    它通过后组合给出：
+
+    $\mathcal{C}(a, g) = (g \circ -)$
+
+    变换$b$意味着从一个对象切换到另一个对象，因此完整的函子$\mathcal{C}(a, -)$将所有从$a$发出的箭头组合成一个一致的范畴视图。这是“a的世界观”。
+
+    相反，当我们固定目标对象并变换源对象时，我们得到一个逆变函子：
+
+    $\mathcal{C}(-, b) \colon \mathcal{C}^{op} \to \mathbf{Set}$
+
+    其作用在箭头$g' \colon a' \to a$上写作：
+
+    $\mathcal{C}(g', b) \colon \mathcal{C}(a, b) \to \mathcal{C}(a', b)$
+
+    它通过前组合给出：
+
+    $\mathcal{C}(g', b) = (- \circ g')$
+
+    函子$\mathcal{C}(-, b)$将所有指向$b$的箭头组织成一个一致的视图。它是“b的世界观”。
+
+    我们现在可以重新表述同构章节中的结果。如果两个对象$a$和$b$是同构的，那么它们的$hom-sets$也是同构的。特别是：
+
+    $\mathcal{C}(a, x) \cong \mathcal{C}(b, x)$
+
+    和
+
+    $\mathcal{C}(x, a) \cong \mathcal{C}(x, b)$
+
+    我们将在下一章讨论自然性条件。
+
+    另一种看待$hom-functor$ $\cat C(a, -)$的方法是将其视为一个提供“a是否与我相连？”问题答案的$oracle$（神谕）。如果集合$\cat C(a, x)$为空，答案是否定的：“a与x不相连。”否则，集合$\cat C(a, x)$中的每个元素都是存在这种连接的证明。
+
+    相反，逆变函子$\cat C (-, a)$回答的问题是：“我与a相连吗？”
+
+    综上所述，$profunctor$ $\cat C(x, y)$在对象之间建立了一个$proof-relevant relation$（证明相关关系）。集合$\cat C(x, y)$中的每个元素都是$x$与$y$相连的证明。如果集合为空，这两个对象是无关的。
+
+    \section{Functor Composition\\函子的组合}
+
+    就像我们可以组合函数一样，我们也可以组合函子。两个函子是可组合的，如果一个函子的目标范畴与另一个的源范畴相同。
+
+    在对象上，$functor composition$（函子组合）$G$之后的$F$首先将$F$应用于一个对象，然后将$G$应用于结果；在箭头上也是如此。
+
+    显然，你只能组合可组合的函子。然而，所有$endofunctors$（自函子）都是可组合的，因为它们的目标范畴与源范畴相同。
+
+    在$Haskell$中，函子是一个参数化的数据类型，因此两个函子的组合也是一个参数化的数据类型。在对象上，我们定义：
+
+    \begin{haskell}
+        data Compose g f a = Compose (g (f a))
+    \end{haskell}
+
+    编译器推断$f$和$g$必须是类型构造子，因为它们被应用于类型：$f$被应用于类型参数$a$，$g$被应用于结果类型。
+
+    或者，你可以告诉编译器前两个参数是类型构造子。你可以通过提供一个$kind signature$（种类签名）来实现这一点，这需要一个语言扩展$KindSignatures$，你可以在源文件的顶部添加：
+
+    \begin{haskell}
+    {-# language KindSignatures #-}
+    \end{haskell}
+
+    你还应该导入$Data.Kind$库，该库定义了$Type$：
+
+    \begin{haskell}
+        import Data.Kind
+    \end{haskell}
+
+    种类签名就像类型签名一样，只不过它可以用于描述操作类型的函数。
+
+    常规类型具有种类$Type$。类型构造子具有种类$Type -> Type$，因为它们将类型映射为类型。
+
+    $Compose$接受两个类型构造子并生成一个类型构造子，因此它的种类签名是：
+
+    \begin{haskell}
+    (Type -> Type) -> (Type -> Type) -> (Type -> Type)
+    \end{haskell}
+
+    完整的定义是：
+
+    \begin{haskell}
+        data Compose :: (Type -> Type) -> (Type -> Type) -> (Type -> Type)
+        where
+        Compose :: (g (f a)) -> Compose g f a
+    \end{haskell}
+
+    任何两个类型构造子都可以这样组合。目前没有要求它们必须是函子。
+
+    但是，如果我们想提升一个函数使用类型构造子的组合$g$之后的$f$，那么它们必须是函子。此要求作为约束在实例声明中编码：
+
+    \begin{haskell}
+        instance (Functor g, Functor f) => Functor (Compose g f) where
+        fmap h (Compose gfa) = Compose (fmap (fmap h) gfa)
+    \end{haskell}
+
+    约束$ (Functor g, Functor f) $ 表示条件是两个类型构造子必须是$Functor$类的实例。约束后跟随双箭头。
+
+    我们正在建立函子性的类型构造子是$Compose f g$，它是部分应用的$Compose$对两个函子。
+
+    在$fmap$的实现中，我们对数据构造子$Compose$进行模式匹配。它的参数$gfa$是类型$g (f a)$。我们使用一个$fmap$来“获取$g$下的内容”。然后我们使用$ (fmap h) $来获取$f$下的内容。编译器通过分析类型来知道应该使用哪个$fmap$。
+
+    你可以将一个复合函子视为一个容器中的容器。例如，$ [] $与$Maybe$的组合是一个可选值的列表。
+
+    \begin{exercise}
+        定义一个$Functor$之后$Contravariant$的组合。提示：你可以重用$Compose$，但你必须提供一个不同的实例声明。
+    \end{exercise}
+
+    \subsection{Category of Categories\\范畴的范畴}
+
+    我们可以将函子视为范畴之间的箭头。正如我们刚刚看到的，函子是可组合的，检查这个组合是结合律的很容易。我们还为每个范畴提供了一个恒等（自）函子。因此，范畴本身似乎形成了一个范畴，我们称之为$\mathbf{Cat}$。
+
+    这是数学家开始担心“大小”问题的地方。这是指代存在悖论的简写。因此，正确的表达是$\mathbf{Cat}$是一个小范畴的范畴。但是只要我们不涉及存在性的证明，我们就可以忽略大小问题。
 
 \end{document}

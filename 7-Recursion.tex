@@ -1,406 +1,402 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{6}
-
-\chapter{Recursion}
-
-When you step between two mirrors, you see your reflection, the reflection of your reflection, the reflection of that reflection, and so on. Each reflection is defined in terms of the previous reflection, but together they produce infinity.
-
-Recursion is a decomposition pattern that splits a single task into many steps, the number of which is potentially unbounded.  
-
-Recursion is based on suspension of disbelief. You are faced with a task that may take arbitrarily many steps. You tentatively assume that you know how to solve it. Then you ask yourself the question: "How would I make the last step if I had the solution to everything \emph{but} the last step?"
-
-\section{Natural Numbers}
-
-An object of natural numbers $N$ does not contain numbers. Objects have no internal structure. Structure is defined by arrows. 
-
-We can use an arrow from the terminal object to define one special element. By convention, we'll call this arrow $Z$ for ``zero.''
-\[ Z \colon 1 \to N \]
-But we have to be able to define infinitely many arrows to account for the fact that, for every natural number, there is another number that is one larger than it. 
-
-We can formalize this statement by saying: Suppose that we know how to create a natural number $n \colon 1 \to N$. How do we make the next step, the step that will point us to the next number---its successor? 
-
-This next step doesn't have to be any more complex than just post-composing $n$ with an arrow that loops back from $N$ to $N$. This arrow should not be the identity, because we want the successor of a number to be different from that number. But a single such arrow, which we'll call $S$  for ``successor'' will suffice. 
-
-The element corresponding to the successor of $n$ is given by the composition:
-\[ 1 \xrightarrow{n} N \xrightarrow{S} N\]
-(We sometimes draw the same object multiple times in a single diagram, if we want to straighten the looping arrows.)
-
-In particular, we can define $One$ as the successor of $Z$:
-\[
- \begin{tikzcd}
- 1
- \arrow[rr, bend left, "One"]
- \arrow[r, "Z"]
- &N
-  \arrow[r, "S"]
-&N
-  \end{tikzcd}
-\]
-and $Two$ as the successor of the successor of $Z$
-\[
- \begin{tikzcd}
- 1
- \arrow[rrr, bend left, "Two"]
- \arrow[r, "Z"]
- &N
-  \arrow[r, "S"]
-&N
-  \arrow[r, "S"]
- &N
- \end{tikzcd}
-\]
-and so on.
-
-\subsection{Introduction Rules}
-
-The two arrows, $Z$ and $S$, serve as the introduction rules for the natural number object $N$. The twist is that one of them is recursive: $S$ uses $N$ as its source as well as its target.
-
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "Z"]
- &N
- \arrow[out=135, in=45, loop, "S"]
- \end{tikzcd}
-\]
-The two introduction rules translate directly to Haskell
-
-
-\begin{haskell}
-data Nat where
-  Z :: Nat
-  S :: Nat -> Nat
-\end{haskell}
-They can be used to define arbitrary natural numbers; for instance:
-
-\begin{haskell}
-zero, one, two :: Nat
-zero = Z
-one  = S zero
-two  = S one
-\end{haskell}
-
-This definition of natural number type is not very useful in practice. However, it's often used in defining type-level naturals, where each number is its own type. 
-
-You may encounter this construction under the name of \index{Peano numbers}\emph{Peano arithmetic}.
-
-\subsection{Elimination Rules}
-
-The fact that the introduction rules are recursive complicates the matters slightly when it comes to defining elimination rules. We will follow the pattern from previous chapters of first assuming that we are given a mapping out of $N$:
-\[ h \colon N \to a \]
-and see what we can deduce from there. 
-
-Previously, we were able to decompose such an $h$ into simpler mappings (pairs of mappings for sum and product; a mapping out of a product for the exponential). 
-
-The introduction rules for $N$ look similar to those for the sum (it's either $Z$ or the successor), so we would expect that $h$ could be split into two arrows. And, indeed, we can easily get the first one by composing $h \circ Z$. This is an arrow that picks an element of $a$. We call it $\mathit{init}$:
-\[\mathit{init} \colon 1 \to a \]
-But there is no obvious way to find the second one. 
-
-
-To see that, let's expand the definition of $N$:
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "Z"]
- &N
-  \arrow[r, "S"]
-&N
-  \arrow[r, "S"]
-&N
-& ...
-  \end{tikzcd}
-\]
-and plug $h$ and $\text{init}$ into it:
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "Z"]
- \arrow[rd, "\mathit{init}"']
- &N
-  \arrow[r, "S"]
-\arrow[d, dashed, "h"]
-&N
-  \arrow[r, "S"]
-\arrow[d, dashed, "h"]
-&N
-\arrow[d, dashed, "h"]
-& ...
-\\
-& a
-& a
-& a
-  \end{tikzcd}
-\]
-
-The intuition is that an arrow from $N$ to $a$ represents a \emph{sequence} $a_n$ of elements of $a$. The zeroth element is given by 
-\[a_0=\mathit{init}\]
-The next element is
-\[a_1 = h \circ S \circ Z \]
-followed by
-\[a_2 = h \circ S \circ S \circ Z \]
-and so on.
-
-We have thus replaced one arrow $h$ with infinitely many arrows $a_n$. Granted, the new arrows are simpler, since they represent elements of $a$, but there are infinitely many of them. 
-
-The problem is that, no matter how you look at it, an arbitrary mapping out of $N$ contains infinite amount of information.
-
-We have to drastically simplify the problem. Since we used a single arrow $S$ to generate all natural numbers, we can try to use a single arrow $a \to a$ to generate all the elements $a_n$. We'll call this arrow $\mathit{step}$:
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "Z"]
- \arrow[rd, "\mathit{init}"']
- &N
-  \arrow[r, "S"]
-\arrow[d, dashed, "h"]
-&N
-\arrow[d, dashed, "h"]
-\\
-& a
-\arrow[r, "\mathit{step}"]
-& a
-  \end{tikzcd}
-\]
-The mappings out of $N$ that are generated by such pairs, $\mathit{init}$ and $\mathit{step}$, are called \emph{recursive}. Not all mappings out of $N$ are recursive. In fact very few are; but recursive mappings are enough to define the object of natural numbers. 
-
-We use the above diagram as the elimination rule. We decree that every recursive mapping $h$ out of $N$ is in one-to-one correspondence with a pair $\mathit{init}$ and $\mathit{step}$. 
-
-
-This means that the \emph{evaluation rule} (extracting $(\mathit{init}, \mathit{step})$ for a given $h$) cannot be formulated for an arbitrary arrow $h \colon N \to a$, only for those arrows that have been previously recursively defined using a pair $(\mathit{init}, \mathit{step})$. 
-
-The arrow $\mathit{init}$ can be always recovered by composing $h \circ Z$. The arrow $\mathit{step}$ is a solution to the equation:
-\[ \mathit{step} \circ h = h \circ S \]
-If $h$ was defined using some $\mathit{init}$ and $\mathit{step}$, then this equation obviously has a solution. 
-
-The important part is that we demand that this solution be \emph{unique}. 
-
-Intuitively, the pair $\mathit{init}$ and $\mathit{step}$ generate the sequence of elements $a_0$, $a_1$, $a_2$, ... If two arrows $h$ and $h'$ are given by the same pair $(\mathit{init}, \mathit{step})$, it means that the sequences they generate are the same. 
-
-So if $h$ were somehow different from $h'$,  it would mean that $N$ contains more than just the sequence of elements $Z$, $S Z$, $S(S Z)$, ... For instance, if we added $-1$ to $N$ (that is, made $Z$ somebody's successor), we could have $h$ and $h'$ differ at $-1$ and yet be generated by the same $\mathit{init}$ and $\mathit{step}$. Uniqueness means there are no natural number before, after, or in between the numbers generated by $Z$ and $S$.
-
-The elimination rule we've discussed here corresponds to \emph{primitive recursion}. We'll see a more advanced version of this rule, corresponding to the induction principle, in the chapter on dependent types.
-
-\subsection{In Programming}
-
-The elimination rule can be implemented as a recursive function in Haskell:
-
-\begin{haskell}
-rec :: a -> (a -> a) -> (Nat -> a)
-rec init step = \n ->
-  case n of
-    Z     -> init
-    (S m) -> step (rec init step m)
-\end{haskell}
-
-This single function, which is called a \emph{recursor}, is enough to implement all recursive functions of natural numbers. For instance, this is how we could implement addition:
-
-\begin{haskell}
-plus :: Nat -> Nat -> Nat
-plus n = rec init step
-  where
-    init = n
-    step = S
-\end{haskell}
-This function takes \hask{n} as an argument and produces a function (a closure) that takes another number and adds  \hask{n} to it. 
-
-In practice, programmers prefer to implement recursion directly---an approach that is equivalent to inlining the recursor \hask{rec}. The following implementation is arguably easier to understand:
-\begin{haskell}
-plus n m = case m of
-  Z -> n
-  (S k) -> S (plus k n)
-\end{haskell}
-It can be read as: If \hask{m} is zero then the result is \hask{n}. Otherwise, if \hask{m} is a successor of some \hask{k}, then the result is the successor of  \hask{k + n}. This is exactly the same as saying that \hask{init = n} and \hask{step = S}.
-
-In imperative languages recursion is often replaced by iteration. Conceptually, iteration seems to be easier to understand, as it corresponds to sequential decomposition. The steps in the sequence usually follow some natural order. This is in contrast with recursive decomposition, where we assume that we have done all the work up to the $n$'th step, and we combine that result with the next consecutive step. 
-
-On the other hand, recursion is more natural when processing recursively defined data structures, such as lists or trees. 
-
-The two approaches are equivalent, and compilers often convert recursive functions to loops in what is called \emph{tail recursion optimization}.
-
-\begin{exercise}
-Implement a curried version of addition as a mapping out of $N$ into the function object $N^N$. Hint: use these types in the recursor:
-\begin{haskell}
-init :: Nat -> Nat
-step :: (Nat -> Nat) -> (Nat -> Nat)
-\end{haskell}
-
-\end{exercise}
-
-\section{Lists}
-
-A list of things is either empty or a thing followed by a list of things. 
-
-This recursive definition translates into two introduction rules for the type $L_a$, the list of $a$: 
-\begin{align*}
- \text{Nil} &\colon 1 \to L_a \\
- \text{Cons} &\colon a \times L_a \to L_a 
-\end{align*}
-The $\text{Nil}$ element describes an empty list, and $\text{Cons}$ constructs a list from a head and a tail. 
-
-The following diagram depicts the relationship between projections and list constructors. The projections extract the head and the tail of the list that was constructed using $\text{Cons}$.
-\[
- \begin{tikzcd}
- & a \times L_a
- \arrow[ld, "fst"]
- \arrow[rd,  "snd"']
- \arrow[rd, bend left=60, red, "\text{Cons}"]
- && 1
- \arrow[ld, red, "\text{Nil}"]
- \\
- a
-&&L_a
-  \end{tikzcd}
-\]
-
-This description can be immediately translated to Haskell:
-\begin{haskell}
-data List a where
-  Nil  :: List a
-  Cons :: (a, List a) -> List a
-\end{haskell}
-
-
-
-\subsection{Elimination Rule}
-
-Suppose that we have a mapping out from a list of $a$ to some arbitrary type $c$:
-\[h \colon L_a \to c\]
-This is how we would plug it into our definition of the list:
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "\text{Nil}"]
- \arrow[rd, "\mathit{init}"']
- &L_a
-\arrow[d, dashed, "h"]
-&a \times L_a
-  \arrow[l, "\text{Cons}"']
-\arrow[d, dashed, "id_a \times h"]
-\\
-& c
-& a \times c
-\arrow[l, "\mathit{step}"]
-  \end{tikzcd}
-\]
-We used the functoriality of the product to apply the pair $(id_a, h)$ to the product $a \times L_a$.
-
-Similar to the natural number object, we can try to define two arrows, $\mathit{init} = h \circ \text{Nil}$ and $\mathit{step}$. The arrow $\mathit{step}$ is a solution to:
-\[ \mathit{step} \circ (id_a \times h) = h \circ \text{Cons} \]
-Again, not every $h$ can be reduced to such a pair of arrows.
-
-However, given $\mathit{init}$ and $\mathit{step}$, we can define an $h$. Such a function is called a \emph{fold}, or a list catamorphism. 
-
-This is the list recursor in Haskell:
-\begin{haskell}
-recList :: c -> ((a, c) -> c) -> (List a -> c)
-recList init step = \as ->
-  case as of 
-    Nil          -> init
-    Cons (a, as) -> step (a, recList init step as)
-\end{haskell}
-Given \hask{init} and \hask{step}, it produces a mapping out of a list.
-
-A list is such a basic data type that Haskell has a built-in syntax for it. The type \hask{(List a)} is written as \hask{[a]}. The \hask{Nil} constructor is an empty pair of square brackets, \hask{[]}, and the \hask{Cons} constructor is an infix colon \hask{(:)}.
-
-We can pattern-match on these constructors. A generic mapping out of a list has the form:
-\begin{haskell}
-h :: [a] -> c
-h []      = -- empty-list case
-h (a : as) = -- case for the head and the tail of a non-empty list
-\end{haskell}
-
-Corresponding to the list recursor, \hask{recList}, here's the type signature of the function \hask{foldr} (fold \emph{right}), which you can find in the standard library:
-\begin{haskell}
-foldr :: (a -> c -> c) -> c -> [a] -> c
-\end{haskell}
-Here's one possible implementation:
-\begin{haskell}
-foldr step init = \as ->
-  case as of
-    [] -> init
-    a : as -> step a (foldr step init as)
-\end{haskell}
-
-As an example, we can use \hask{foldr} to calculate the sum of the elements of a list of natural numbers:
-\begin{haskell}
-sum :: [Nat] -> Nat
-sum = foldr plus Z
-\end{haskell}
-
-
-\begin{exercise}
-Consider what happens when you replace $a$ in the definition of a list with the terminal object. Hint: What is base-one encoding of natural numbers?
-\end{exercise}
-\begin{exercise}
-How many mappings $h \colon L_a \to 1 + a$ are there? Can we get all of them using a list recursor? How about Haskell functions of the signature:
-\begin{haskell}
-h :: [a] -> Maybe a
-\end{haskell}
-\end{exercise}
-\begin{exercise}
-Implement a function that extracts the third element from a list, if the list is long enough. Hint: Use \hask{Maybe a} for the result type.
-\end{exercise}
-
-\section{Functoriality}
-
-Functoriality means, roughly, the ability to transform the ``contents'' of a data structure. The contents of a list $L_a$ is of the type $a$. Given an arrow $f \colon a \to b$, we need to define a mapping of lists $h \colon L_a \to L_b$.
-
-Lists are defined by the mapping out property, so let's replace the target $c$ of the elimination rule by $L_b$. We get:
-
-\[
- \begin{tikzcd}
- 1
- \arrow[r, "\text{Nil}_a"]
- \arrow[rd, "\mathit{init}"']
- &L_a
-\arrow[d, dashed, "h"]
-&a \times L_a
-  \arrow[l, "\text{Cons}_a"']
-\arrow[d, dashed, "id_a \times h"]
-\\
-& L_b
-& a \times L_b
-\arrow[l, "\mathit{step}"]
-  \end{tikzcd}
-\]
-Since we are dealing with two different lists here, we have to distinguish between their constructors. For instance, we have: 
-\begin{align*}
-\text{Nil}_a &\colon 1 \to L_a \\
-\text{Nil}_b &\colon 1 \to L_b 
-\end{align*}
-and similarly for $\text{Cons}$.
-
-The only candidate for $\mathit{init}$ is $\text{Nil}_b$, which is to say that $h$ acting on an empty list of $a$'s produces an empty list of $b$'s:
-\[ h \circ \text{Nil}_a = \text{Nil}_b \]
-
-What remains is to define the arrow:
-\[\mathit{step} \colon a \times L_b \to L_b\]
-We can guess:
-\[ \mathit{step} = \text{Cons}_b \circ (f \times id_{L_b}) \]
-
-This corresponds to the Haskell function:
-
-\begin{haskell}
-mapList :: (a -> b) -> List a -> List b
-mapList f = recList init step
-  where
-    init = Nil
-    step (a, bs) = Cons (f a, bs)
-\end{haskell}
-or, using the built-in list syntax and inlining the recursor,
-\begin{haskell}
-map :: (a -> b) -> [a] -> [b]
-map f [] = []
-map f (a : as) = f a : map f as
-\end{haskell}
-
-You might wonder what prevents us from choosing $\mathit{step} = \mathit{snd}$, resulting in:
-\begin{haskell}
-badMap :: (a -> b) -> [a] -> [b]
-badMap f [] = []
-badMap f (a : as) = badMap f as
-\end{haskell}
-We'll see, in the next chapter, why this is a bad choice. (Hint: What happens when we apply \hask{badMap} to $id$?)
+    \setcounter{chapter}{6}
+
+    \chapter{Recursion\\递归}
+
+    当你站在两个镜子之间时，你会看到自己的反射，反射的反射，反射的反射的反射，如此反复。每个反射都是基于前一个反射定义的，但它们共同产生了无限。
+
+    递归是一种将单一任务分解为许多步骤的模式，这些步骤的数量可能是无限的。
+
+    递归是基于对不可能性的暂时搁置。你面临一个可能需要任意多步骤的任务。你暂时假设你知道如何解决它。然后你问自己一个问题：“如果我已经解决了除最后一步以外的所有问题，我会如何进行最后一步？”
+
+    \section{Natural Numbers\\自然数}
+
+    自然数$N$的对象并不包含数字。对象没有内部结构。结构由箭头定义。
+
+    我们可以使用从终端对象到自然数对象的箭头来定义一个特殊的元素。按照惯例，我们将这个箭头称为$Z$，表示“零”。
+    \[ Z \colon 1 \to N \]
+    但我们必须能够定义无穷多个箭头，以表示对于每一个自然数，还有另一个比它大一的数字。
+
+    我们可以形式化这个声明：假设我们知道如何创建一个自然数$n \colon 1 \to N$。我们如何迈出下一步，指向下一个数字——它的继承者？
+
+    这下一步不必比直接将$n$与一个从$N$到$N$的箭头进行后合成更复杂。这个箭头不应该是恒等，因为我们希望一个数字的继承者与该数字不同。但一个单一的箭头就足够了，我们将其称为$S$，表示“继承者”。
+
+    与$n$的继承者对应的元素由以下组合给出：
+    \[ 1 \xrightarrow{n} N \xrightarrow{S} N\]
+    （我们有时在同一个图中多次绘制同一个对象，如果我们想要拉直循环箭头。）
+
+    特别地，我们可以定义$One$为$Z$的继承者：
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[rr, bend left, "One"]
+            \arrow[r, "Z"]
+            &N
+            \arrow[r, "S"]
+            &N
+        \end{tikzcd}
+    \]
+    并将$Two$定义为$Z$的继承者的继承者
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[rrr, bend left, "Two"]
+            \arrow[r, "Z"]
+            &N
+            \arrow[r, "S"]
+            &N
+            \arrow[r, "S"]
+            &N
+        \end{tikzcd}
+    \]
+    如此继续下去。
+
+    \subsection{Introduction Rules\\引入规则}
+
+    这两个箭头$Z$和$S$是自然数对象$N$的引入规则。不同的是，其中一个是递归的：$S$同时使用$N$作为它的源和目标。
+
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "Z"]
+            &N
+            \arrow[out=135, in=45, loop, "S"]
+        \end{tikzcd}
+    \]
+    这两个引入规则可以直接翻译为Haskell代码：
+
+    \begin{haskell}
+        data Nat where
+        Z :: Nat
+        S :: Nat -> Nat
+    \end{haskell}
+    它们可以用于定义任意自然数；例如：
+
+    \begin{haskell}
+        zero, one, two :: Nat
+        zero = Z
+        one  = S zero
+        two  = S one
+    \end{haskell}
+
+    这种自然数类型的定义在实际应用中并不十分有用。然而，它经常被用于定义类型级别的自然数，其中每个数字都有其自己的类型。
+
+    你可能会在\index{Peano numbers}\emph{皮亚诺算术}中遇到这种结构。
+
+    \subsection{Elimination Rules\\消去规则}
+
+    引入规则的递归性质使得定义消去规则时稍微有些复杂。我们将按照前几章的模式，首先假设我们给定了一个从$N$映射出的映射：
+    \[ h \colon N \to a \]
+    然后看看我们能从中推导出什么。
+
+    之前，我们能够将这样的$h$分解为更简单的映射（对于和类型和积类型是映射对，对于指数类型是从积映射出）。
+
+    $N$的引入规则与和类型的引入规则类似（它要么是$Z$，要么是继承者），所以我们预计$h$可以分为两个箭头。实际上，我们可以通过组合$h \circ Z$轻松地得到第一个箭头。这个箭头选择$a$的一个元素。我们称它为$\mathit{init}$：
+    \[\mathit{init} \colon 1 \to a \]
+    但没有明显的方法来找到第二个箭头。
+
+    为了看清这一点，让我们扩展$N$的定义：
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "Z"]
+            &N
+            \arrow[r, "S"]
+            &N
+            \arrow[r, "S"]
+            &N
+            & ...
+        \end{tikzcd}
+    \]
+    并将$h$和$\text{init}$插入其中：
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "Z"]
+            \arrow[rd, "\mathit{init}"']
+            &N
+            \arrow[r, "S"]
+            \arrow[d, dashed, "h"]
+            &N
+            \arrow[r, "S"]
+            \arrow[d, dashed, "h"]
+            &N
+            \arrow[d, dashed, "h"]
+            & ...
+            \\
+            & a
+            & a
+            & a
+        \end{tikzcd}
+    \]
+
+    直观地说，从$N$到$a$的箭头代表了$a$元素的\emph{序列}$a_n$。第零个元素由以下公式给出：
+    \[a_0=\mathit{init}\]
+    下一个元素是
+    \[a_1 = h \circ S \circ Z \]
+    接下来是
+    \[a_2 = h \circ S \circ S \circ Z \]
+    如此继续下去。
+
+    因此，我们将一个箭头$h$替换为无穷多个箭头$a_n$。当然，新的箭头更简单，因为它们表示$a$的元素，但它们是无穷多个。
+
+    问题在于，不管你怎么看，从$N$映射出的任意映射都包含无限量的信息。
+
+    我们必须大幅简化问题。由于我们使用了一个单一的箭头$S$来生成所有自然数，我们可以尝试使用一个单一的箭头$a \to a$来生成所有元素$a_n$。我们将这个箭头称为$\mathit{step}$：
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "Z"]
+            \arrow[rd, "\mathit{init}"']
+            &N
+            \arrow[r, "S"]
+            \arrow[d, dashed, "h"]
+            &N
+            \arrow[d, dashed, "h"]
+            \\
+            & a
+            \arrow[r, "\mathit{step}"]
+            & a
+        \end{tikzcd}
+    \]
+    由这样的对$\mathit{init}$和$\mathit{step}$生成的从$N$映射出的映射称为\emph{递归}映射。并非所有从$N$映射出的映射都是递归的。事实上，只有极少数是递归的；但递归映射足以定义自然数对象。
+
+    我们使用上面的图作为消去规则。我们规定，从$N$映射出的每个递归映射$h$与一对$\mathit{init}$和$\mathit{step}$一一对应。
+
+    这意味着\emph{评估规则}（提取给定$h$的$(\mathit{init}, \mathit{step})$）不能为任意箭头$h \colon N \to a$制定，只能为那些先前使用对$(\mathit{init}, \mathit{step})$递归定义的箭头制定。
+
+    箭头$\mathit{init}$可以总是通过组合$h \circ Z$恢复。箭头$\mathit{step}$是以下方程的解：
+    \[ \mathit{step} \circ h = h \circ S \]
+    如果$h$是使用某个$\mathit{init}$和$\mathit{step}$定义的，那么这个方程显然有解。
+
+    重要的是我们要求这个解是\emph{唯一}的。
+
+    直观上，这对$\mathit{init}$和$\mathit{step}$生成了元素序列$a_0$、$a_1$、$a_2$，等等。如果有两个箭头$h$和$h'$由同一对$(\mathit{init}, \mathit{step})$给出，这意味着它们生成的序列是相同的。
+
+    所以，如果$h$与$h'$有某种不同，这将意味着$N$包含的数字不仅仅是由$Z$和$S$生成的数字序列。例如，如果我们在$N$中添加$-1$（即使$Z$成为某人的继承者），我们可能会让$h$和$h'$在$-1$处有所不同，但仍由同一对$\mathit{init}$和$\mathit{step}$生成。唯一性意味着在$Z$和$S$生成的数字之间、之前或之后没有其他自然数。
+
+    我们在这里讨论的消去规则对应于\emph{原始递归}。在依赖类型的章节中，我们将看到这种规则的更高级版本，对应于归纳原理。
+
+    \subsection{In Programming\\在编程中}
+
+    消去规则可以在Haskell中实现为递归函数：
+
+    \begin{haskell}
+        rec :: a -> (a -> a) -> (Nat -> a)
+        rec init step = \n ->
+        case n of
+        Z     -> init
+        (S m) -> step (rec init step m)
+    \end{haskell}
+
+    这个单一的函数，称为\emph{递归器}，足以实现所有自然数的递归函数。例如，这是我们如何实现加法的：
+
+    \begin{haskell}
+        plus :: Nat -> Nat -> Nat
+        plus n = rec init step
+        where
+        init = n
+        step = S
+    \end{haskell}
+    这个函数将\hask{n}作为参数，并生成一个函数（闭包），该函数接受另一个数字并将\hask{n}加到它上面。
+
+    在实际编程中，程序员更喜欢直接实现递归——这种方法等同于内联递归器\hask{rec}。以下实现可能更容易理解：
+    \begin{haskell}
+        plus n m = case m of
+        Z -> n
+        (S k) -> S (plus k n)
+    \end{haskell}
+    这可以理解为：如果\hask{m}是零，那么结果是\hask{n}。否则，如果\hask{m}是某个\hask{k}的继承者，那么结果是\hask{k + n}的继承者。这与说\hask{init = n}和\hask{step = S}完全相同。
+
+    在命令式语言中，递归通常被迭代所取代。从概念上讲，迭代似乎更容易理解，因为它对应于顺序分解。序列中的步骤通常遵循某种自然顺序。这与递归分解形成对比，在递归分解中，我们假设我们已经完成了第$n$步之前的所有工作，然后将该结果与下一步结合起来。
+
+    另一方面，递归在处理递归定义的数据结构（如列表或树）时更加自然。
+
+    这两种方法是等效的，编译器通常会将递归函数转换为循环，这被称为\emph{尾递归优化}。
+
+    \begin{exercise}
+        Implement a curried version of addition as a mapping out of $N$ into the function object $N^N$. Hint: use these types in the recursor:
+        \begin{haskell}
+            init :: Nat -> Nat
+            step :: (Nat -> Nat) -> (Nat -> Nat)
+        \end{haskell}
+
+    \end{exercise}
+
+    \section{Lists\\列表}
+
+    一个事物的列表要么是空的，要么是一个事物后跟着一个事物的列表。
+
+    这个递归定义转化为类型$L_a$的两个引入规则，即$a$的列表：
+    \begin{align*}
+        \text{Nil} &\colon 1 \to L_a \\
+        \text{Cons} &\colon a \times L_a \to L_a
+    \end{align*}
+    $\text{Nil}$元素描述一个空列表，而$\text{Cons}$从头部和尾部构造一个列表。
+
+    以下图描述了投影和列表构造函数之间的关系。投影提取用$\text{Cons}$构造的列表的头部和尾部。
+    \[
+        \begin{tikzcd}
+            & a \times L_a
+            \arrow[ld, "fst"]
+            \arrow[rd,  "snd"']
+            \arrow[rd, bend left=60, red, "\text{Cons}"]
+            && 1
+            \arrow[ld, red, "\text{Nil}"]
+            \\
+            a
+            &&L_a
+        \end{tikzcd}
+    \]
+
+    这种描述可以立即翻译为Haskell代码：
+    \begin{haskell}
+        data List a where
+        Nil  :: List a
+        Cons :: (a, List a) -> List a
+    \end{haskell}
+
+
+    \subsection{Elimination Rule\\消去规则}
+
+    假设我们有一个从$a$的列表映射到某个任意类型$c$的映射：
+    \[h \colon L_a \to c\]
+    这是我们如何将其插入到列表的定义中：
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "\text{Nil}"]
+            \arrow[rd, "\mathit{init}"']
+            &L_a
+            \arrow[d, dashed, "h"]
+            &a \times L_a
+            \arrow[l, "\text{Cons}"']
+            \arrow[d, dashed, "id_a \times h"]
+            \\
+            & c
+            & a \times c
+            \arrow[l, "\mathit{step}"]
+        \end{tikzcd}
+    \]
+    我们使用了积的函子性来将对$(id_a, h)$应用于积$a \times L_a$。
+
+    与自然数对象类似，我们可以尝试定义两个箭头，$\mathit{init} = h \circ \text{Nil}$和$\mathit{step}$。箭头$\mathit{step}$是以下方程的解：
+    \[ \mathit{step} \circ (id_a \times h) = h \circ \text{Cons} \]
+    同样，并不是所有的$h$都能简化为这样的一对箭头。
+
+    然而，给定$\mathit{init}$和$\mathit{step}$，我们可以定义一个$h$。这样的函数称为\emph{折叠}，或列表的降阶同态。
+
+    这是Haskell中的列表递归器：
+    \begin{haskell}
+        recList :: c -> ((a, c) -> c) -> (List a -> c)
+        recList init step = \as ->
+        case as of
+        Nil          -> init
+        Cons (a, as) -> step (a, recList init step as)
+    \end{haskell}
+    给定\hask{init}和\hask{step}，它生成一个从列表映射出的映射。
+
+    列表是一种如此基本的数据类型，以至于Haskell为其提供了内置语法。类型\hask{(List a)}写作\hask{[a]}。构造函数\hask{Nil}是一个空的方括号对\hask{[]}，而构造函数\hask{Cons}是一个中缀的冒号\hask{(:)}。
+
+    我们可以对这些构造函数进行模式匹配。一个通用的从列表映射出的映射的形式如下：
+    \begin{haskell}
+        h :: [a] -> c
+        h []      = -- empty-list case
+        h (a : as) = -- case for the head and the tail of a non-empty list
+    \end{haskell}
+
+    对应于列表递归器\hask{recList}，以下是你可以在标准库中找到的函数\hask{foldr}（折叠\emph{右}）的类型签名：
+    \begin{haskell}
+        foldr :: (a -> c -> c) -> c -> [a] -> c
+    \end{haskell}
+    这是一个可能的实现：
+    \begin{haskell}
+        foldr step init = \as ->
+        case as of
+        [] -> init
+        a : as -> step a (foldr step init as)
+    \end{haskell}
+
+    作为一个例子，我们可以使用\hask{foldr}来计算自然数列表元素的和：
+    \begin{haskell}
+        sum :: [Nat] -> Nat
+        sum = foldr plus Z
+    \end{haskell}
+
+
+    \begin{exercise}
+        考虑在列表的定义中用终端对象替换$a$时会发生什么。提示：自然数的一元编码是什么？
+    \end{exercise}
+    \begin{exercise}
+        从$L_a$映射到$1 + a$的映射有多少种？我们能用列表递归器得到它们吗？Haskell函数的签名如何：
+        \begin{haskell}
+            h :: [a] -> Maybe a
+        \end{haskell}
+    \end{exercise}
+    \begin{exercise}
+        实现一个函数，从列表中提取第三个元素，如果列表足够长。提示：使用\hask{Maybe a}作为结果类型。
+    \end{exercise}
+
+    \section{Functoriality\\函子性}
+
+    函子性大致意味着转换数据结构“内容”的能力。列表$L_a$的内容类型是$a$。给定一个箭头$f \colon a \to b$，我们需要定义一个列表映射$h \colon L_a \to L_b$。
+
+    列表是通过映射出属性定义的，所以我们将消去规则的目标$c$替换为$L_b$。我们得到：
+
+    \[
+        \begin{tikzcd}
+            1
+            \arrow[r, "\text{Nil}_a"]
+            \arrow[rd, "\mathit{init}"']
+            &L_a
+            \arrow[d, dashed, "h"]
+            &a \times L_a
+            \arrow[l, "\text{Cons}_a"']
+            \arrow[d, dashed, "id_a \times h"]
+            \\
+            & L_b
+            & a \times L_b
+            \arrow[l, "\mathit{step}"]
+        \end{tikzcd}
+    \]
+    由于这里涉及两个不同的列表，我们必须区分它们的构造函数。例如，我们有：
+    \begin{align*}
+        \text{Nil}_a &\colon 1 \to L_a \\
+        \text{Nil}_b &\colon 1 \to L_b
+    \end{align*}
+    同样的，对于$\text{Cons}$也是如此。
+
+    $\mathit{init}$的唯一候选是$\text{Nil}_b$，也就是说，$h$作用于一个$a$的空列表会生成一个$b$的空列表：
+    \[ h \circ \text{Nil}_a = \text{Nil}_b \]
+
+    剩下的就是定义箭头：
+    \[\mathit{step} \colon a \times L_b \to L_b\]
+    我们可以猜测：
+    \[ \mathit{step} = \text{Cons}_b \circ (f \times id_{L_b}) \]
+
+    这对应于Haskell中的函数：
+
+    \begin{haskell}
+        mapList :: (a -> b) -> List a -> List b
+        mapList f = recList init step
+        where
+        init = Nil
+        step (a, bs) = Cons (f a, bs)
+    \end{haskell}
+    或者，使用内置的列表语法并内联递归器，
+    \begin{haskell}
+        map :: (a -> b) -> [a] -> [b]
+        map f [] = []
+        map f (a : as) = f a : map f as
+    \end{haskell}
+
+    你可能想知道是什么阻止我们选择$\mathit{step} = \mathit{snd}$，结果是：
+    \begin{haskell}
+        badMap :: (a -> b) -> [a] -> [b]
+        badMap f [] = []
+        badMap f (a : as) = badMap f as
+    \end{haskell}
+    我们将在下一章中看到，为什么这是一个糟糕的选择。（提示：当我们将\hask{badMap}应用于$id$时会发生什么？）
 
 \end{document}
