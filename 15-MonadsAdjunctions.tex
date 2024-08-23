@@ -1,779 +1,776 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{14}
+    \setcounter{chapter}{14}
 
-\chapter{Monads and Adjunctions}
+    \chapter{Monads and Adjunctions\text{（单子与伴随）}}
 
-\section{String Diagrams}
+    \section{String Diagrams\text{（字符串图）}}
 
-A line partitions a plane. We can think of it as either dividing a plane or as connecting two halves of the plane.
+    一条线将一个平面划分开。我们可以将其视为将平面分开，也可以将其视为连接平面的两半。
 
-A dot partitions a line. We can think of it as either separating two half-lines or as joining them together.
+    一个点将一条线划分开。我们可以将其视为分离两条半线，也可以将其视为将它们连接在一起。
 
-This is a diagram in which two categories are represented as dots, two functors as arrows, and a natural transformation as a double arrow.
+    这是一个图，其中两个范畴被表示为点，两个函子作为箭头，自然变换则作为双箭头。
 
-\[
-\begin{tikzpicture}[column sep=huge]
-\def \xa{-1.2};
-\def \xb{0};
-\def \xc{1.2};
-\def \ya{-1};
-\def \yb{0};
-\def \yc{1};
+    \[
+        \begin{tikzpicture}[column sep=huge]
+            \def \xa{-1.2};
+            \def \xb{0};
+            \def \xc{1.2};
+            \def \ya{-1};
+            \def \yb{0};
+            \def \yc{1};
 
-\node(c) at (\xa, \yb) {};
-\node[left] at (c) {$\mathcal{C}$};
-\filldraw[black] (c) circle (1 pt);
-\node(d) at (\xc, \yb) {};
-\node[right] at (d) {$\mathcal{D}$};
-\filldraw[black] (d) circle (1 pt);
+            \node(c) at (\xa, \yb) {};
+            \node[left] at (c) {$\mathcal{C}$};
+            \filldraw[black] (c) circle (1 pt);
+            \node(d) at (\xc, \yb) {};
+            \node[right] at (d) {$\mathcal{D}$};
+            \filldraw[black] (d) circle (1 pt);
 
-\draw [->] (c) to [out=60,in=120] node[midway, above]{$G$}(d);
-\draw [->] (c) to [out=-60,in=-120] node[midway, below]{$F$}(d);
+            \draw [->] (c) to [out=60,in=120] node[midway, above]{$G$}(d);
+            \draw [->] (c) to [out=-60,in=-120] node[midway, below]{$F$}(d);
 
-\node(mup) at (\xb, \yc -0.5) {};
-\node(mdn) at (\xb, \ya + 0.5) {};
-\draw[->, -{Implies}, double, double distance=2pt] (mdn) -- node[midway, left]{$\alpha$} (mup);
-\end{tikzpicture}
-\]
+            \node(mup) at (\xb, \yc -0.5) {};
+            \node(mdn) at (\xb, \ya + 0.5) {};
+            \draw[->, -{Implies}, double, double distance=2pt] (mdn) -- node[midway, left]{$\alpha$} (mup);
+        \end{tikzpicture}
+    \]
 
-But the same idea can be represented by drawing categories as areas of a plane, functors as lines between areas, and natural transformations as dots that join line segments. 
+    但是，同样的概念可以通过将范畴绘制为平面的区域，函子作为区域之间的线，自然变换作为连接线段的点来表示。
 
-The idea is that a functor always goes between a pair of categories, therefore it can be drawn as a boundary between them. A natural transformation always goes between a pair of functors, therefore it can be drawn as a dot joining two segments of a line.
+    这个概念是，函子总是在一对范畴之间运行，因此可以将其绘制为它们之间的边界。自然变换总是在一对函子之间运行，因此可以将其绘制为连接两段线段的点。
 
-\[
-\begin{tikzpicture}
-\def\x{0};
-\def\xl{-1.5};
-\def\xr{1.5};
-
-
-\def \ya{0.8};
-\def \yb{1.7};
-\def \yc{2.6};
-\def \yt {2.3};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\x, \yc);
-\filldraw[fill=orange!30, draw=white] (\x, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\x, \ya) {$F$};
-\node(b) at (\x, \yb) {};
-\node [above] (c) at (\x, \yc) {$G$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{D}$};
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\alpha$};
-
-\draw (a)  -- (c);
-
-\end{tikzpicture}
-\]
-
-This is an example of a \emph{string diagram}. You read such a digram bottom-up, left-to-right (think of the $(x, y)$ system of coordinates). 
-
-The bottom of this diagram shows the functor $F$ that goes from $\mathcal{C}$ to $\mathcal{D}$. The top of the diagram shows the functor $G$ that goes between the same two categories. The transition happens in the middle, where a natural transformation $\alpha$ maps $F$ to $G$.
-
-In Haskell, this diagram is interpreted as a polymorphic function between two endofunctors:
-\begin{haskell}
-alpha :: forall x. F x -> G x
-\end{haskell}
-
-So far it doesn't seem like we gain a lot by using this new visual representation. But let's apply it to something more interesting: vertical composition of natural transformations:
-\[
-\begin{tikzcd}[column sep=huge]
-\mathcal{C}
-  \arrow[bend left=60]{rr}[name=U, label=above:$H$]{}
-  \arrow[]{rr}[name=M, label={[xshift=15pt, yshift=-5pt]:$G$}]{} 
-  \arrow[bend right=60]{rr}[name=D, label=below:$F$]{} 
- &&
-\mathcal{D}
-  \arrow[shorten <=8pt, shorten >=8pt,Leftarrow, to path={(U) -- node[label=left:$\beta$] {} (M)}]{}
-  \arrow[shorten <=8pt, shorten >=8pt,Leftarrow, to path={(M) -- node[label=left:$\alpha$] {} (D)}]{}
-\end{tikzcd}
-\]
-
-The corresponding string diagram shows the two categories and three functors between them joined by two natural transformations.
-\[
-\begin{tikzpicture}
-\def\x{0};
-\def\xl{-1.5};
-\def\xr{1.5};
-
-
-\def \ya{0};
-\def \yb{0.8};
-\def \ybb{2.2};
-\def \yc{3};
-\def \yt {2.7};
-\def \ymid {1.5}
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\x, \yc);
-\filldraw[fill=orange!30, draw=white] (\x, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\x, \ya) {$F$};
-\node(b) at (\x, \yb) {};
-\node(bb) at (\x, \ybb) {};
-\node [above] (c) at (\x, \yc) {$H$};
-\node(m)[right] at (\x, \ymid) {$G$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{D}$};
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\alpha$};
-\filldraw[black] (bb) circle (1 pt);
-\node [left] at (bb) {$\beta$};
-
-\draw (a)  -- (c);
-
-\end{tikzpicture}
-\]
-As you can see, you can reconstruct the original diagram from the string diagram by scanning it bottom-to-top.
-
-Again, in Haskell we'll be dealing with three endofunctors, and the vertical composition of \hask{beta} after \hask{alpha}:
-\begin{haskell}
-alpha :: forall x. F x -> G x
-beta  :: forall x. G x -> H x
-\end{haskell}
- is implemented using regular function composition:
-\begin{haskell}
-beta_alpha :: forall x. F x -> H x
-beta_alpha = beta . alpha
-\end{haskell}
-
-Let's continue with the horizontal composition of natural transformations:
-\[
-\begin{tikzcd}[column sep=huge]
-\mathcal{C}
-  \arrow[bend left=50]{r}[name=U, label=above:$F'$]{}
-  \arrow[bend right=50]{r}[name=D, label=below:$F$]{} 
- &
-\mathcal{D}
-  \arrow[bend left=50]{r}[name=U1, label=above:$G'$]{}
-  \arrow[bend right=50]{r}[name=D1, label=below:$G$]{} 
- &
-\mathcal{E}
-  \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\alpha$] {} (D)}]{}
-  \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U1) -- node[label=left:$\beta$] {} (D1)}]{}
-\end{tikzcd}
-\]
-This time we have three categories, so we'll have three areas. 
-
-The bottom of the string diagram corresponds to the composition of functors $G \circ F$ (in this order). The top corresponds to $G' \circ F'$. One natural transformation, $\alpha$, connects $F$ to $F'$; the other, $\beta$, connects $G$ to $G'$.
-\[
-\begin{tikzpicture}
-\def\xl{-2.75};
-\def\xa{-1};
-\def\xc{0}
-\def\xb{1};
-\def\xr{2.75};
-
-
-\def \ya{0};
-\def \yb{1};
-\def \yc{2};
-\def \yt {1.7};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
-\filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
-\filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\xa, \ya) {$F$};
-\node(b) at (\xa, \yb) {};
-\node [above] (c) at (\xa, \yc) {$F'$};
-
-\node[below] (d) at (\xb, \ya) {$G$};
-\node(e) at (\xb, \yb) {};
-\node [above] (f) at (\xb, \yc) {$G'$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r) at (\xc, \yt) {$\mathcal{D}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\alpha$};
-\filldraw[black] (e) circle (1 pt);
-\node [left] at (e) {$\beta$};
-
-\draw (a)  -- (c);
-\draw (d)  -- (f);
-
-\end{tikzpicture}
-\]
-Parallel vertical lines in this new system correspond to functor composition. 
-
-You may think of the horizontal composition of natural transformations as happening along the imaginary horizontal line in the middle of the diagram. But what if somebody was sloppy in drawing the diagram, and one of the dots was a little higher than the other? As it turns out, the exact positioning of the dots doesn't matter, due to the interchange law.
-
-But first, let's illustrate whiskering: horizontal composition in which one of the natural transformation is the identity. We can draw it like this:
-
-\[
-\begin{tikzpicture}
-\def\xl{-2.75};
-\def\xa{-1};
-\def\xc{0}
-\def\xb{1};
-\def\xr{2.75};
-
-
-\def \ya{0};
-\def \yb{1};
-\def \yc{2};
-\def \yt {1.7};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
-\filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
-\filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\xa, \ya) {$F$};
-\node(b) at (\xa, \yb) {};
-\node [above] (c) at (\xa, \yc) {$F$};
-
-\node[below] (d) at (\xb, \ya) {$G$};
-\node(e) at (\xb, \yb) {};
-\node [above] (f) at (\xb, \yc) {$G'$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r) at (\xc, \yt) {$\mathcal{D}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$id_F$};
-\filldraw[black] (e) circle (1 pt);
-\node [left] at (e) {$\beta$};
-
-\draw (a)  -- (c);
-\draw (d)  -- (f);
-
-\end{tikzpicture}
-\]
-But, really, the identity can be inserted at any point on a vertical line, so we don't even have to draw it. The following diagram represents the whiskering of $\beta \circ F$.
-\[
-\begin{tikzpicture}
-\def\xl{-2.75};
-\def\xa{-1};
-\def\xc{0}
-\def\xb{1};
-\def\xr{2.75};
-
-
-\def \ya{0};
-\def \yb{1};
-\def \yc{2};
-\def \yt {1.7};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
-\filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
-\filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\xa, \ya) {$F$};
-\node(b) at (\xa, \yb) {};
-\node [above] (c) at (\xa, \yc) {$F$};
-
-\node[below] (d) at (\xb, \ya) {$G$};
-\node(e) at (\xb, \yb) {};
-\node [above] (f) at (\xb, \yc) {$G'$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r) at (\xc, \yt) {$\mathcal{D}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
-
-\filldraw[black] (e) circle (1 pt);
-\node [left] at (e) {$\beta$};
-
-\draw (a)  -- (c);
-\draw (d)  -- (f);
-
-\end{tikzpicture}
-\]
-
-In Haskell, where \hask{beta} is a polymorphic function:
-\begin{haskell}
-beta :: forall x. G x -> G' x
-\end{haskell}
- we read this diagram as:
-\begin{haskell}
-beta_f :: forall x. G (F x) -> G' (F x)
-beta_f = beta
-\end{haskell}
-with the understanding that the type checker instantiates the polymorphic function \hask{beta} for the correct type.
-
-Similarly, you can easily imagine the diagram for $G \circ \alpha$, and its Haskell realization:
-\begin{haskell}
-g_alpha :: forall x. G (F x) -> G (F' x)
-beta_f = fmap alpha
-\end{haskell}
-with:
-\begin{haskell}
-alpha :: forall x. F x -> F' x
-\end{haskell}
-
-Here's the string diagram that corresponds to the interchange law:
-\[
-\begin{tikzpicture}
-\def\xl{-2.75};
-\def\xa{-1};
-\def\xc{0}
-\def\xb{1};
-\def\xr{2.75};
-
-
-\def \ya{0.2};
-\def \yb{1};
-\def \ybb{2}
-\def \yc{2.8};
-\def \yt {\yc -0.3};
-\def \ymid {1.5}
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
-\filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
-\filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\xa, \ya) {$F$};
-\node(b) at (\xa, \yb) {};
-\node [above] (c) at (\xa, \yc) {$F''$};
-\node [right] (ml) at (\xa, \ymid) {$F'$};
-
-\node[below] (d) at (\xb, \ya) {$G$};
-\node(e) at (\xb, \yb) {};
-\node [above] (f) at (\xb, \yc) {$G''$};
-\node [right] (ml) at (\xb, \ymid) {$G'$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r) at (\xc, \yt) {$\mathcal{D}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\alpha$};
-\filldraw[black] (e) circle (1 pt);
-\node [left] at (e) {$\beta$};
-
-\node(bb) at (\xa, \ybb) {};
-\node(ee) at (\xb, \ybb) {};
-
-\filldraw[black] (bb) circle (1 pt);
-\node [left] at (bb) {$\alpha'$};
-\filldraw[black] (ee) circle (1 pt);
-\node [left] at (ee) {$\beta'$};
-
-\draw (a)  -- (c);
-\draw (d)  -- (f);
-
-\end{tikzpicture}
-\]
-This diagram is purposefully ambiguous. Are we supposed to first do vertical composition of natural transformations and then the horizontal one? Or should we compose $\beta \circ \alpha$ and $\beta' \circ \alpha'$ horizontally, and then compose the results vertically? The interchange law says that it doesn't matter: the result is the same. 
-
-Now try to replace a pair of natural transformations in this diagram with identities. If you replace $\alpha'$ and $\beta'$, you get the horizontal composition of $\beta \circ \alpha$. If you replace $\alpha'$ and $\beta$ with identity natural transformations, and rename $\beta'$ to $\beta$, you get the diagram in which $\alpha$ is shifted down with respect to $\beta$, and so on. 
-
-\[
-\begin{tikzpicture}
-\def\xl{-2.75};
-\def\xa{-1};
-\def\xc{0}
-\def\xb{1};
-\def\xr{2.75};
-
-
-\def \ya{0.2};
-\def \yb{1};
-\def \ybb{2}
-\def \yc{2.8};
-\def \yt {\yc -0.3};
-\def \ymid {1.5}
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
-\filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
-\filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
-
-\node[below] (a) at (\xa, \ya) {$F$};
-\node(b) at (\xa, \yb) {};
-\node [above] (c) at (\xa, \yc) {$F'$};
-
-\node[below] (d) at (\xb, \ya) {$G$};
-\node(e) at (\xb, \yb) {};
-\node [above] (f) at (\xb, \yc) {$G'$};
-
-\node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
-\node(r) at (\xc, \yt) {$\mathcal{D}$};
-\node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\alpha$};
-
-\node(bb) at (\xa, \ybb) {};
-\node(ee) at (\xb, \ybb) {};
-
-\filldraw[black] (ee) circle (1 pt);
-\node [left] at (ee) {$\beta$};
-
-\draw (a)  -- (c);
-\draw (d)  -- (f);
-
-\end{tikzpicture}
-\]
-The interchange law tells us that all these diagrams are equal. We are free to slide natural transformations like beads on a string.
-
-\subsection{String diagrams for the monad}
-
-A monad is defined as an endofunctor equipped with two natural transformations, as illustrated by the following diagrams:
- 
-\[
-\begin{tikzcd}[column sep=huge]
-\mathcal{C}
-  \arrow[bend left=50]{r}[name=U, label=above:$T$]{}
-  \arrow[bend right=50]{r}[name=D, label=below:$\text{Id}$]{} 
- &
-\mathcal{C}
-  \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\eta$] {} (D)}]{}
-\end{tikzcd}
-\hspace{20pt}
-\begin{tikzcd}[column sep=huge]
-\mathcal{C}
-  \arrow[bend left=50]{r}[name=U, label=above:$T$]{}
-  \arrow[bend right=50]{r}[name=D, label=below:$T \circ T$]{} 
- &
-\mathcal{C}
-  \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\mu$] {} (D)}]{}
-\end{tikzcd}
-\]
-
-Since we are dealing with just one category, when translating these diagrams to string diagrams, we can dispose of the naming (and the shading) of categories, and just draw the strings alone.
-\[
-\begin{tikzpicture}
-
-\def \xleft{-2}
-
-\def\xa{0};
-\def\xb{0.7};
-\def\xc{\xb * 2};
-
-\def \ya{0};
-\def \yb{1};
-\def \yc{2};
-
-\node(a) at (\xleft, \ya) {};
-\node(b) at (\xleft, \yb) {}; % middle
-\node(c) at (\xleft, \yc) {};
-
-\draw[dashed] (a) -- node[right] {$\text{Id}$} (b);
-\draw (b) -- node[right] {$T$} (c);
-
-
-\node(d) at (\xa, \ya) {};
-\node(e) at (\xc, \ya) {};
-\node(f) at (\xb, \yb) {}; % middle
-\node(g) at (\xb, \yc) {}; % top
-
-
-\filldraw[black] (b) circle (1 pt);
-\node [left] at (b) {$\eta$};
-
-\draw (d) to [out=90, in=180]  node[left] {$T$}(f);
-\draw (e) to [out=90, in=0]  node[right] {$T$} (f);
-
-\draw (f) -- node[right] {$T$} (g);
-
-\filldraw[black] (f) circle (1 pt);
-\node [below] at (f) {$\mu$};
-
-\end{tikzpicture}
-\]
-In the first diagram it's customary to skip the dashed line corresponding to the identity functor. The $\eta$ dot can be used to freely inject a $T$ line into a diagram. Two $T$ lines can be joined by the $\mu$ dot. 
-
-String diagrams are especially useful in expressing monad laws. For instance, we have the left identity law:
-\[ \mu \circ (\eta \circ T) = id \]
-which can be visualized as a commuting diagram:
-\[
- \begin{tikzcd}
- \text{Id} \circ T
- \arrow[rr, "\eta \circ T"]
- \arrow[rrd, "id"']
-& & T \circ T
- \arrow[d, "\mu"]
- \\
- && T
-  \end{tikzcd}
-\]
-The corresponding string diagrams represents the equality of the two paths through this diagram:
-\[
-\begin{tikzpicture}
-\def\xa{0};
-\def\xb{0.7};
-\def\xc{\xb * 2};
-
-\def \ya{0.8};
-\def \yb{1.7};
-\def \yc{2.6};
-
-\node(a) at (\xa, \ya) {};
-\node(b) at (\xb, \yb) {};
-\node(c) at (\xc, 0) {};
-\node(d) at (\xb, \yc) {};
-\filldraw[black] (a) circle (1 pt);
-\node [below] at (a) {$\eta$};
-\filldraw[black] (b) circle (1 pt);
-\node [below] at (b) {$\mu$};
-\draw (a) to [out=90, in=180]  node[left] {$T$}(b);
-\draw (c) to [out=90, in=0]  node[right] {$T$} (b);
-\draw (b) -- node[right] {$T$} (d);
-
-\def\xd{3.5}
-\def\xe{2.5}
-\node(e) at (\xd, 0) {};
-\node(f) at (\xd, \yc) {};
-\node at (\xe, 1.5) {$=$};
-\draw (e) -- node[right] {$T$} (f);
-\end{tikzpicture}
-\]
-You may think of this equality as the result of yanking the top and bottom strings resulting in the $\eta$ appendage being retracted into the straight line.
-
-There is a symmetric right identity law:
-\[
-\begin{tikzpicture}
-\def\xa{0};
-\def\xb{0.7};
-\def\xc{\xb * 2};
-
-\def \ya{0.8};
-\def \yb{1.7};
-\def \yc{2.6};
-
-\node(a) at (\xa, 0) {};
-\node(b) at (\xb, \yb) {};
-\node(c) at (\xc, \ya) {};
-\node(d) at (\xb, \yc) {};
-\filldraw[black] (b) circle (1 pt);
-\node [below] at (c) {$\eta$};
-\filldraw[black] (c) circle (1 pt);
-\node [below] at (b) {$\mu$};
-\draw (a) to [out=90, in=180]  node[left] {$T$}(b);
-\draw (c) to [out=90, in=0]  node[right] {$T$} (b);
-\draw (b) -- node[right] {$T$} (d);
-
-\def\xd{3.5}
-\def\xe{2.5}
-\node(e) at (\xd, 0) {};
-\node(f) at (\xd, \yc) {};
-\node at (\xe, 1.5) {$=$};
-\draw (e) -- node[right] {$T$} (f);
-\end{tikzpicture}
-\]
-
-Finally, this is the associativity law in terms of string diagrams:
-\[
-\begin{tikzpicture}
-\def\delta{0.7}
-\def\xa{0};
-\def\xb{\delta};
-\def\xc{\delta * 2};
-\def\xd{\delta * 3};
-
-\def \ya{0.8};
-\def \yb{1.7};
-\def \yc{2.6};
-
-\node(a) at (\xa, 0) {};
-\node(b) at (\xb, \yb) {};
-\node(c) at (\xc, \ya) {};
-\node(d) at (\xb, \yc) {};
-\node(e) at (\xb, 0) {};
-\node(f) at (\xd, 0) {};
-\filldraw[black] (b) circle (1 pt);
-\filldraw[black] (c) circle (1 pt);
-\node [below] at (b) {$\mu$};
-\draw (a) to [out=90, in=180]  node[left] {}(b);
-\draw (c) to [out=90, in=0]  node[right] {} (b);
-\draw (b) -- node[right] {} (d);
-\draw (e) to [out=90, in=180]  node[left] {}(c);
-\draw (f) to [out=90, in=0]  node[right] {}(c);
-\node [below] at (c) {$\mu$};
-\node [below] at (a) {$T$};
-\node [above] at (d) {$T$};
-\node [below] at (e) {$T$};
-\node [below] at (f) {$T$};
-
-\def\xe{2.5}
-\node at (\xe, 1.5) {$=$};
-
-\def\off{3}
-\def\xa{\off + \delta * 0};
-\def\xb{\off + \delta * 1};
-\def\xc{\off + \delta * 2};
-\def\xd{\off + \delta * 3};
-
-\node(a) at (\xa, 0) {};
-\node(b) at (\xc, 0) {};
-\node(c) at (\xd, 0) {};
-\node(d) at (\xb, \ya) {};
-\node(e) at (\xc, \yb) {};
-\node(f) at (\xc, \yc) {};
-\filldraw[black] (d) circle (1 pt);
-\filldraw[black] (e) circle (1 pt);
-\node [below] at (d) {$\mu$};
-\draw (a) to [out=90, in=180]  node[left] {}(d);
-\draw (b) to [out=90, in=0]  node[right] {} (d);
-\draw (e) -- node[right] {} (f);
-\draw (d) to [out=90, in=180]  node[left] {}(e);
-\draw (c) to [out=90, in=0]  node[right] {}(e);
-\node [below] at (e) {$\mu$};
-\node [below] at (a) {$T$};
-\node [below] at (b) {$T$};
-\node [below] at (c) {$T$};
-\node [above] at (f) {$T$};
-\end{tikzpicture}
-\]
-
-\subsection{String diagrams for the adjunction}
-
-As we discussed before, an adjunction is a relation between a pair of functors, $L \colon \mathcal{D} \to \mathcal{C}$ and $R \colon \mathcal{C} \to \mathcal{D}$. It can be defined by a pair of natural transformations, the unit $\eta$ and the counit $\varepsilon$, satisfying triangular identities.
-
-The unit of the adjunction can be illustrated by a ``cup''-shaped diagram:
-
-\[
-\begin{tikzpicture}
-
-\def \xrightmost {2}
-\def \xright         {1}
-\def \xmid          {0}
-\def \xleft           {-\xright}
-\def \xleftmost   {-\xrightmost}
-
-\def \ybot           {0}
-\def \ymid          {1}
-\def \ytop           {2}
-\def \ylabel        {\ytop - 0.3}
+    \[
+        \begin{tikzpicture}
+            \def\x{0};
+            \def\xl{-1.5};
+            \def\xr{1.5};
+
+
+            \def \ya{0.8};
+            \def \yb{1.7};
+            \def \yc{2.6};
+            \def \yt {2.3};
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\x, \yc);
+            \filldraw[fill=orange!30, draw=white] (\x, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\x, \ya) {$F$};
+            \node(b) at (\x, \yb) {};
+            \node [above] (c) at (\x, \yc) {$G$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{D}$};
+
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$\alpha$};
+
+            \draw (a)  -- (c);
+
+        \end{tikzpicture}
+    \]
+
+    这是一个\emph{字符串图（string diagram）}的示例。你从下到上、从左到右读取这样的图（想象一下$(x, y)$坐标系）。
+
+    这个图的底部显示了从$\mathcal{C}$到$\mathcal{D}$的函子$F$。图的顶部显示了在同一对范畴之间的函子$G$。转变发生在中间，自然变换$\alpha$将$F$映射到$G$。
+
+    在Haskell中，这个图表示为两个自函子之间的多态函数：
+    \begin{haskell}
+        alpha :: forall x. F x -> G x
+    \end{haskell}
+
+    到目前为止，使用这种新的视觉表示似乎并没有带来太多好处。但让我们将其应用于更有趣的东西：自然变换的垂直组合：
+    \[
+        \begin{tikzcd}[column sep=huge]
+            \mathcal{C}
+            \arrow[bend left=60]{rr}[name=U, label=above:$H$]{}
+            \arrow[]{rr}[name=M, label={[xshift=15pt, yshift=-5pt]:$G$}]{}
+            \arrow[bend right=60]{rr}[name=D, label=below:$F$]{}
+            &&
+            \mathcal{D}
+            \arrow[shorten <=8pt, shorten >=8pt,Leftarrow, to path={(U) -- node[label=left:$\beta$] {} (M)}]{}
+            \arrow[shorten <=8pt, shorten >=8pt,Leftarrow, to path={(M) -- node[label=left:$\alpha$] {} (D)}]{}
+        \end{tikzcd}
+    \]
+
+    相应的字符串图显示了两个范畴以及它们之间由两个自然变换连接的三个函子。
+    \[
+        \begin{tikzpicture}
+            \def\x{0};
+            \def\xl{-1.5};
+            \def\xr{1.5};
+
+
+            \def \ya{0};
+            \def \yb{0.8};
+            \def \ybb{2.2};
+            \def \yc{3};
+            \def \yt {2.7};
+            \def \ymid {1.5}
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\x, \yc);
+            \filldraw[fill=orange!30, draw=white] (\x, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\x, \ya) {$F$};
+            \node(b) at (\x, \yb) {};
+            \node(bb) at (\x, \ybb) {};
+            \node [above] (c) at (\x, \yc) {$H$};
+            \node(m)[right] at (\x, \ymid) {$G$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{D}$};
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$\alpha$};
+            \filldraw[black] (bb) circle (1 pt);
+            \node [left] at (bb) {$\beta$};
+
+            \draw (a)  -- (c);
+
+        \end{tikzpicture}
+    \]
+    如你所见，你可以通过从下到上扫描字符串图来重建原始图。
+
+    在Haskell中，我们将处理三个自函子，以及$\hask{beta}$在$\hask{alpha}$之后的垂直组合：
+    \begin{haskell}
+        alpha :: forall x. F x -> G x
+        beta  :: forall x. G x -> H x
+    \end{haskell}
+    使用常规函数组合来实现：
+    \begin{haskell}
+        beta_alpha :: forall x. F x -> H x
+        beta_alpha = beta . alpha
+    \end{haskell}
+
+    让我们继续研究自然变换的水平组合：
+    \[
+        \begin{tikzcd}[column sep=huge]
+            \mathcal{C}
+            \arrow[bend left=50]{r}[name=U, label=above:$F'$]{}
+            \arrow[bend right=50]{r}[name=D, label=below:$F$]{}
+            &
+            \mathcal{D}
+            \arrow[bend left=50]{r}[name=U1, label=above:$G'$]{}
+            \arrow[bend right=50]{r}[name=D1, label=below:$G$]{}
+            &
+            \mathcal{E}
+            \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\alpha$] {} (D)}]{}
+            \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U1) -- node[label=left:$\beta$] {} (D1)}]{}
+        \end{tikzcd}
+    \]
+    这次我们有三个范畴，因此我们将有三个区域。
+
+    字符串图的底部对应于函子$G \circ F$（按此顺序）的组合。顶部对应于$G' \circ F'$。一个自然变换$\alpha$连接$F$到$F'$；另一个自然变换$\beta$连接$G$到$G'$。
+    \[
+        \begin{tikzpicture}
+            \def\xl{-2.75};
+            \def\xa{-1};
+            \def\xc{0}
+            \def\xb{1};
+            \def\xr{2.75};
+
+
+            \def \ya{0};
+            \def \yb{1};
+            \def \yc{2};
+            \def \yt {1.7};
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
+            \filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
+            \filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\xa, \ya) {$F$};
+            \node(b) at (\xa, \yb) {};
+            \node [above] (c) at (\xa, \yc) {$F'$};
+
+            \def\xd{3.5}
+            \def\xe{2.5}
+            \node(e) at (\xd, 0) {};
+            \node(f) at (\xd, \yc) {};
+            \node at (\xe, 1.5) {$=$};
+            \draw (e) -- node[right] {$T$} (f);
+
+            \node[below] (d) at (\xb, \ya) {$G$};
+            \node(e) at (\xb, \yb) {};
+            \node [above] (f) at (\xb, \yc) {$G'$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r) at (\xc, \yt) {$\mathcal{D}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
+
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$\alpha$};
+            \filldraw[black] (e) circle (1 pt);
+            \node [left] at (e) {$\beta$};
+
+            \draw (a)  -- (c);
+            \draw (d)  -- (f);
+
+        \end{tikzpicture}
+    \]
+    这个新的系统中，平行的垂直线对应于函子的组合。
+
+    你可以认为自然变换的水平组合发生在图的中间的想象水平线上。但是，如果有人在绘制图时不够仔细，并且其中一个点比另一个点略高呢？事实证明，由于交换律，点的确切位置无关紧要。
+
+    但首先，让我们说明whiskering：这是一个水平组合，其中一个自然变换是恒等的。我们可以这样绘制它：
+
+    \[
+        \begin{tikzpicture}
+            \def\xl{-2.75};
+            \def\xa{-1};
+            \def\xc{0}
+            \def\xb{1};
+            \def\xr{2.75};
+
+
+            \def \ya{0};
+            \def \yb{1};
+            \def \yc{2};
+            \def \yt {1.7};
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
+            \filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
+            \filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\xa, \ya) {$F$};
+            \node(b) at (\xa, \yb) {};
+            \node [above] (c) at (\xa, \yc) {$F$};
+
+            \node[below] (d) at (\xb, \ya) {$G$};
+            \node(e) at (\xb, \yb) {};
+            \filldraw[black] (e) circle (1 pt);
+            \node [left] at (e) {$\beta$};
+
+            \node [above] (f) at (\xb, \yc) {$G'$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r) at (\xc, \yt) {$\mathcal{D}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
+
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$id_F$};
+
+            \draw (a)  -- (c);
+            \draw (d)  -- (f);
+
+        \end{tikzpicture}
+    \]
+    但是，实际上，恒等可以插入到垂直线的任何位置，因此我们甚至不需要绘制它。以下图表示$\beta \circ F$的whiskering。
+    \[
+        \begin{tikzpicture}
+            \def\xl{-2.75};
+            \def\xa{-1};
+            \def\xc{0}
+            \def\xb{1};
+            \def\xr{2.75};
+
+
+            \def \ya{0};
+            \def \yb{1};
+            \def \yc{2};
+            \def \yt {1.7};
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
+            \filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
+            \filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\xa, \ya) {$F$};
+            \node(b) at (\xa, \yb) {};
+            \node [above] (c) at (\xa, \yc) {$F$};
+
+            \node[below] (d) at (\xb, \ya) {$G$};
+            \node(e) at (\xb, \yb) {};
+            \node [above] (f) at (\xb, \yc) {$G'$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r) at (\xc, \yt) {$\mathcal{D}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
+
+            \filldraw[black] (e) circle (1 pt);
+            \node [left] at (e) {$\beta$};
+
+            \draw (a)  -- (c);
+            \draw (d)  -- (f);
+
+        \end{tikzpicture}
+    \]
+
+    在Haskell中，当$\hask{beta}$是一个多态函数时：
+    \begin{haskell}
+        beta :: forall x. G x -> G' x
+    \end{haskell}
+    我们将这个图读作：
+    \begin{haskell}
+        beta_f :: forall x. G (F x) -> G' (F x)
+        beta_f = beta
+    \end{haskell}
+    理解到类型检查器将实例化多态函数$\hask{beta}$为正确的类型。
+
+    类似地，你可以轻松想象$G \circ \alpha$的图及其Haskell实现：
+    \begin{haskell}
+        g_alpha :: forall x. G (F x) -> G (F' x)
+        g_alpha = fmap alpha
+    \end{haskell}
+    其中：
+    \begin{haskell}
+        alpha :: forall x. F x -> F' x
+    \end{haskell}
+
+    以下是对应于交换律的字符串图：
+    \[
+        \begin{tikzpicture}
+            \def\xl{-2.75};
+            \def\xa{-1};
+            \def\xc{0}
+            \def\xb{1};
+            \def\xr{2.75};
+
+
+            \def \ya{0.2};
+            \def \yb{1};
+            \def \ybb{2}
+            \def \yc{2.8};
+            \def \yt {\yc -0.3};
+            \def \ymid {1.5}
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
+            \filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
+            \filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\xa, \ya) {$F$};
+            \node(b) at (\xa, \yb) {};
+            \node [above] (c) at (\xa, \yc) {$F''$};
+            \node [right] (ml) at (\xa, \ymid) {$F'$};
+
+            \node[below] (d) at (\xb, \ya) {$G$};
+            \node(e) at (\xb, \yb) {};
+            \node [above] (f) at (\xb, \yc) {$G''$};
+            \node [right] (ml) at (\xb, \ymid) {$G'$};
+
+            \node(l)[right] at (\xl, \yt) {$\mathcal{C}$};
+            \node(r) at (\xc, \yt) {$\mathcal{D}$};
+            \node(r)[left] at (\xr, \yt) {$\mathcal{E}$};
+
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$\alpha$};
+            \filldraw[black] (e) circle (1 pt);
+            \node [left] at (e) {$\beta$};
+
+            \node(bb) at (\xa, \ybb) {};
+            \node(ee) at (\xb, \ybb) {};
+
+            \filldraw[black] (bb) circle (1 pt);
+            \node [left] at (bb) {$\alpha'$};
+            \filldraw[black] (ee) circle (1 pt);
+            \node [left] at (ee) {$\beta'$};
+
+            \draw (a)  -- (c);
+            \draw (d)  -- (f);
+
+        \end{tikzpicture}
+    \]
+    这个图故意模棱两可。我们应该先进行自然变换的垂直组合，然后再进行水平组合吗？还是应该水平组合$\beta \circ \alpha$和$\beta' \circ \alpha'$，然后再垂直组合结果？交换律告诉我们，这无关紧要：结果是相同的。
+
+    现在尝试在此图中将一对自然变换替换为恒等变换。如果你替换$\alpha'$和$\beta'$，你会得到$\beta \circ \alpha$的水平组合。如果你用恒等自然变换替换$\alpha'$和$\beta$，并将$\beta'$重命名为$\beta$，你会得到一个图，其中$\alpha$相对于$\beta$向下移动，依此类推。
+
+    \[
+        \begin{tikzpicture}
+            \def\xl{-2.75};
+            \def\xa{-1};
+            \def\xc{0}
+            \def\xb{1};
+            \def\xr{2.75};
+
+
+            \def \ya{0.2};
+            \def \yb{1};
+            \def \ybb{2}
+            \def \yc{2.8};
+            \def \yt {\yc -0.3};
+            \def \ymid {1.5}
+
+            \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ya) rectangle (\xa, \yc);
+            \filldraw[fill=black!10!white, draw=white] (\xa, \ya) rectangle (\xb, \yc);
+            \filldraw[fill=orange!30, draw=white] (\xb, \ya) rectangle (\xr, \yc);
+
+            \node[below] (a) at (\xa, 0) {};
+            \node(b) at (\xb, \yb) {};
+            \node [above] (c) at (\xa, \yc) {$F'$};
+
+            \node[below] (d) at (\xb, \ya) {$G$};
+            \node(e) at (\xb, \yb) {};
+            \filldraw[black] (e) circle (1 pt);
+            \node [left] at (e) {$\beta$};
+
+            \draw (a)  -- (c);
+            \draw (d)  -- (f);
+
+        \end{tikzpicture}
+    \]
+    交换律告诉我们，所有这些图都是相等的。我们可以像珠子穿在线上一样自由滑动自然变换。
+
+    \subsection{String diagrams for the monad\text{（单子的字符串图）}}
+
+    一个单子定义为一个配备了两个自然变换的自函子，如下图所示：
+
+    \[
+        \begin{tikzcd}[column sep=huge]
+            \mathcal{C}
+            \arrow[bend left=50]{r}[name=U, label=above:$T$]{}
+            \arrow[bend right=50]{r}[name=D, label=below:$\text{Id}$]{}
+            &
+            \mathcal{C}
+            \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\eta$] {} (D)}]{}
+        \end{tikzcd}
+        \hspace{20pt}
+        \begin{tikzcd}[column sep=huge]
+            \mathcal{C}
+            \arrow[bend left=50]{r}[name=U, label=above:$T$]{}
+            \arrow[bend right=50]{r}[name=D, label=below:$T \circ T$]{}
+            &
+            \mathcal{C}
+            \arrow[shorten <=10pt,shorten >=10pt,Leftarrow,to path={(U) -- node[label=left:$\mu$] {} (D)}]{}
+        \end{tikzcd}
+    \]
+
+    由于我们只处理一个范畴，当将这些图转换为字符串图时，我们可以省略范畴的命名（和着色），只绘制字符串。
+
+    \[
+        \begin{tikzpicture}
+
+            \def \xleft{-2}
+
+            \def\xa{0};
+            \def\xb{0.7};
+            \def\xc{\xb * 2};
+
+            \def \ya{0};
+            \def \yb{1};
+            \def \yc{2};
+
+            \node(a) at (\xleft, \ya) {};
+            \node(b) at (\xleft, \yb) {}; % middle
+            \node(c) at (\xleft, \yc) {};
+
+            \draw[dashed] (a) -- node[right] {$\text{Id}$} (b);
+            \draw (b) -- node[right] {$T$} (c);
+
+
+            \node(d) at (\xa, \ya) {};
+            \node(e) at (\xc, \ya) {};
+            \node(f) at (\xb, \yb) {}; % middle
+            \node(g) at (\xb, \yc) {}; % top
+
+
+            \filldraw[black] (b) circle (1 pt);
+            \node [left] at (b) {$\eta$};
+
+            \draw (d) to [out=90, in=180]  node[left] {$T$}(f);
+            \draw (e) to [out=90, in=0]  node[right] {$T$} (f);
+
+            \draw (f) -- node[right] {$T$} (g);
+
+            \filldraw[black] (f) circle (1 pt);
+            \node [below] at (f) {$\mu$};
+
+        \end{tikzpicture}
+    \]
+    在第一个图中，通常会跳过表示恒等函子的虚线。$\eta$点可以自由地将$T$线注入到图中。两个$T$线可以通过$\mu$点连接。
+
+    字符串图在表达单子律时特别有用。例如，我们有左恒等律：
+    \[ \mu \circ (\eta \circ T) = id \]
+    这可以用一个交换图来表示：
+    \[
+        \begin{tikzcd}
+            \text{Id} \circ T
+            \arrow[rr, "\eta \circ T"]
+            \arrow[rrd, "id"']
+            & & T \circ T
+            \arrow[d, "\mu"]
+            \\
+            && T
+        \end{tikzcd}
+    \]
+    相应的字符串图表示通过这个图的两条路径的相等性：
+
+    \[
+        \begin{tikzpicture}
+            \def\xa{0};
+            \def\xb{0.7};
+            \def\xc{\xb * 2};
+
+            \def \ya{0.8};
+            \def \yb{1.7};
+            \def \yc{2.6};
+
+            \node(a) at (\xa, \ya) {};
+            \node(b) at (\xb, \yb) {};
+            \node(c) at (\xc, 0) {};
+            \node(d) at (\xb, \yc) {};
+            \filldraw[black] (a) circle (1 pt);
+            \node [below] at (a) {$\eta$};
+            \filldraw[black] (b) circle (1 pt);
+            \node [below] at (b) {$\mu$};
+            \draw (a) to [out=90, in=180]  node[left] {$T$}(b);
+            \draw (c) to [out=90, in=0]  node[right] {$T$} (b);
+            \draw (b) -- node[right] {$T$} (d);
+
+            \def\xd{3.5}
+            \def\xe{2.5}
+            \node(e) at (\xd, 0) {};
+            \node(f) at (\xd, \yc) {};
+            \node at (\xe, 1.5) {$=$};
+            \draw (e) -- node[right] {$T$} (f);
+        \end{tikzpicture}
+    \]
+    你可以将此等式视为通过拉扯上下字符串，使$\eta$附属物缩回到直线中。
+
+    同样有一个对称的右恒等律：
+    \[
+        \begin{tikzpicture}
+            \def\xa{0};
+            \def\xb{0.7};
+            \def\xc{\xb * 2};
+
+            \def \ya{0.8};
+            \def \yb{1.7};
+            \def \yc{2.6};
+
+            \node(a) at (\xa, 0) {};
+            \node(b) at (\xb, \yb) {};
+            \node(c) at (\xc, \ya) {};
+            \node(d) at (\xb, \yc) {};
+            \filldraw[black] (b) circle (1 pt);
+            \node [below] at (c) {$\eta$};
+            \filldraw[black] (c) circle (1 pt);
+            \node [below] at (b) {$\mu$};
+            \draw (a) to [out=90, in=180]  node[left] {$T$}(b);
+            \draw (c) to [out=90, in=0]  node[right] {$T$} (b);
+            \draw (b) -- node[right] {$T$} (d);
+
+            \def\xd{3.5}
+            \def\xe{2.5}
+            \node(e) at (\xd, 0) {};
+            \node(f) at (\xd, \yc) {};
+            \node at (\xe, 1.5) {$=$};
+            \draw (e) -- node[right] {$T$} (f);
+        \end{tikzpicture}
+    \]
+
+    最后，这是关联律的字符串图表示：
+    \[
+        \begin{tikzpicture}
+            \def\delta{0.7}
+            \def\xa{0};
+            \def\xb{\delta};
+            \def\xc{\delta * 2};
+            \def\xd{\delta * 3};
+
+            \def \ya{0.8};
+            \def \yb{1.7};
+            \def \yc{2.6};
+
+            \node(a) at (\xa, 0) {};
+            \node(b) at (\xb, \yb) {};
+            \node(c) at (\xc, \ya) {};
+            \node(d) at (\xb, \yc) {};
+            \node(e) at (\xb, 0) {};
+            \node(f) at (\xd, 0) {};
+            \filldraw[black] (b) circle (1 pt);
+            \filldraw[black] (c) circle (1 pt);
+            \node [below] at (b) {$\mu$};
+            \draw (a) to [out=90, in=180]  node[left] {}(b);
+            \draw (c) to [out=90, in=0]  node[right] {} (b);
+            \draw (b) -- node[right] {} (d);
+            \draw (e) to [out=90, in=180]  node[left] {}(c);
+            \draw (f) to [out=90, in=0]  node[right] {}(c);
+            \node [below] at (c) {$\mu$};
+            \node [below] at (a) {$T$};
+            \node [above] at (d) {$T$};
+            \node [below] at (e) {$T$};
+            \node [below] at (f) {$T$};
+
+            \def\xe{2.5}
+            \node at (\xe, 1.5) {$=$};
+
+            \def\off{3}
+            \def\xa{\off + \delta * 0};
+            \def\xb{\off + \delta * 1};
+            \def\xc{\off + \delta * 2};
+            \def\xd{\off + \delta * 3};
+
+            \node(a) at (\xa, 0) {};
+            \node(b) at (\xc, 0) {};
+            \node(c) at (\xd, 0) {};
+            \node(d) at (\xb, \ya) {};
+            \node(e) at (\xc, \yb) {};
+            \node(f) at (\xc, \yc) {};
+            \filldraw[black] (d) circle (1 pt);
+            \filldraw[black] (e) circle (1 pt);
+            \node [below] at (d) {$\mu$};
+            \draw (a) to [out=90, in=180]  node[left] {}(d);
+            \draw (b) to [out=90, in=0]  node[right] {} (d);
+            \draw (e) -- node[right] {} (f);
+            \draw (d) to [out=90, in=180]  node[left] {}(e);
+            \draw (c) to [out=90, in=0]  node[right] {}(e);
+            \node [below] at (e) {$\mu$};
+            \node [below] at (a) {$T$};
+            \node [below] at (b) {$T$};
+            \node [below] at (c) {$T$};
+            \node [above] at (f) {$T$};
+        \end{tikzpicture}
+    \]
+
+    \subsection{String diagrams for the adjunction\text{（伴随函子的字符串图）}}
+
+    正如我们之前讨论的，伴随函子是两个函子之间的关系，$L \colon \mathcal{D} \to \mathcal{C}$和$R \colon \mathcal{C} \to \mathcal{D}$。它可以通过一对自然变换来定义，伴随单元$\eta$和伴随余单元$\varepsilon$，它们满足三角恒等式。
+
+    伴随单元可以通过一个“杯”形图来说明：
+
+    \[
+        \begin{tikzpicture}
+
+            \def \xrightmost {2}
+            \def \xright         {1}
+            \def \xmid          {0}
+            \def \xleft           {-\xright}
+            \def \xleftmost   {-\xrightmost}
+
+            \def \ybot           {0}
+            \def \ymid          {1}
+            \def \ytop           {2}
+            \def \ylabel        {\ytop - 0.3}
 
 % functor labels
-\node [above] at (\xleft, \ytop)   {$L$};
-\node [above] at (\xright, \ytop) {$R$};
+            \node [above] at (\xleft, \ytop)   {$L$};
+            \node [above] at (\xright, \ytop) {$R$};
 % background
-\filldraw[fill=orange!30, draw=white] (\xleftmost, \ytop) rectangle (\xrightmost, \ybot);
+            \filldraw[fill=orange!30, draw=white] (\xleftmost, \ytop) rectangle (\xrightmost, \ybot);
 % cup
-\draw [fill=blue!50!green!20] (\xleft, \ytop) to [out=-90, in=180] (\xmid, \ymid) to [out=0, in=-90] (\xright, \ytop);
+            \draw [fill=blue!50!green!20] (\xleft, \ytop) to [out=-90, in=180] (\xmid, \ymid) to [out=0, in=-90] (\xright, \ytop);
 % natural transformation
-\filldraw [black] (\xmid, \ymid) circle (1 pt);
-\node [below] at (\xmid, \ymid) {$\eta$};
+            \filldraw [black] (\xmid, \ymid) circle (1 pt);
+            \node [below] at (\xmid, \ymid) {$\eta$};
 % category labels
-\node           at (\xmid, \ylabel)        {$\mathcal{C}$};
-\node [right] at (\xleftmost, \ylabel) {$\mathcal{D}$};
+            \node           at (\xmid, \ylabel)        {$\mathcal{C}$};
+            \node [right] at (\xleftmost, \ylabel) {$\mathcal{D}$};
 
-\end{tikzpicture}
-\]
-The identity functor at the bottom of the diagram is omitted from the picture. The $\eta$ dot turns the identity functor below it to the composition $R \circ L$ above it.
+        \end{tikzpicture}
+    \]
+    图底部的恒等函子从图中省略了。$\eta$点将其下方的恒等函子转变为其上方的组合$R \circ L$。
 
-Similarly, the counit can be visualized as a ``cap''-shaped string diagram with the implicit identity functor at the top:
+    类似地，伴随余单元可以通过一个“帽”形字符串图来可视化，顶部的隐含恒等函子：
 
-\[
-\begin{tikzpicture}
-\def\xleft{0};
-\def\xmid{1};
-\def\xright{\xmid * 2};
+    \[
+        \begin{tikzpicture}
+            \def\xleft{0};
+            \def\xmid{1};
+            \def\xright{\xmid * 2};
 
-\def \ybot{0};
-\def \ymid{1};
-\def \ytop{2 * \ymid};
-\def \yt{2 * \ymid - 0.3};
+            \def \ybot{0};
+            \def \ymid{1};
+            \def \ytop{2 * \ymid};
+            \def \yt{2 * \ymid - 0.3};
 
-\node [below] (a) at (\xleft, \ybot) {$R$};
-\node(b) at (\xmid, \ymid) {};
-\node[below] (c) at (\xright, \ybot) {$L$};
+            \node [below] (a) at (\xleft, \ybot) {$R$};
+            \node(b) at (\xmid, \ymid) {};
+            \node[below] (c) at (\xright, \ybot) {$L$};
 
-\filldraw[fill=blue!50!green!20, draw=white] (\xleft-1, \ytop) rectangle (\xright+1, \ybot);
+            \filldraw[fill=blue!50!green!20, draw=white] (\xleft-1, \ytop) rectangle (\xright+1, \ybot);
 
 
-\draw [fill=orange!30] (a.north) to [out=90, in=180] (b.west) -- (b.east) to [out=0, in=90] (c.north);
+            \draw [fill=orange!30] (a.north) to [out=90, in=180] (b.west) -- (b.east) to [out=0, in=90] (c.north);
 
-\filldraw[black] (b) circle (1 pt);
-\node [above] at (b) {$\varepsilon$};
+            \filldraw[black] (b) circle (1 pt);
+            \node [above] at (b) {$\varepsilon$};
 
-\node(l)[right] at (\xleft-1, \yt) {$\mathcal{C}$};
-\node(r) at (\xmid, \ybot + 0.3) {$\mathcal{D}$};
+            \node(l)[right] at (\xleft-1, \yt) {$\mathcal{C}$};
+            \node(r) at (\xmid, \ybot + 0.3) {$\mathcal{D}$};
 
-\end{tikzpicture}
-\]
+        \end{tikzpicture}
+    \]
 
-Triangle identities can be easily expressed using string diagrams. They also make intuitive sense, as you can imagine pulling on the string from both sides to straighten the curve.
+    三角恒等式可以使用字符串图轻松表达。它们也很直观，因为你可以想象从两边拉动字符串以拉直曲线。
 
-For instance, this is the first triangle identity, sometimes called the \index{zigzag identity}\emph{zigzag} identity: 
+    例如，这是第一个三角恒等式，有时称为\index{zigzag identity}\emph{之字形恒等式}：
 
-\[
-\begin{tikzpicture}
-\def \dx {0.7}
-\def \dy {0.7}
+    \[
+        \begin{tikzpicture}
+            \def \dx {0.7}
+            \def \dy {0.7}
 
-\def \xa{-3 * \dx};
-\def \xb{-2 * \dx};
-\def \xc{-1 * \dx};
-\def \xd{0};
-\def \xe{1 * \dx};
-\def \xf{2 * \dx};
-\def \xg{3 * \dx};
+            \def \xa{-3 * \dx};
+            \def \xb{-2 * \dx};
+            \def \xc{-1 * \dx};
+            \def \xd{0};
+            \def \xe{1 * \dx};
+            \def \xf{2 * \dx};
+            \def \xg{3 * \dx};
 
-\def \ya{0};
-\def \yb{1 * \dy};
-\def \yc{2 * \dy};
-\def \yd{3 * \dy};
-\def \ye{4 * \dy};
+            \def \ya{0};
+            \def \yb{1 * \dy};
+            \def \yc{2 * \dy};
+            \def \yd{3 * \dy};
+            \def \ye{4 * \dy};
 
-\node [below] at (\xb, \ya) {$R$};
-\node [right] at (\xd, \yc) {$L$};
-\node [above] at (\xf, \ye) {$R$};
+            \node [below] at (\xb, \ya) {$R$};
+            \node [right] at (\xd, \yc) {$L$};
+            \node [above] at (\xf, \ye) {$R$};
 % background
-\filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xg, \ya);
+            \filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xg, \ya);
 % fill shape
-\path [fill=orange!30] (\xa, \ya) to (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to [out=-90, in=180] (\xe, \yb) to [out=0, in=-90] (\xf, \yc) to (\xf, \ye) to (\xa, \ye);
+            \path [fill=orange!30] (\xa, \ya) to (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to [out=-90, in=180] (\xe, \yb) to [out=0, in=-90] (\xf, \yc) to (\xf, \ye) to (\xa, \ye);
 
-\draw (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to [out=-90, in=180] (\xe, \yb) to [out=0, in=-90] (\xf, \yc) to (\xf, \ye);
+            \draw (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to [out=-90, in=180] (\xe, \yb) to [out=0, in=-90] (\xf, \yc) to (\xf, \ye);
 
-\filldraw[black] (\xc, \yd) circle (1 pt);
-\node [above] at (\xc, \yd) {$\varepsilon$};
+            \filldraw[black] (\xc, \yd) circle (1 pt);
+            \node [above] at (\xc, \yd) {$\varepsilon$};
 
-\filldraw[black] (\xe, \yb) circle (1 pt);
-\node [below] at (\xe, \yb) {$\eta$};
+            \filldraw[black] (\xe, \yb) circle (1 pt);
+            \node [below] at (\xe, \yb) {$\eta$};
 
-\node[right] at (\xa, \ye - 0.3) {$\mathcal{C}$};
-\node[left] at (\xg, \ya + 0.3) {$\mathcal{D}$};
+            \node[right] at (\xa, \ye - 0.3) {$\mathcal{C}$};
+            \node[left] at (\xg, \ya + 0.3) {$\mathcal{D}$};
 
 % right diagram
 
-\node (eq) at (4 * \dy, \yc) {$=$};
-\def \xh {6.3 * \dx}
+            \node (eq) at (4 * \dy, \yc) {$=$};
+            \def \xh {6.3 * \dx}
 
-\filldraw[fill=orange!30, draw=white] (\xh - 1, \ye) rectangle (\xh, \ya);
-\filldraw[fill=blue!50!green!20, draw=white] (\xh, \ye) rectangle (\xh + 1, \ya);
+            \filldraw[fill=orange!30, draw=white] (\xh - 1, \ye) rectangle (\xh, \ya);
+            \filldraw[fill=blue!50!green!20, draw=white] (\xh, \ye) rectangle (\xh + 1, \ya);
 
-\draw (\xh, \ye) -- (\xh, \ya);
+            \draw (\xh, \ye) -- (\xh, \ya);
 
-\node[below] (bb) at (\xh, \ya) { $R$ };
-\node[above] (bt) at (\xh, \ye) { $R$ };
+            \node[below] (bb) at (\xh, \ya) { $R$ };
+            \node[above] (bt) at (\xh, \ye) { $R$ };
 
-\node(l)[right] at (\xh - 1, \ye - 0.3) {$\mathcal{C}$};
-\node(r)[left] at (\xh + 1, \ya + 0.3) {$\mathcal{D}$};
+            \node(l)[right] at (\xh - 1, \ye - 0.3) {$\mathcal{C}$};
+            \node(r)[left] at (\xh + 1, \ya + 0.3) {$\mathcal{D}$};
 
-\end{tikzpicture}
-\]
-Reading the left diagram bottom-to-top produces a series of mappings:
+        \end{tikzpicture}
+    \]
+    从下到上读取左图，会得到一系列映射：
 
-\[  Id_{\mathcal{D}} \circ R \xrightarrow{\eta \circ R} R \circ L \circ R \xrightarrow{R \circ \varepsilon} R \circ Id_{\mathcal{C}}  \]
-This must be equal to the right-hand-side, which may be interpreted as the (invisible) identity natural transformation on $R$
+    \[  Id_{\mathcal{D}} \circ R \xrightarrow{\eta \circ R} R \circ L \circ R \xrightarrow{R \circ \varepsilon} R \circ Id_{\mathcal{C}}  \]
+    这必须等于右侧，它可以被解释为$\hask{R}$上的（隐形）恒等自然变换。
 
-In the case $R$ is an endofunctor, we can translate the first diagram directly to Haskell. The whiskering of the unit of the adjunction $\eta$ by $R$ results in the polymorphic function \hask{unit} being instantiated at \hask{R x}. The whiskering of $\varepsilon$ results in the lifting of \hask{counit} by the functor $R$. The vertical composition translates to function composition:
-\begin{haskell}
-triangle :: forall x. R x -> R x
-triangle = fmap counit . unit
-\end{haskell}
+    在$\hask{R}$是自函子的情况下，我们可以将第一个图直接翻译为Haskell。$\hask{R}$对伴随单元$\eta$的whiskering导致多态函数$\hask{unit}$在$\hask{R x}$上实例化。伴随余单元$\varepsilon$的whiskering导致$\hask{counit}$由函子$\hask{R}$提升。垂直组合翻译为函数组合：
+    \begin{haskell}
+        triangle :: forall x. R x -> R x
+        triangle = fmap counit . unit
+    \end{haskell}
 
-\begin{exercise}
-Draw the string diagrams for the second triangle identity and translate them to Haskell.
-\end{exercise}
+    \begin{exercise}
+        Draw the string diagrams for the second triangle identity and translate them to Haskell.
+    \end{exercise}
 
-\section{Monads from Adjunctions}
+    \section{Monads from Adjunctions}
 
 You might have noticed that the same symbol $\eta$ is used for the unit of the adjunction and for the unit of the monad. This is \emph{not} a coincidence. 
 
