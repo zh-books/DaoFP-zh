@@ -1,475 +1,475 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{4}
+ \setcounter{chapter}{4}
 
-\chapter{Product Types}
+ \chapter{Product Types\\积类型}
 
-We can use sum types to enumerate possible values of a given type, but the encoding can be wasteful. We needed ten constructors just to encode numbers between zero and nine.
-\begin{haskell}
-data Digit = Zero | One | Two | Three | ... | Nine
-\end{haskell}
-But if we combine two digits into a single data structure, a two-digit decimal number, we'll be able to encode a hundred numbers. Or, as Lao Tzu would say, with just four digits you can encode ten thousand numbers.
+ 我们可以使用和类型枚举给定类型的可能值，但这种编码可能是低效的。我们需要十个构造器才能编码从零到九的数字。
+ \begin{haskell}
+  data Digit = Zero | One | Two | Three | ... | Nine
+ \end{haskell}
+ 但是，如果我们将两个数字组合成一个数据结构，即一个两位数的十进制数，我们就能编码一百个数字。正如老子所说，只需四位数字就可以编码一万个数字。
 
-A data type that combines two types in this manner is called a product, or a \index{cartesian product}\emph{cartesian} product. Its defining quality is the elimination rule: there are two arrows coming from $a \times b$; one called ``$\text{fst}$'' goes to $a$, and another called ``$\text{snd}$'' goes to $b$. They are called (cartesian) \index{cartesian projections}\emph{projections}. They let us retrieve $a$ and $b$ from the product $a \times b$.
+ 这种以这种方式组合两种类型的数据类型称为积，或\index{cartesian product}\emph{笛卡尔}积。它的定义特性是消去规则：有两个箭头从$a \times b$出发；一个叫“$\text{fst}$”，指向$a$，另一个叫“$\text{snd}$”，指向$b$。它们被称为（笛卡尔）\index{cartesian projections}\emph{投影}。它们让我们从积$a \times b$中检索$a$和$b$。
 
-\[
- \begin{tikzcd}
-& a \times b
- \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
-\\
-a && b
- \end{tikzcd}
-\]
-
-Suppose that somebody gave you an element of a product, that is an arrow $h$ from the terminal object $1$ to $a \times b$. You can easily retrieve a pair of elements, just by using composition: an element of $a$ given by 
-\[x = \text{fst} \circ h \]
-and an element of $b$ given by
-\[y = \text{snd} \circ h \]
-
-\[
- \begin{tikzcd}
- & 1
-\arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "x"']
- \arrow[ddr, bend left, "y"]
-\\
-&a \times b
- \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
-\\
-a && b
- \end{tikzcd}
-\]
-
-In fact, given an arrow from an arbitrary object $c$ to $a \times b$, we can define, by composition, a pair of arrows $f \colon c \to a$ and $g \colon c \to b$
-
-\[
- \begin{tikzcd}
- & c
-\arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "f"']
- \arrow[ddr, bend left, "g"]
-\\
-&a \times b
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
-\\
-a && b
- \end{tikzcd}
-\]
-
-As we did before with the sum type, we can turn this idea around, and use this diagram to \emph{define} the product type: We impose the condition that a pair of functions $f$ and $g$ be in one-to-one correspondence with a \index{mapping in}\emph{mapping in} from $c$ to $a \times b$. This is the \emph{introduction} rule for the product.
-
-In particular, the mapping out of the terminal object is used in Haskell to define a product type. Given two elements, \hask{a :: A} and \hask{b :: B}, we construct the product 
-
-\begin{haskell}
-(a, b) :: (A, B)
-\end{haskell}
-The built-in syntax for products is just that: a pair of parentheses and a comma in between. It works both for defining the product of two types \hask{(A, B)} and the data constructor \hask{(a, b)} that takes two elements and pairs them together. 
-
-We should never lose sight of the purpose of programming: to decompose complex problems into a series of simpler ones. We see it again in the definition of the product. Whenever we have to construct a mapping \emph{into} the product, we decompose it into two smaller tasks of constructing a pair of functions, each mapping into one of the components of the product. This is as simple as saying that, in order to implement a function that returns a pair of values, it's enough to implement two functions, each returning one of the elements of the pair.
-
-\subsection{Logic}
-
-In logic, a product type corresponds to logical conjunction. In order to prove $A \times B$ ($A$ and $B$), you need to provide the proofs of \emph{both} $A$ and $B$. These are the arrows targeting $A$ and $B$. The elimination rule says that if you have a proof of $A \times B$, then you automatically get the proof of $A$ (through $\text{fst}$) and the proof of $B$ (through $\text{snd}$).
-
-\subsection{Tuples and Records}
-
-As Lao Tzu would say, a product of ten thousand objects is just an object with ten thousand projections. 
-
-We can form arbitrary products in Haskell using the tuple notation. For instance, a product of three types is written as \hask{(A, B, C)}. A term of this type can be constructed from three elements: \hask{(a, b, c)}. 
-
-In what mathematicians call ``abuse of notation'', a product of zero types is written as \hask{()}, an empty tuple, which happens to be the same as the terminal object, or unit type. This is because the product behaves very much like multiplication of numbers, with the terminal object playing the role of one.
-
-In Haskell, rather than defining separate projections for all tuples, we use the pattern-matching syntax. For instance, to extract the third component from a triple we would write
-
-\begin{haskell}
-thrd :: (a, b, c) -> c
-thrd (_, _, c) = c
-\end{haskell}
-We use wildcards for the components that we want to ignore.
-
-Lao Tzu said that ``Naming is the origin of all particular things.'' In programming, keeping track of the meaning of the components of a particular tuple is difficult without giving them names. Record syntax allows us to give names to projections. This is the definition of a product written in record style:
-\begin{haskell}
-data Product a b = Pair { fst :: a, snd :: b }
-\end{haskell}
-\hask{Pair} is the data constructor and \hask{fst} and \hask{snd} are the projections. 
-
-This is how it could be used to declare and initialize a particular pair:
-\begin{haskell}
-ic :: Product Int Char
-ic = Pair 10 'A'
-\end{haskell}
-
-\section{Cartesian Category}
-
-In Haskell, we can define a product of any two types. A category in which all products exist, and the terminal object exists, is called \emph{cartesian}. 
-
-\subsection{Tuple Arithmetic}
-
-The identities satisfied by the product can be derived using the mapping-in property. For instance, to show that $a \times b \cong b \times a$ consider the following two diagrams:
-
-\[
- \begin{tikzcd}
- &x
- \arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "f"']
- \arrow[ddr, bend left, "g"]
- \\
- & a \times b
-  \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
- \\
-a && b
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
- &x
- \arrow[d, dashed, "h'"]
- \arrow[ddl, bend right, "g"']
- \arrow[ddr, bend left, "f"]
- \\
- & b \times a
-  \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
-\\
-b && a
+ \[
+  \begin{tikzcd}
+   & a \times b
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   a && b
   \end{tikzcd}
-\]
-
-They show that, for any object $x$ the arrows to $a \times b$ are in one-to-one correspondence with arrows to $b \times a$. This is because each of these arrows is determined by the same pair $f$ and $g$. 
-
-You can check that the naturality condition is satisfied because, when you shift the perspective using $k \colon x' \to x$, all arrows originating in $x$ are shifted by pre-composition $(- \circ k)$.
-
-In Haskell, this isomorphism can be implemented as a function which is its own inverse:
-\begin{haskell}
-swap :: (a, b) -> (b, a)
-swap x = (snd x, fst x)
-\end{haskell}
-Here's the same function written using pattern matching:
-\begin{haskell}
-swap (x, y) = (y, x)
-\end{haskell}
-
-It's important to keep in mind that the product is symmetric only ``up to isomorphism.'' It doesn't mean that swapping the order of pairs won't change the behavior of a program. Symmetry means that the information content of a swapped pair is the same, but access to it needs to be modified.
-
-The terminal object is the unit of the product, $1 \times a \cong a$. The arrow that witnesses the isomorphism between $1 \times a$ and $a$ is called the \emph{left unitor}:
-\[ \lambda \colon 1 \times a \to a \]
-It can be implemented as $\lambda = \text{snd}$. Its inverse $\lambda^{-1}$ is defined as the unique arrow in the following diagram:
-\[
- \begin{tikzcd}
- &a
- \arrow[d, dashed, "\lambda^{-1}"]
- \arrow[ddl, bend right, "!"']
- \arrow[ddr, bend left, "\text{id}"]
- \\
- & 1 \times a
-  \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
- \\
-1 && a
- \end{tikzcd}
  \]
-The arrow from $a$ to $1$ is called \index{!}$!$ (pronounced, \emph{bang}). This indeed shows that 
-\[\text{snd} \circ \lambda^{-1} = \text{id} \] 
-We still have to prove that $\lambda^{-1}$ is the left inverse of $\text{snd}$. Consider the following diagram:
-\[
- \begin{tikzcd}
- &1 \times a
- \arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "!"']
- \arrow[ddr, bend left, "\text{snd}"]
- \\
- & 1 \times a
-  \arrow[dl,  "\text{fst}"]
- \arrow[dr,   "\text{snd}"']
- \\
-1 && a
- \end{tikzcd}
+
+ 假设有人给了你一个积的元素，即一个从终端对象$1$到$a \times b$的箭头$h$。你可以通过组合轻松检索一对元素：一个给定$a$的元素
+ \[x = \text{fst} \circ h \]
+ 和一个给定$b$的元素
+ \[y = \text{snd} \circ h \]
+
+ \[
+  \begin{tikzcd}
+   & 1
+   \arrow[d, dashed, "h"]
+   \arrow[ddl, bend right, "x"']
+   \arrow[ddr, bend left, "y"]
+   \\
+   &a \times b
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   a && b
+  \end{tikzcd}
  \]
- It obviously commutes for $h = id$. It also commutes for $h = \lambda^{-1}  \circ  \text{snd}$, because we have:
+
+ 实际上，给定一个从任意对象$c$到$a \times b$的箭头，我们可以通过组合定义一对箭头$f \colon c \to a$和$g \colon c \to b$。
+
+ \[
+  \begin{tikzcd}
+   & c
+   \arrow[d, dashed, "h"]
+   \arrow[ddl, bend right, "f"']
+   \arrow[ddr, bend left, "g"]
+   \\
+   &a \times b
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   a && b
+  \end{tikzcd}
+ \]
+
+ 正如我们之前对和类型所做的那样，我们可以反过来使用这个图来\emph{定义}积类型：我们规定一个函数对$f$和$g$与从$c$到$a \times b$的\index{mapping in}\emph{映射}是一对一对应的关系。这是积的\emph{引入}规则。
+
+ 特别地，从终端对象的映射在Haskell中用于定义积类型。给定两个元素，\hask{a :: A}和\hask{b :: B}，我们构造积
+
+ \begin{haskell}
+ (a, b) :: (A, B)
+ \end{haskell}
+ 内置的积语法就是这样：一对括号和中间的逗号。它既适用于定义两个类型的积\hask{(A, B)}，也适用于数据构造器\hask{(a, b)}，它接受两个元素并将它们配对在一起。
+
+ 我们应该始终牢记编程的目的：将复杂问题分解为一系列简单的问题。在积的定义中，我们再次看到这一点。每当我们必须构造一个\emph{进入}积的映射时，我们将其分解为两个较小的任务，即构造一个函数对，每个函数映射到积的一个组成部分。这就像说，为了实现一个返回一对值的函数，足以实现两个函数，每个函数返回对中一个元素。
+
+ \subsection{Logic\\逻辑}
+
+ 在逻辑中，积类型对应于逻辑合取。为了证明$A \times B$（$A$和$B$），你需要同时提供$A$和$B$的证明。这些是指向$A$和$B$的箭头。消去规则表明，如果你有$A \times B$的证明，那么你自动获得$A$的证明（通过$\text{fst}$）和$B$的证明（通过$\text{snd}$）。
+
+ \subsection{Tuples and Records\\元组和记录}
+
+ 正如老子所说，万物的积不过是一个具有万物投影的对象。
+
+ 我们可以使用元组表示法在Haskell中形成任意积。例如，三种类型的积写作\hask{(A, B, C)}。该类型的一个项可以由三个元素构造：\hask{(a, b, c)}。
+
+ 在数学家所称的“符号滥用”中，零个类型的积写作\hask{()}，一个空元组，它恰好与终端对象或单位类型相同。这是因为积的行为非常像数字的乘法，终端对象扮演了“一”的角色。
+
+ 在Haskell中，与其为所有元组定义单独的投影，我们使用模式匹配语法。例如，要从三元组中提取第三个组件，我们可以这样写
+
+ \begin{haskell}
+  thrd :: (a, b, c) -> c
+  thrd (_, _, c) = c
+ \end{haskell}
+ 我们对想忽略的组件使用通配符。
+
+ 老子说，“命名是所有特殊事物的起源。”在编程中，如果不给它们命名，跟踪特定元组中组件的含义是困难的。记录语法允许我们为投影命名。这是以记录方式编写的积的定义：
+ \begin{haskell}
+  data Product a b = Pair { fst :: a, snd :: b }
+ \end{haskell}
+ \hask{Pair}是数据构造器，\hask{fst}和\hask{snd}是投影。
+
+ 这是如何声明和初始化特定对的：
+ \begin{haskell}
+  ic :: Product Int Char
+  ic = Pair 10 'A'
+ \end{haskell}
+
+ \section{Cartesian Category\\笛卡尔范畴}
+
+ 在Haskell中，我们可以定义任意两种类型的积。具有所有积和终端对象的范畴称为\emph{笛卡尔}范畴。
+
+ \subsection{Tuple Arithmetic\\元组算术}
+
+ 积所满足的恒等式可以使用映射性质导出。例如，要证明$a \times b \cong b \times a$，考虑以下两个图：
+
+ \[
+  \begin{tikzcd}
+   &x
+   \arrow[d, dashed, "h"]
+   \arrow[ddl, bend right, "f"']
+   \arrow[ddr, bend left, "g"]
+   \\
+   & a \times b
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   a && b
+  \end{tikzcd}
+  \qquad
+  \begin{tikzcd}
+   &x
+   \arrow[d, dashed, "h'"]
+   \arrow[ddl, bend right, "g"']
+   \arrow[ddr, bend left, "f"]
+   \\
+   & b \times a
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   b && a
+  \end{tikzcd}
+ \]
+
+ 它们显示，对于任何对象$x$，到$a \times b$的箭头与到$b \times a$的箭头是一对一对应的。这是因为这些箭头中的每一个都由相同的$f$和$g$对确定。
+
+ 你可以检查自然性条件是否得到了满足，因为当你使用箭头$k \colon x' \to x$切换焦点时，所有起始于$x$的箭头都通过前组合$(- \circ k)$来转换。
+
+ 在Haskell中，这个同构可以实现为一个函数，它是其自身的逆：
+ \begin{haskell}
+  swap :: (a, b) -> (b, a)
+  swap x = (snd x, fst x)
+ \end{haskell}
+ 这是使用模式匹配编写的相同函数：
+ \begin{haskell}
+  swap (x, y) = (y, x)
+ \end{haskell}
+
+ 重要的是要记住，积仅在“同构意义上”是对称的。这并不意味着交换对的顺序不会改变程序的行为。对称性意味着交换对的信息内容相同，但访问它需要进行修改。
+
+ 终端对象是积的单位，$1 \times a \cong a$。见证$1 \times a$和$a$之间同构的箭头称为\emph{左单位元}：
+ \[ \lambda \colon 1 \times a \to a \]
+ 它可以实现为$\lambda = \text{snd}$。它的逆$\lambda^{-1}$定义为以下图中的唯一箭头：
+ \[
+  \begin{tikzcd}
+   &a
+   \arrow[d, dashed, "\lambda^{-1}"]
+   \arrow[ddl, bend right, "!"']
+   \arrow[ddr, bend left, "\text{id}"]
+   \\
+   & 1 \times a
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   1 && a
+  \end{tikzcd}
+ \]
+ 从$a$到$1$的箭头称为\index{!}$!$（发音为，\emph{bang}）。这确实表明
+ \[\text{snd} \circ \lambda^{-1} = \text{id} \]
+ 我们仍然需要证明$\lambda^{-1}$是$\text{snd}$的左逆。考虑以下图：
+ \[
+  \begin{tikzcd}
+   &1 \times a
+   \arrow[d, dashed, "h"]
+   \arrow[ddl, bend right, "!"']
+   \arrow[ddr, bend left, "\text{snd}"]
+   \\
+   & 1 \times a
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   \\
+   1 && a
+  \end{tikzcd}
+ \]
+ 很明显，对于$h = id$来说，这个图是交换的。对于$h = \lambda^{-1}  \circ  \text{snd}$，这个图也是交换的，因为我们有：
  \[  \text{snd} \circ \lambda^{-1}  \circ  \text{snd} = \text{snd} \]
- Since $h$ is supposed to be unique, we conclude that:
-\[ \lambda^{-1}  \circ  \text{snd} = id \]
-This kind of reasoning with universal constructions is pretty standard.
+ 由于$h$应该是唯一的，我们得出结论：
+ \[ \lambda^{-1}  \circ  \text{snd} = id \]
+ 这种使用普遍构造的推理是相当标准的。
 
-Here are some other isomorphisms written in Haskell (without proofs of having the inverse). This is associativity:
-\begin{haskell}
-assoc :: ((a, b), c) -> (a, (b, c))
-assoc ((a, b), c) = (a, (b, c))
-\end{haskell}
-And this is the right unit
-\begin{haskell}
-runit :: (a, ()) -> a
-runit (a, _) = a
-\end{haskell}
+ 以下是用Haskell编写的其他一些同构（没有证明逆）。这是结合律：
+ \begin{haskell}
+  assoc :: ((a, b), c) -> (a, (b, c))
+  assoc ((a, b), c) = (a, (b, c))
+ \end{haskell}
+ 这是右单位
+ \begin{haskell}
+  runit :: (a, ()) -> a
+  runit (a, _) = a
+ \end{haskell}
 
-These two functions correspond to the \index{associator}\emph{associator}
-\[ \alpha \colon (a \times b) \times c \to a \times (b \times c) \]
-and the \index{unitor}\emph{right unitor}:
-\[ \rho \colon a \times 1 \to a \]
+ 这两个函数对应于\index{associator}\emph{结合子}
+ \[ \alpha \colon (a \times b) \times c \to a \times (b \times c) \]
+ 和\index{unitor}\emph{右单位元}：
+ \[ \rho \colon a \times 1 \to a \]
 
-\begin{exercise}
-Show that the bijection in the proof of left unit is natural. Hint, change focus using an arrow $g \colon a \to b$.
-\end{exercise}
+ \begin{exercise}
+  证明左单位证明中的双射是自然的。提示，使用箭头$g \colon a \to b$来更改焦点。
+ \end{exercise}
 
-\begin{exercise}
-Construct an arrow 
-\[ h \colon b + a \times b \to (1 + a) \times b \]
-Is this arrow unique?
+ \begin{exercise}
+  构造一个箭头
+  \[ h \colon b + a \times b \to (1 + a) \times b \]
+  这个箭头是唯一的吗？
 
-Hint: It's a mapping into a product, so it's given by a pair of arrow. These arrows, in turn, map out of a sum, so each is given by a pair of arrows. 
+  提示：这是映射到积的映射，所以它由一对箭头给出。这些箭头，反过来，从和类型中映射出来，因此每一个都是由一对箭头给出的。
 
-Hint: The mapping $b \to 1 + a$ is given by $(\text{Left} \, \circ \, !)$
-\end{exercise}
+  提示：映射$b \to 1 + a$由$(\text{Left} \, \circ \, !)$给出
+ \end{exercise}
 
-\begin{exercise}
-Redo the previous exercise, this time treating $h$ as a mapping \emph{out} of a sum. 
-\end{exercise}
+ \begin{exercise}
+  重做上一个练习，这次将$h$视为从和类型中映射\emph{出}。
+ \end{exercise}
 
-\begin{exercise}
-Implement a Haskell function \hask{maybeAB :: Either b (a, b) -> (Maybe a, b)}. Is this function uniquely defined by its type signature or is there some leeway?
-\end{exercise}
+ \begin{exercise}
+  实现一个Haskell函数\hask{maybeAB :: Either b (a, b) -> (Maybe a, b)}。这个函数是由其类型签名唯一定义的吗？还是有一些余地？
+ \end{exercise}
 
-\subsection{Functoriality}
+ \subsection{Functoriality\\函子性}
 
-Suppose that we have arrows that map $a$ and $b$ to some $a'$ and $b'$:
-\begin{align*}
-f &\colon a \to a' \\
-g &\colon b \to b'
-\end{align*}
-The composition of these arrows with the projections $\text{fst}$ and $\text{snd}$, respectively, can be used to define the mapping $h$ between the products:
+ 假设我们有箭头将$a$和$b$映射到某个$a'$和$b'$：
+ \begin{align*}
+  f &\colon a \to a' \\
+  g &\colon b \to b'
+ \end{align*}
+ 这些箭头与投影$\text{fst}$和$\text{snd}$的组合分别用于定义积之间的映射$h$：
 
-\[
- \begin{tikzcd}
- & a \times b
-\arrow[d, dashed, "h"]
- \arrow[dl,  "\text{fst}"']
- \arrow[dr,   "\text{snd}"]
-\\
-a
-\arrow[d, "f"']
-&a' \times b'
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
-& b
-\arrow[d, "g"]
-\\
-a' && b'
- \end{tikzcd}
-\]
-The shorthand notation for this diagram is:
-\[ a \times b \xrightarrow{f \times g} a' \times b' \]
+ \[
+  \begin{tikzcd}
+   & a \times b
+   \arrow[d, dashed, "h"]
+   \arrow[dl,  "\text{fst}"']
+   \arrow[dr,   "\text{snd}"]
+   \\
+   a
+   \arrow[d, "f"']
+   &a' \times b'
+   \arrow[dl,  "\text{fst}"]
+   \arrow[dr,   "\text{snd}"']
+   & b
+   \arrow[d, "g"]
+   \\
+   a' && b'
+  \end{tikzcd}
+ \]
+ 这个图的简写符号是：
+ \[ a \times b \xrightarrow{f \times g} a' \times b' \]
 
-This property of the product is called \emph{functoriality}. You can imagine it as allowing you to transform the two objects \emph{inside} the product to get the new product. We also say that functoriality lets us \index{lifting}\emph{lift} a pair of arrows in order to operate on products.
+ 这种积的性质称为\emph{函子性}。你可以想象它允许你在积内部转换两个对象以获得新的积。我们还说函子性允许我们\index{lifting}\emph{提升}一对箭头以操作积。
 
-\section{Duality}
+ \section{Duality\\对偶性}
 
-When a child sees an arrow, it knows which end points at the source, and which points at the target
-\[a \to b \]
-But maybe this is just a preconception. Would the Universe be very different if we called $b$ the source and $a$ the target? 
+ 当一个孩子看到一个箭头时，它知道哪一端指向源，哪一端指向目标
+ \[a \to b \]
+ 但这也许只是一个先入之见。如果我们把$b$称为源，$a$称为目标，宇宙会有很大不同吗？
 
-We would still be able to compose this arrow with this one
-\[b \to c\]
-whose ``target'' $b$ is the same as the same as the ``source'' of $a \to b$, and the result would still be an arrow 
-\[a \to c\]
- only now we would say that it goes from $c$ to $a$.
+ 我们仍然能够将这个箭头与这个箭头组合
+ \[b \to c\]
+ 其“目标”$b$与$a \to b$的“源”相同，结果仍然是一个箭头
+ \[a \to c\]
+ 只不过现在我们会说它从$c$到$a$。
 
-In this dual Universe, the object that we call ``initial'' would be called ``terminal,'' because it's the ``target'' of unique arrows coming from all objects. Conversely, the terminal object would be called initial.
+ 在这个对偶宇宙中，我们称之为“初始”的对象将被称为“终端”，因为它是从所有对象来的唯一箭头的“目标”。相反，终端对象将被称为初始对象。
 
-Now consider this diagram that we used to define the sum object:
-\[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& c
- \end{tikzcd}
-\]
-In the new interpretation, the arrow $h$ would go ``from'' an arbitrary object $c$ ``to'' the object we call $a + b$. This arrow is uniquely defined by a pair of arrows $(f, g)$ whose ``source'' is $c$. If we rename $\text{Left}$ to $\text{fst}$ and $\text{Right}$ to $\text{snd}$, we will get  the defining diagram for a product. 
+ 现在考虑我们用来定义和对象的这个图：
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & c
+  \end{tikzcd}
+ \]
+ 在新的解释中，箭头$h$将从任意对象$c$“到”我们称为$a + b$的对象。这个箭头由一对箭头$(f, g)$唯一定义，其“源”是$c$。如果我们将$\text{Left}$重命名为$\text{fst}$，将$\text{Right}$重命名为$\text{snd}$，我们将得到积的定义图。
 
-A product is the sum with arrows reversed. 
+ 积是和类型的对偶。
 
-Conversely, a sum is the product with arrows reversed. 
+ 相反，和类型是积的对偶。
 
-\medskip
+ \medskip
 
-Every construction in category theory has its dual.
+ 范畴论中的每个构造都有其对偶。
 
-\medskip
+ \medskip
 
-If the direction of arrows is just a matter of interpretation, then what makes sum types so different from product types, in programming? The difference goes back to one assumption we made at the start: There are no incoming arrows to the initial object (other than the identity arrow). This is in contrast with the terminal object having lots of outgoing arrows, arrows that we used to define (global) elements. In fact, we assume that every object of interest has elements, and the ones that don't are isomorphic to \hask{Void}. 
+ 如果箭头的方向只是解释问题，那么在编程中，和类型和积类型有什么区别呢？这种区别可以追溯到我们一开始做的一个假设：没有指向初始对象的箭头（除身份箭头外）。这与终端对象有大量指向外部的箭头形成对比，我们用这些箭头来定义（全局）元素。事实上，我们假设每个感兴趣的对象都有元素，而没有元素的对象是与\hask{Void}同构的。
 
-We'll see an even deeper difference when we talk about function types.
+ 当我们讨论函数类型时，我们将看到更深的差异。
 
-\section{Monoidal Category}
+ \section{Monoidal Category\\幺半范畴}
 
-We have seen that the product satisfies these simple rules:
-\begin{align*}
-1 \times a &\cong a
-\\
-a \times b &\cong b \times a
-\\
-(a \times b) \times c &\cong a \times (b \times c)
-\end{align*}
-and is functorial. 
+ 我们已经看到积满足以下简单规则：
+ \begin{align*}
+  1 \times a &\cong a
+  \\
+  a \times b &\cong b \times a
+  \\
+  (a \times b) \times c &\cong a \times (b \times c)
+ \end{align*}
+ 并且是函子性的。
 
-A category in which an operation with these properties is defined is called \emph{symmetric monoidal}\footnote{Strictly speaking, a product of two objects is defined up to isomorphism, whereas the product in a monoidal category must be defined on the nose. But we can get a monoidal category by making a choice of a product}. We've seen a similar structure before, when working with sums and the initial object. 
+ 定义了具有这些属性的运算的范畴称为\emph{对称幺半范畴}\footnote{严格来说，两个对象的积是同构定义的，而幺半范畴中的积必须是确切定义的。但通过选择一个积，我们可以得到一个幺半范畴}。当我们处理和类型和初始对象时，我们看到了类似的结构。
 
-A category can have multiple monoidal structures at the same time. When you don't want to name your monoidal structure, you replace the plus sign or the product sign with a tensor sign, and the neutral element with the letter $I$. The rules of a symmetric monoidal category can then be written as:
-\begin{align*}
-I \otimes a &\cong a
-\\
-a \otimes b &\cong b \otimes a
-\\
-(a \otimes b) \otimes c &\cong a \otimes (b \otimes c)
-\end{align*}
+ 一个范畴可以同时有多个幺半结构。当你不想为你的幺半结构命名时，你可以用张量符号代替加号或积号，用字母$I$代替中性元素。对称幺半范畴的规则可以写作：
+ \begin{align*}
+  I \otimes a &\cong a
+  \\
+  a \otimes b &\cong b \otimes a
+  \\
+  (a \otimes b) \otimes c &\cong a \otimes (b \otimes c)
+ \end{align*}
 
-These isomorphisms are often written as families of invertible arrows called \index{associator}associators and \index{unitor}unitors. If the monoidal category is not symmetric, there is a separate left and right unitor.
-\begin{align*}
-\alpha &\colon (a \otimes b) \otimes c \to a \otimes (b \otimes c)
-\\
- \lambda &\colon I \otimes a \to a
- \\
- \rho &\colon a \otimes I \to a
-\end{align*}
-The symmetry is witnessed by:
-\[ \gamma \colon a \otimes b \to b \otimes a \]
-Functoriality lets us \emph{lift} a pair of arrows:
-\begin{align*} 
-f &\colon a \to a' \\
-g &\colon b \to b'
-\end{align*}
- to operate on tensor products:
-\[ a \otimes b \xrightarrow{f \otimes g} a' \otimes b' \]
+ 这些同构通常写作称为\index{associator}结合子的可逆箭头家族和\index{unitor}单位子。如果幺半范畴不是对称的，则有单独的左单位和右单位子。
+ \begin{align*}
+  \alpha &\colon (a \otimes b) \otimes c \to a \otimes (b \otimes c)
+  \\
+  \lambda &\colon I \otimes a \to a
+  \\
+  \rho &\colon a \otimes I \to a
+ \end{align*}
+ 对称性由下式见证：
+ \[ \gamma \colon a \otimes b \to b \otimes a \]
+ 函子性让我们\emph{提升}一对箭头：
+ \begin{align*}
+  f &\colon a \to a' \\
+  g &\colon b \to b'
+ \end{align*}
+ 以操作张量积：
+ \[ a \otimes b \xrightarrow{f \otimes g} a' \otimes b' \]
 
-If we think of morphisms as actions, their tensor product corresponds to performing two actions in parallel. Contrast this with the serial composition of morphisms, which suggests their temporal ordering.
+ 如果我们将态射视为动作，那么它们的张量积对应于同时执行两个动作。与态射的序列组合相比，这表明它们的时间顺序。
 
-You may think of a tensor product as the lowest common denominator of product and sum. It still has an introduction rule, which requires both objects $a$ and $b$; but it has no elimination rule. Once created, a tensor product ``forgets'' how it was created. Unlike a cartesian product, it has no projections. 
+ 你可以将张量积想象为积和和的最小公分母。它仍然有一个引入规则，需要两个对象$a$和$b$；但它没有消去规则。一旦创建，张量积就“忘记”了它是如何创建的。与笛卡尔积不同，它没有投影。
 
-Some interesting examples of tensor products are not even symmetric. 
+ 一些有趣的张量积甚至不是对称的。
 
-\subsection{Monoids}
+ \subsection{Monoids\\幺半群}
 
-Monoids are very simple structures equipped with a binary operation and a unit. Natural numbers with addition and zero form a monoid. So do natural numbers with multiplication and one. 
+ 幺半群是非常简单的结构，具有二元运算和一个单位。以加法和零为运算的自然数构成一个幺半群。以乘法和一为运算的自然数也构成一个幺半群。
 
-The intuition is that a monoid lets you combine two things to get another thing. There is also one special thing, such that combining it with anything else gives back the same thing. That's the unit. And the combining must be associative. 
+ 直觉上，幺半群让你将两件事物结合起来，得到另一件事物。还有一个特殊的事物，将其与任何其他事物结合，都会返回相同的事物。那就是单位元。并且结合必须是结合的。
 
-What's not assumed is that the combining is symmetric, or that there is an inverse element.
+ 未被假定的是结合是对称的，或存在逆元素。
 
-The rules that define a monoid are reminiscent of the rules of a category. The difference is that, in a monoid, any two things are composable, whereas in a category this is usually not the case: You can only compose two arrows if the target of one is the source of another. Except, that is, when the category contains only one object, in which case all arrows are composable.
+ 定义幺半群的规则让人联想到范畴的规则。不同之处在于，在幺半群中，任何两件事物都是可组合的，而在范畴中通常不是这样：只有当一个箭头的目标是另一个箭头的源时，你才能组合这两个箭头。除非该范畴仅包含一个对象，在这种情况下，所有箭头都是可组合的。
 
-A category with a single object is called a monoid. The combining operation is the composition of arrows and the unit is the identity arrow. 
+ 包含单个对象的范畴称为幺半群。组合运算是箭头的组合，单位是身份箭头。
 
-This is a perfectly valid definition. In practice, however, we are often interested in monoids that are embedded in larger categories. In particular, in programming, we want to be able to define monoids inside the category of types and functions. 
+ 这是一个完全有效的定义。然而，在实践中，我们通常对嵌入更大范畴中的幺半群更感兴趣。特别是在编程中，我们希望能够在类型和函数的范畴内定义幺半群。
 
-However, in a category, rather than looking at individual elements, we prefer to define operations in bulk. So we start with an object $m$. A binary operation is a function of two arguments. Since elements of a product are pairs of elements, we can characterize a binary operation as an arrow from a product $m \times m$ to $m$:
-\[ \mu \colon m \times m \to m \]
-The unit element can be defined as an arrow from the terminal object $1$:
-\[ \eta \colon 1 \to m \]
+ 但是，在范畴中，我们倾向于整体定义运算，而不是关注个别元素。因此我们从一个对象$m$开始。二元运算是一个有两个参数的函数。由于积的元素是成对的元素，我们可以将二元运算表征为从积$m \times m$到$m$的箭头：
+ \[ \mu \colon m \times m \to m \]
+ 单位元素可以定义为从终端对象$1$的箭头：
+ \[ \eta \colon 1 \to m \]
 
-We can translate this description directly to Haskell by defining a \index{type class}class of types equipped with two methods, traditionally called \hask{mappend} and \hask{mempty}:
-\begin{haskell}
-class Monoid m where
+ 我们可以直接将这种描述翻译为Haskell，定义一个\index{type class}类型类，它配备了两个方法，传统上称为\hask{mappend}和\hask{mempty}：
+ \begin{haskell}
+  class Monoid m where
   mappend :: (m, m) -> m
   mempty  :: () -> m
-\end{haskell}
+ \end{haskell}
 
-The two arrows $\mu$ and $\eta$ have to satisfy monoid laws but, again, we have to formulate them in bulk, without any recourse to elements.
+ 这两个箭头$\mu$和$\eta$必须满足幺半群律，但我们再次需要在整体上表述它们，而不涉及元素。
 
-To formulate the left unit law, we first create the product $1 \times m$. We then use $\eta$ to ``pick the unit element in $m$'' or, in terms of arrows, turn $1$ into $m$. Since we are operating on a product $1 \times m$, we have to lift the pair $\langle \eta, id_m \rangle$, which ensures that we ``do not touch'' the $m$. Finally we perform the ``multiplication'' using $\mu$. 
+ 为了表述左单位律，我们首先创建积$1 \times m$。然后我们使用$\eta$“选择$m$中的单位元素”，或者，用箭头的术语来说，将$1$变成$m$。由于我们正在操作积$1 \times m$，我们必须提升对$\langle \eta, id_m \rangle$，确保我们“不接触”$m$。最后，我们使用$\mu$执行“乘法”。
 
-We want the result to be the same as the original element of $m$, but without mentioning elements. So we just use the left unitor $\lambda$ to go from $1 \times m$ to $m$ without ``stirring things up.''
-\[
- \begin{tikzcd}
- 1 \times m
- \arrow[rr, "\eta \times id_m"]
- \arrow[rrd, "\lambda"']
-& & m \times m
- \arrow[d, "\mu"]
- \\
- && m
+ 我们希望结果与原始的$m$元素相同，但不提及元素。因此，我们只是使用左单位元$\lambda$从$1 \times m$到$m$而不“搅动事物。”
+ \[
+  \begin{tikzcd}
+   1 \times m
+   \arrow[rr, "\eta \times id_m"]
+   \arrow[rrd, "\lambda"']
+   & & m \times m
+   \arrow[d, "\mu"]
+   \\
+   && m
   \end{tikzcd}
-\]
-Here is the analogous law for the right unit:
-\[
- \begin{tikzcd}
- m \times m
- \arrow[d, "\mu"]
- && m \times 1
- \arrow[ll, "id_m \times \eta"']
- \arrow[lld, "\rho"]
- \\
- m
- \end{tikzcd}
-\]
-To formulate the law of associativity, we have to start with a triple product and act on it in bulk. Here, $\alpha$ is the associator that rearranges the product without ``stirring things up.''
-\[
- \begin{tikzcd}
- (m \times m) \times m 
- \arrow[rr, "\alpha"]
- \arrow[d, "\mu \times id"]
- &&
- m \times (m \times m)
- \arrow[d, "id \times \mu"]
- \\
- m \times m 
- \arrow[dr, "\mu"]
-& & m \times m
- \arrow[dl, "\mu"']
- \\
-&  m
- \end{tikzcd}
-\]
-
-Notice that we didn't have to assume a lot about the categorical product that we used with the objects $m$ and $1$. In particular we never had to use projections. This suggests that the above definition will work equally well for a tensor product in an arbitrary monoidal category. It doesn't even have to be symmetric. All we have to assume is that: there is a unit object, that the product is functorial, and that it satisfies the unit and associativity laws up to isomorphism.
-
-Thus if we replace $\times$ with $\otimes$ and $1$ with $I$, we get a definition of a monoid in an arbitrary monoidal category. 
-
-A \index{monoid}\emph{monoid} in a monoidal category is an object $m$ equipped with two morphisms:
-\[ \mu \colon m \otimes m \to m \]
-\[ \eta \colon I \to m \]
-satisfying the unit and associativity laws:
-\[
- \begin{tikzcd}
- 1 \otimes m
- \arrow[rr, "\eta \otimes id_m"]
- \arrow[rrd, "\lambda"']
-& & m \otimes m
- \arrow[d, "\mu"']
-&& m \otimes 1
- \arrow[ll, "id_m \otimes \eta"']
- \arrow[lld, "\rho"]
- \\
- && m
+ \]
+ 这里是右单位的类似律：
+ \[
+  \begin{tikzcd}
+   m \times m
+   \arrow[d, "\mu"]
+   && m \times 1
+   \arrow[ll, "id_m \times \eta"']
+   \arrow[lld, "\rho"]
+   \\
+   m
   \end{tikzcd}
-\]
+ \]
+ 为了表述结合律，我们必须从三重积开始，并在整体上操作。在这里，$\alpha$是结合子，它重新排列积而不“搅动事物”。
+ \[
+  \begin{tikzcd}
+  (m \times m) \times m
+  \arrow[rr, "\alpha"]
+  \arrow[d, "\mu \times id"]
+  &&
+  m \times (m \times m)
+  \arrow[d, "id \times \mu"]
+  \\
+  m \times m
+  \arrow[dr, "\mu"]
+  & & m \times m
+  \arrow[dl, "\mu"']
+  \\
+  &  m
+  \end{tikzcd}
+ \]
 
-\[
- \begin{tikzcd}
- (m \otimes m) \otimes m 
- \arrow[rr, "\alpha"]
- \arrow[d, "\mu \otimes id_m"]
- &&
- m \otimes (m \otimes m)
- \arrow[d, "id_m \otimes \mu"]
- \\
- m \otimes m 
- \arrow[dr, "\mu"]
-& & m \otimes m
- \arrow[dl, "\mu"']
- \\
-&  m
- \end{tikzcd}
-\]
-We used the functoriality of $\otimes$ to lift pairs of arrows, as in $\eta \otimes id_m$, $\mu \otimes id_m$, etc.
+ 注意，我们不需要对我们与对象$m$和$1$一起使用的范畴积假设太多，特别是我们从未需要使用投影。这表明上述定义同样适用于任意幺半范畴中的张量积。它甚至不需要是对称的。我们只需假设：存在一个单位对象，积是函子的，并且它满足单位和结合律（最多同构）。
+
+ 因此，如果我们将$\times$替换为$\otimes$，并将$1$替换为$I$，我们将得到任意幺半范畴中幺半群的定义。
+
+ 任意幺半范畴中的\index{monoid}\emph{幺半群}是一个配备两个态射的对象$m$：
+ \[ \mu \colon m \otimes m \to m \]
+ \[ \eta \colon I \to m \]
+ 满足单位和结合律：
+ \[
+  \begin{tikzcd}
+   1 \otimes m
+   \arrow[rr, "\eta \otimes id_m"]
+   \arrow[rrd, "\lambda"']
+   & & m \otimes m
+   \arrow[d, "\mu"']
+   && m \otimes 1
+   \arrow[ll, "id_m \otimes \eta"']
+   \arrow[lld, "\rho"]
+   \\
+   && m
+  \end{tikzcd}
+ \]
+
+ \[
+  \begin{tikzcd}
+  (m \otimes m) \otimes m
+  \arrow[rr, "\alpha"]
+  \arrow[d, "\mu \otimes id_m"]
+  &&
+  m \otimes (m \otimes m)
+  \arrow[d, "id_m \otimes \mu"]
+  \\
+  m \otimes m
+  \arrow[dr, "\mu"]
+  & & m \otimes m
+  \arrow[dl, "\mu"']
+  \\
+  &  m
+  \end{tikzcd}
+ \]
+ 我们使用了$\otimes$的函子性来提升箭头对，例如$\eta \otimes id_m$、$\mu \otimes id_m$等。
 
 \end{document}

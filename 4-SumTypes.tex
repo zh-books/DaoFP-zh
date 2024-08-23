@@ -1,631 +1,550 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{3}
+ \setcounter{chapter}{3}
 
-\chapter{Sum Types}
+ \chapter{Sum Types\\和类型}
 
-\section{Bool}
+ \section{Bool\\布尔类型}
 
-We know how to compose arrows. But how do we compose objects?
+ 我们已经知道如何组合箭头。那么我们如何组合对象呢？
 
- We have defined $0$ (the initial object) and $1$ (the terminal object). What is $2$ if not $1$ plus $1$?
- 
-A $2$ is an object with two elements: two arrows coming from $1$. Let's call one arrow \hask{True} and the other \hask{False}. Don't confuse those names with the logical interpretations of the initial and the terminal objects. These two are \emph{arrows}. 
+ 我们已经定义了$0$（初始对象）和$1$（终端对象）。那么$2$是什么？它就是$1$加$1$。
 
-\[
- \begin{tikzcd}
- 1
- \arrow[dd, bend right, "\text{True}"']
- \arrow[dd, bend left, "\text{False}"]
- \\
- \\
-2
- \end{tikzcd}
-\]
+ 一个$2$是一个具有两个元素的对象：从$1$发出的两个箭头。我们将其中一个箭头称为\hask{True}，另一个箭头称为\hask{False}。不要将这些名称与初始和终端对象的逻辑解释混淆。这两个只是\emph{箭头}。
 
-This simple idea can be immediately expressed in Haskell\footnote{This style of definition is called the Generalized Algebraic Data Types or \hask{GADTs} in Haskell} as the definition of a type, traditionally called \hask{Bool}, after its inventor George Boole (1815-1864).
+ \[
+  \begin{tikzcd}
+   1
+   \arrow[dd, bend right, "\text{True}"']
+   \arrow[dd, bend left, "\text{False}"]
+   \\
+   \\
+   2
+  \end{tikzcd}
+ \]
 
-\begin{haskell}
-data Bool where
+ 这个简单的概念可以立即用Haskell表达\footnote{这种定义风格在Haskell中称为广义代数数据类型或\hask{GADTs}}，即定义一个类型，传统上称为\hask{Bool}，以纪念其发明者George Boole（1815-1864）。
+
+ \begin{haskell}
+  data Bool where
   True  :: () -> Bool
   False :: () -> Bool
-\end{haskell}
-It corresponds to the same diagram (only with some Haskell renamings):
-\[
- \begin{tikzcd}
- \hask{()}
- \arrow[dd, bend right, "\hask{True}"']
- \arrow[dd, bend left, "\hask{False}"]
- \\
- \\
-\hask{Bool}
- \end{tikzcd}
-\]
+ \end{haskell}
+ 它对应于相同的图（只是在Haskell中重命名了一些内容）：
+ \[
+  \begin{tikzcd}
+   \hask{()}
+   \arrow[dd, bend right, "\hask{True}"']
+   \arrow[dd, bend left, "\hask{False}"]
+   \\
+   \\
+   \hask{Bool}
+  \end{tikzcd}
+ \]
 
-As we've seen before, there is a shortcut notation for elements, so here's a more compact version:
+ 正如我们之前所见，元素有一种简写表示法，因此这是一个更紧凑的版本：
 
-\begin{haskell}
-data Bool where
+ \begin{haskell}
+  data Bool where
   True  :: Bool
   False :: Bool
-\end{haskell}
+ \end{haskell}
 
-We can now define a term of the type \hask{Bool}, for instance
-\begin{haskell}
-x :: Bool
-x = True
-\end{haskell}
-The first line declares \hask{x} to be an element of \hask{Bool} (secretly a function \hask{()->Bool}), and the second line tells us which one of the two.
+ 现在我们可以定义\hask{Bool}类型的一个项，例如
+ \begin{haskell}
+  x :: Bool
+  x = True
+ \end{haskell}
+ 第一行声明\hask{x}是\hask{Bool}的一个元素（实际上是一个函数\hask{()->Bool}），第二行告诉我们它是两个元素中的哪个。
 
-The functions \hask{True} and \hask{False} that we used in the definition of \hask{Bool} are called \index{data constructor}\emph{data constructors}. They can be used to construct specific terms, like in the example above. As a side note, in Haskell, function names start with lower-case letters, except when they are data constructors. 
+ 我们在\hask{Bool}定义中使用的\hask{True}和\hask{False}函数被称为\emph{数据构造器}。它们可以用来构造特定的项，就像上面的例子一样。顺便提一下，在Haskell中，函数名称通常以小写字母开头，除非它们是数据构造器。
 
-Our definition of the type \hask{Bool} is still incomplete. We know how to construct a \hask{Bool} term, but we don't know what to do with it. We have to be able to define arrows that go out of \hask{Bool}---the \index{mapping out}\emph{mappings ou}t of \hask{Bool}. 
+ 我们对\hask{Bool}类型的定义仍然不完整。我们知道如何构造一个\hask{Bool}项，但我们不知道如何使用它。我们必须能够定义从\hask{Bool}发出的箭头——即从\hask{Bool}到其他类型的\emph{映射}。
 
-The first observation is that, if we have an arrow \hask{h} from \hask{Bool} to some concrete type \hask{A} then we automatically get two arrows \hask{x} and \hask{y} from unit to \hask{A}, just by composition. The following two (distorted) triangles commute:
+ 第一个观察结果是，如果我们有一个从\hask{Bool}到某个具体类型\hask{A}的箭头\hask{h}，那么我们自动会得到两个从单位对象到\hask{A}的箭头，只需通过组合即可。以下两个（扭曲的）三角形是可交换的：
 
-\[
- \begin{tikzcd}
- \hask{()}
- \arrow[dd, bend right, "\text{True}"']
- \arrow[dd, bend left, "\text{False}"]
-  \arrow[ddd, bend right =90, "x"']
- \arrow[ddd, bend left=90, "y"]
-\\
- \\
-\text{Bool}
-\arrow[d, dashed, "h"]
-\\
-A
- \end{tikzcd}
-\]
-In other words, every function \hask{Bool->A} produces a pair of elements of \hask{A}.
+ \[
+  \begin{tikzcd}
+   \hask{()}
+   \arrow[dd, bend right, "\text{True}"']
+   \arrow[dd, bend left, "\text{False}"]
+   \arrow[ddd, bend right =90, "x"']
+   \arrow[ddd, bend left=90, "y"]
+   \\
+   \\
+   \text{Bool}
+   \arrow[d, dashed, "h"]
+   \\
+   A
+  \end{tikzcd}
+ \]
+ 换句话说，每个\hask{Bool->A}函数都会生成一对\hask{A}的元素。
 
-Given a concrete type \hask{A}:
-\begin{haskell}
-h :: Bool -> A
-\end{haskell}
-we have:
-\begin{haskell}
-x = h True
-y = h False
-\end{haskell}
-where
-\begin{haskell}
-x :: A
-y :: A
-\end{haskell}
-Notice the use of the shorthand notation for the application of a function to an element:
-\begin{haskell}
-h True -- meaning: h . True
-\end{haskell}
+ 给定一个具体类型\hask{A}：
+ \begin{haskell}
+  h :: Bool -> A
+ \end{haskell}
+ 我们有：
+ \begin{haskell}
+  x = h True
+  y = h False
+ \end{haskell}
+ 其中
+ \begin{haskell}
+  x :: A
+  y :: A
+ \end{haskell}
+ 注意，这里使用了应用函数到元素的简写表示法：
+ \begin{haskell}
+  h True -- 意味着: h . True
+ \end{haskell}
 
-We are now ready to complete our definition of \hask{Bool} by adding the condition that any function from \hask{Bool} to \hask{A} not only produces but \emph{is equivalent} to a pair of elements of \hask{A}. In other words, a pair of elements uniquely determines a function from \hask{Bool}. 
+ 我们现在准备通过添加一个条件来完成对\hask{Bool}的定义，即从\hask{Bool}到\hask{A}的任何函数不仅生成，而且\emph{等价于}一对\hask{A}的元素。换句话说，一对元素唯一地决定了从\hask{Bool}的函数。
 
-What this means is that we can interpret the diagram above in two ways: Given \hask{h}, we can easily get \hask{x} and \hask{y}. But the converse is also true: a pair of elements \hask{x} and \hask{y} uniquely \emph{defines} \hask{h}.
+ 这意味着我们可以以两种方式解释上面的图：给定\hask{h}，我们可以很容易地得到\hask{x}和\hask{y}。但反过来也成立：一对元素\hask{x}和\hask{y}唯一地\emph{定义}了\hask{h}。
 
-We have a bijection at work here. This time it's a one-to-one mapping between a pair of elements $(x, y)$ and an arrow $h$. 
+ 这里有一个双射在起作用。这次是元素对$(x, y)$与箭头$h$之间的一对一映射。
 
-In Haskell, this definition of \hask{h} is encapsulated in the \index{\hask{if} statement}\hask{if}, \hask{then}, \hask{else} construct. Given
-\begin{haskell}
-x :: A
-y :: A
-\end{haskell}
-we define the mapping out
-\begin{haskell}
-h :: Bool -> A
-h b = if b then x else y
-\end{haskell}
-Here, \hask{b} is a term of the type \hask{Bool}. 
+ 在Haskell中，\hask{h}的定义封装在\hask{if}, \hask{then}, \hask{else}结构中。给定
+ \begin{haskell}
+  x :: A
+  y :: A
+ \end{haskell}
+ 我们定义映射为
+ \begin{haskell}
+  h :: Bool -> A
+  h b = if b then x else y
+ \end{haskell}
+ 在这里，\hask{b}是\hask{Bool}类型的一个项。
 
-In general, a data type is created using \index{introduction rule}\emph{introduction} rules and deconstructed using \index{elimination rule}\emph{elimination} rules. The \hask{Bool} data type has two introduction rules, one using \hask{True} and another using \hask{False}. The \hask{if}, \hask{then}, \hask{else} construct defines the elimination rule. 
+ 一般来说，数据类型是通过\emph{引入规则}创建的，并通过\emph{消除规则}解构。 \hask{Bool}数据类型有两个引入规则，一个使用\hask{True}，另一个使用\hask{False}。 \hask{if}, \hask{then}, \hask{else}结构定义了消除规则。
 
-The fact that, given the above definition of \hask{h}, we can retrieve the two terms that were used to define it, is called the \index{computation rule}\emph{computation} rule. It tells us how to compute the result of \hask{h}. If we call \hask{h} with \hask{True}, the result is \hask{x}; if we call it with \hask{False}, the result is \hask{y}.
+ 考虑到上面对\hask{h}的定义，我们可以检索用于定义它的两个项，这被称为\emph{计算规则}。它告诉我们如何计算\hask{h}的结果。如果我们用\hask{True}调用\hask{h}，结果是\hask{x}；如果我们用\hask{False}调用它，结果是\hask{y}。
 
-We should never lose sight of the purpose of programming: to decompose complex problems into a series of simpler ones. The definition of \hask{Bool} illustrates this idea. Whenever we have to construct a mapping out of \hask{Bool}, we decompose it into two smaller tasks of constructing a pair of elements of the target type. We traded one larger problem for two simpler ones.
+ 我们永远不要忘记编程的目的：将复杂问题分解为一系列更简单的问题。 \hask{Bool}的定义说明了这个想法。每当我们需要构造一个从\hask{Bool}到某类型的映射时，我们将其分解为构造目标类型的一对元素的两个更小的任务。我们用两个更简单的问题换取了一个更大的问题。
 
-\subsection{Examples}
+ \section{Enumerations\\枚举类型}
 
-Let's do a few examples. We haven't defined many types yet, so we'll be limited to mappings out of \hask{Bool} to either \hask{Void}, \hask{()}, or \hask{Bool}. Such edge cases, however, may offer new insights into well known results.
-
-We have decided that there can be no functions (other than identity) with \hask{Void} as a target, so we don't expect any functions from \hask{Bool} to \hask{Void}. And indeed, we have zero pairs of elements of \hask{Void}. 
-
-What about functions from \hask{Bool} to \hask{()}? Since \hask{()} is terminal, there can be only one function from \hask{Bool} to it. And, indeed, this function corresponds to the single possible pair of functions from \hask{()} to \hask{()}---both being identities. So far so good.
-\[
- \begin{tikzcd}
- \hask{()}
- \arrow[dd, bend right, "\text{True}"']
- \arrow[dd, bend left, "\text{False}"]
-  \arrow[ddd, bend right =90, "\hask{id}"']
- \arrow[ddd, bend left=90, "\hask{id}"]
-\\
- \\
-\text{Bool}
-\arrow[d, dashed, "h"]
-\\
-\hask{()}
- \end{tikzcd}
-\]
-
-
-The interesting case is functions from \hask{Bool} to \hask{Bool}. Let's plug \hask{Bool} in place of \hask{A}:
-\[
- \begin{tikzcd}
- \hask{()}
- \arrow[dd, bend right, "\text{True}"']
- \arrow[dd, bend left, "\text{False}"]
-  \arrow[ddd, bend right =90, "x"']
- \arrow[ddd, bend left=90, "y"]
-\\
- \\
-\text{Bool}
-\arrow[d, dashed, "h"]
-\\
-\text{Bool}
- \end{tikzcd}
-\]
-How many pairs $(x, y)$ of functions from \hask{()} to \hask{Bool} do we have at our disposal? There are only two such functions, \hask{True} and \hask{False}, so we can form four pairs. These are $(True, True)$, $(False, False)$, $(True, False)$, and $(False, True)$. Therefore there can only be four functions from \hask{Bool} to \hask{Bool}. 
-
-We can write them in Haskell using the  \hask{if}, \hask{then}, \hask{else} construct. For instance, the last one, which we'll call \hask{not} is defined as:
-\begin{haskell}
-not :: Bool -> Bool
-not b = if b then False else True
-\end{haskell}
-
-We can also look at functions from \hask{Bool} to \hask{A} as elements of the object of arrows, or the exponential object $A^2$, where $2$ is the \hask{Bool} object. According to our count, we have zero elements in $0^2$, one element in $1^2$, and four elements in $2^2$. This is exactly what we'd expect from high-school algebra, where numbers actually mean numbers.
-
-\begin{exercise}
-Write the implementations of the three other functions \hask{Bool->Bool}.
-\end{exercise}
-
-\section{Enumerations}
-
-What comes after 0, 1, and 2? An object with three data constructors. For instance:
-\begin{haskell}
-data RGB where
+ 在0、1和2之后是什么？一个具有三个数据构造器的对象。例如：
+ \begin{haskell}
+  data RGB where
   Red   :: RGB
   Green :: RGB
   Blue  :: RGB
-\end{haskell}
-If you're tired of redundant syntax, there is a shorthand for this type of definition:
+ \end{haskell}
+ 如果您厌倦了冗长的语法，可以使用此类型定义的简写：
 
-\begin{haskell}
-data RGB = Red | Green | Blue
-\end{haskell}
-This introduction rule allows us to construct terms of the type \hask{RGB}, for instance:
-\begin{haskell}
-c :: RGB
-c = Blue
-\end{haskell}
-To define mappings out of \hask{RGB}, we need a more general elimination pattern. Just like a function from \hask{Bool} was determined by two elements, a function from \hask{RGB} to \hask{A} is determined by a triple of elements of \hask{A}: \hask{x}, \hask{y}, and \hask{z}. We write such a function using \emph{pattern matching} syntax:
-\begin{haskell}
-h :: RGB -> A
-h Red   = x
-h Green = y
-h Blue  = z
-\end{haskell}
-This is just one function whose definition is split into three cases. 
+ \begin{haskell}
+  data RGB = Red | Green | Blue
+ \end{haskell}
+ 此引入规则允许我们构造\hask{RGB}类型的项，例如：
+ \begin{haskell}
+  c :: RGB
+  c = Blue
+ \end{haskell}
+ 要定义从\hask{RGB}到其他类型的映射，我们需要更通用的消除模式。就像从\hask{Bool}到某个类型的函数由两个元素决定一样，从\hask{RGB}到\hask{A}的函数由\hask{A}的三个元素\hask{x}, \hask{y}, \hask{z}决定。我们使用模式匹配语法来编写这样的函数：
+ \begin{haskell}
+  h :: RGB -> A
+  h Red   = x
+  h Green = y
+  h Blue  = z
+ \end{haskell}
+ 这只是一个函数，它的定义分为三种情况。
 
-It's possible to use the same syntax for \hask{Bool} as well, in place of \hask{if}, \hask{then}, \hask{else}:
-\begin{haskell}
-h :: Bool -> A
-h True  = x
-h False = y
-\end{haskell}
-In fact, there is a third way of writing the same thing using the \index{\hask{case} statement}\hask{case} statement:
-\begin{haskell}
-h c = case c of
+ 我们也可以使用相同的语法用于\hask{Bool}，代替\hask{if}, \hask{then}, \hask{else}：
+ \begin{haskell}
+  h :: Bool -> A
+  h True  = x
+  h False = y
+ \end{haskell}
+ 实际上，还有第三种编写相同内容的方法，即\hask{case}语句：
+ \begin{haskell}
+  h c = case c of
   Red   -> x
   Green -> y
   Blue  -> z
-\end{haskell}
-or even
-\begin{haskell}
-h :: Bool -> A
-h b = case b of
+ \end{haskell}
+ 甚至是：
+ \begin{haskell}
+  h :: Bool -> A
+  h b = case b of
   True  -> x
   False -> y
-\end{haskell}
-You can use any of these at your convenience when programming.
+ \end{haskell}
+ 编程时，您可以根据需要使用这些方式中的任何一种。
 
-These patterns will also work for types with four, five, and more data constructors. For instance, a decimal digit is one of:
-\begin{haskell}
-data Digit = Zero | One | Two | Three | ... | Nine
-\end{haskell}
+ 这些模式也适用于具有四个、五个或更多数据构造器的类型。例如，十进制数字是以下之一：
+ \begin{haskell}
+  data Digit = Zero | One | Two | Three | ... | Nine
+ \end{haskell}
 
-There is a giant enumeration of Unicode characters called \hask{Char}. Their constructors are given special names: you write the character itself between two apostrophes, e.g.,
-\begin{haskell}
-c :: Char
-c = 'a'
-\end{haskell}
+ 有一个巨大的Unicode字符枚举，称为\hask{Char}。它们的构造器有特殊的名称：你在字符本身前后加上单引号，例如：
+ \begin{haskell}
+  c :: Char
+  c = 'a'
+ \end{haskell}
 
-As Lao Tzu would say, a pattern of ten thousand things would take many years to complete, therefore people came up with the wildcard pattern, the underscore, which matches everything. 
+ 正如老子所说，万物之模式，需时多年，故人们发明了通配符模式“下划线”，它匹配一切。
 
-Because the patterns are matched in order, you should use the wildcard pattern as the last one in a series:
-\begin{haskell}
-yesno :: Char -> Bool
-yesno c = case c of
+ 由于模式是按顺序匹配的，因此您应该将通配符模式作为系列中的最后一个：
+ \begin{haskell}
+  yesno :: Char -> Bool
+  yesno c = case c of
   'y' -> True
   'Y' -> True
   _   -> False
-\end{haskell}
+ \end{haskell}
 
-But why should we stop at that? The type \hask{Int} could be thought of as an enumeration of integers in the range between $-2^{29}$ and $2^{29}$ (or more, depending on the implementation). Of course, exhaustive pattern matching on such ranges is out of the question, but the principle holds. 
+ 但我们为什么要止步于此呢？类型\hask{Int}可以被看作是在$-2^{29}$到$2^{29}$范围内的整数枚举（或更多，取决于实现）。当然，在这种范围内进行详尽的模式匹配是不可行的，但原理仍然成立。
 
-In practice, the types \hask{Char} for Unicode characters, \hask{Int} for fixed-precision integers, \hask{Double} for double-precision floating point numbers, and several others, are built into the language.
+ 实际上，类型\hask{Char}用于Unicode字符，\hask{Int}用于固定精度整数，\hask{Double}用于双精度浮点数，以及其他几个类型，都内置于语言中。
 
-These are not infinite types. Their elements can be enumerated, even if it would take ten thousand years. The type \hask{Integer} is infinite, though.
+ 这些不是无限类型。它们的元素可以被枚举，即使可能需要一万年。类型\hask{Integer}则是无限的。
 
-\subsection{Short Haskell Digression}
+ \section{Sum Types\\和类型}
 
-Since we are going to write more Haskell code, we have to establish some preliminaries. To define data types using functions, we need to use the language pragma called \hask{GADTs} (it stands for \emph{Generalized Algebraic Data Types}). The pragma has to be put at the top of the source file. For instance:
+ \hask{Bool}类型可以看作是和类型$2 = 1 + 1$。但没有什么能阻止我们用其他类型替换$1$，甚至用不同的类型替换这两个$1$。我们可以使用两个箭头定义一个新类型$a + b$。我们称它们为\hask{Left}和\hask{Right}。定义图就是引入规则：
 
-\begin{haskell}
-{-# language GADTs #-}
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr,  "\text{Left}"']
+   && b
+   \arrow[dl, "\text{Right}"]
+   \\
+   &a + b
+  \end{tikzcd}
+ \]
 
-data Bool where
-  True  :: () -> Bool
-  False :: () -> Bool
-\end{haskell}
-
-The \hask{Void} data type can be defined as:
-\begin{haskell}
-data Void where
-\end{haskell}
-with the empty \hask{where} clause (no data constructor!).
-
-The function \hask{absurd} works with any type as its target (it's a \emph{polymorphic} function), so it is parameterized by a \emph{type variable}. Unlike concrete types, type variables must start with a lowercase letter. Here, \hask{a} is such a type variable:
-
-\begin{haskell}
-absurd :: Void -> a
-absurd v = undefined
-\end{haskell}
-We use \hask{undefined} to placate the compiler. In this case, we are absolutely sure that the function \hask{absurd} can never be called, because it's impossible to construct an argument of type \hask{Void}.
-
-You may use \hask{undefined} when you're only interested in compiling, as opposed to running, your code. For instance, you may need to plug a function \hask{f} to check if your definitions work together:
-\begin{haskell}
-f :: a -> x
-f = undefined
-\end{haskell}
-
-If you want to experiment with defining your own versions of standard types, like \hask{Either}, you have to tell the compiler to hide the originals that are defined in the standard library called the \hask{Prelude}. Put this line at the top of the file, after the language pragmas:
-\begin{haskell}
-import Prelude hiding (Either, Left, Right)
-\end{haskell}
-
-
-\section{Sum Types}
-
-The \hask{Bool} type could be seen as the sum $2 = 1 + 1$. But nothing stops us from replacing $1$ with another type, or even replacing each of the $1$s with different types. We can define a new type $a + b$ by using two arrows. Let's call them \hask{Left} and \hask{Right}. The defining diagram is the introduction rule:
-\[
- \begin{tikzcd}
- a
- \arrow[dr,  "\text{Left}"']
- && b
- \arrow[dl, "\text{Right}"]
- \\
-&a + b
- \end{tikzcd}
-\]
-In Haskell, the type $a + b$ is called \hask{Either a b}. By analogy with \hask{Bool}, we can define it as
-\begin{haskell}
-data Either a b where
+ 在Haskell中，类型$a + b$被称为\hask{Either a b}。类似于\hask{Bool}，我们可以将其定义为：
+ \begin{haskell}
+  data Either a b where
   Left  :: a -> Either a b
   Right :: b -> Either a b
-\end{haskell}
- (Note the use of lower-case letters for type variables.)
- 
-Similarly, the mapping out from $a + b$ to some type $c$ is determined by this commuting diagram:
-\[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& c
- \end{tikzcd}
-\]
-Given a function $h$, we get a pair of functions $f$ and $g$ just by composing it with \hask{Left} and \hask{Right}. Conversely, such a pair of functions uniquely determines $h$. This is the elimination rule.
+ \end{haskell}
+ （注意小写字母用于类型变量。）
 
-When we want to translate this diagram to Haskell, we need to select elements of the two types. We can do it by defining the arrows $a$ and $b$ from the terminal object. 
-\[
- \begin{tikzcd}
- &1
- \arrow[ld, "a"']
- \arrow[rd, "b"]
- \\
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& c
- \end{tikzcd}
-\]
-Follow the arrows in this diagram to get:
-\[h \circ \text{Left} \circ a = f \circ a\]
-\[h \circ \text{Right} \circ b = g \circ b\]
+ 类似地，从$a + b$到某个类型$c$的映射由以下可交换图决定：
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & c
+  \end{tikzcd}
+ \]
 
-Haskell syntax repeats these equations almost literally, resulting in this pattern-matching syntax for the definition of \hask{h}:
+ 给定一个函数$h$，我们只需通过组合它与\hask{Left}和\hask{Right}即可得到一对函数$f$和$g$。反过来，这对函数唯一地决定了$h$。这是消除规则。
 
-\begin{haskell}
-h :: Either a b -> c
-h (Left  a) = f a
-h (Right b) = g b
-\end{haskell}
-(Again, notice the use of lower-case letters for type variables and the same letters for terms of that type. Unlike humans, the compilers don't get confused by this.)
+ 当我们想将此图转换为Haskell时，我们需要选择两种类型的元素。我们可以通过定义从终端对象的箭头来完成：
 
-You can also read these equations right to left, and you will see the computation rules for sum types: The two functions that were used to define \hask{h} can be recovered by applying \hask{h} to \hask{(Left a)} and \hask{(Right b)}. 
+ \[
+  \begin{tikzcd}
+   &1
+   \arrow[ld, "a"']
+   \arrow[rd, "b"]
+   \\
+   a
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & c
+  \end{tikzcd}
+ \]
 
-You can also use the \hask{case} syntax to define \hask{h}:
-\begin{haskell}
-h e = case e of
+ 沿着这个图的箭头，我们得到：
+ \[h \circ \text{Left} \circ a = f \circ a\]
+ \[h \circ \text{Right} \circ b = g \circ b\]
+
+ Haskell语法几乎逐字重复了这些方程，最终得到这个模式匹配语法用于定义\hask{h}：
+
+ \begin{haskell}
+  h :: Either a b -> c
+  h (Left  a) = f a
+  h (Right b) = g b
+ \end{haskell}
+ （再次注意小写字母用于类型变量，并且这些字母与这些类型的项相同。与人类不同，编译器不会因此感到困惑。）
+
+ 你还可以从右向左阅读这些方程，这样你就会看到和类型的计算规则：定义\hask{h}所使用的两个函数可以通过应用\hask{h}到\hask{(Left a)}和\hask{(Right b)}来恢复。
+
+ 你也可以使用\hask{case}语法定义\hask{h}：
+ \begin{haskell}
+  h e = case e of
   Left  a -> f a
   Right b -> g b
-\end{haskell}
+ \end{haskell}
 
-So what is the essence of a data type? It is but a recipe for manipulating arrows.
+ 那么，数据类型的本质是什么？不过是操纵箭头的一个方法。
 
-\subsection{Maybe}
+ \section{Maybe\\可能类型}
 
-A very useful data type, \hask{Maybe} is defined as a sum $1 + a$, for any $a$. This is its definition in Haskell:
-\begin{haskell}
-data Maybe a where
+ 一个非常有用的数据类型，\hask{Maybe}被定义为$1 + a$，对于任意$a$。这是它在Haskell中的定义：
+ \begin{haskell}
+  data Maybe a where
   Nothing :: () -> Maybe a
   Just    ::  a -> Maybe a
-\end{haskell}
-The data constructor \hask{Nothing} is an arrow from the unit type, and \hask{Just} constructs \hask{Maybe a} from \hask{a}. \hask{Maybe a} is isomorphic to \hask{Either () a}. It can also be defined using the shorthand notation
-\begin{haskell}
-data Maybe a = Nothing | Just a
-\end{haskell}
+ \end{haskell}
+ 数据构造器\hask{Nothing}是从单位类型的箭头，而\hask{Just}从\hask{a}构造\hask{Maybe a}。 \hask{Maybe a}与\hask{Either () a}是同构的。它也可以用简写符号定义：
+ \begin{haskell}
+  data Maybe a = Nothing | Just a
+ \end{haskell}
 
-\hask{Maybe} is mostly used to encode the return type of partial functions: ones that are undefined for some values of their arguments. In that case, instead of failing, such functions return \hask{Nothing}. In other programming languages partial functions are often implemented using exceptions (or core dumps).
+ \hask{Maybe}主要用于对部分函数的返回类型进行编码：这些函数在某些参数值上未定义。在这种情况下，这些函数不会失败，而是返回\hask{Nothing}。在其他编程语言中，部分函数通常使用异常（或核心转储）来实现。
 
-\subsection{Logic}
+ \section{Logic\\逻辑}
 
-In logic, the proposition $A + B$ is called the \index{alternative}alternative, or \emph{logical or}. You can prove it by providing the proof of $A$ or the proof of $B$. Either one will suffice. 
+ 在逻辑中，命题$A + B$被称为\emph{逻辑或}。你可以通过提供$A$的证明或$B$的证明来证明它。任意一个证明都足够了。
 
-If you want to prove that $C$ follows from $A+B$, you have to be prepared for two eventualities: either somebody proved $A+B$ by proving $A$ (and $B$ could be false) or by proving $B$ (and $A$ could be false). In the first case, you have to show that $C$ follows from $A$. In the second case you need a proof that $C$ follows from $B$. These are exactly the arrows in the elimination rule for $A+B$.
+ 如果你想证明$C$从$A+B$中得出，你必须为两种可能性做好准备：一种是有人通过证明$A$来证明$A+B$（此时$B$可能是假的），另一种是通过证明$B$来证明$A+B$（此时$A$可能是假的）。在第一种情况下，你必须展示$C$如何从$A$中得出。在第二种情况下，你需要证明$C$从$B$中得出。这些正是$A+B$消除规则中的箭头。
 
-\section{Cocartesian Categories}
+ \section{Cocartesian Categories\\余笛卡尔范畴}
 
-In Haskell, we can define a sum of any two types using \hask{Either}. A category in which all sums exist, and the initial object exists, is called \emph{cocartesian}, and the sum is called a \emph{coproduct}. You might have noticed that sum types mimic addition of numbers. It turns out that the initial object plays the role of zero. 
+ 在Haskell中，我们可以使用\hask{Either}定义任意两种类型的和。一个类别中，如果所有和存在，并且初始对象也存在，我们称这个类别为\emph{余笛卡尔}，而和则被称为\emph{余积}。你可能注意到，和类型模仿了数字的加法。事实证明，初始对象扮演了零的角色。
 
+ \subsection{One Plus Zero\\一加零}
 
+ 我们首先展示$1 + 0 \cong 1$，这意味着终端对象与初始对象的和是同构于终端对象的。此类证明的标准程序是使用Yoneda技巧。由于和类型是通过映射出去定义的，我们应该比较它们的箭头。
 
-\subsection{One Plus Zero}
-Let's first show that $1 + 0 \cong 1$, meaning the sum of the terminal object and the initial object is isomorphic to the terminal object. The standard procedure for this kind of proofs is to use the Yoneda trick. Since sum types are defined by mapping out, we should compare arrows coming \emph{out} of either side. 
+ Yoneda论证说，如果两个对象有一个自然的双射$\beta_a$，它在从它们到任意对象$a$的箭头集合之间建立，那么这两个对象是同构的。
 
-The Yoneda argument says that two objects are isomorphic if there is a bijection $\beta_a$ between the sets of arrows coming out of them to an arbitrary object $a$, and this bijection is natural.  
- 
-Let's look at the definition of $1 + 0$ and it's mapping out to any object $a$. This mapping is defined by a pair $(x, \mbox{!`})$, where $x$ is an element of $a$ and $\mbox{!`}$ is the unique arrow from the initial object to $a$ (the \hask{absurd} function in Haskell). 
+ 让我们看看$1 + 0$的定义以及它到任意对象$a$的映射。这个映射由一对$(x, \mbox{!`})$定义，其中$x$是$a$的一个元素，$\mbox{!`}$是从初始对象到$a$的唯一箭头（在Haskell中是\hask{absurd}函数）。
 
-\[
- \begin{tikzcd}
- 1
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "x"']
- && 0
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "\mbox{!`}"]
- \\
-&1 + 0
-\arrow[d, dashed, "h"]
-\\
-& a
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
- 1
- \arrow[dd, "x"]
- \\
- \\
- a
- \end{tikzcd}
-\]
-We want to establish a one-to-one mapping between arrows originating in $1+0$ and the ones originating in $1$. The arrow $h$ is determined by the pair $(x, \mbox{!`})$. Since there is only one $\mbox{!`}$, there  is a bijection between $h$'s and $x$'s. 
+ \[
+  \begin{tikzcd}
+   1
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "x"']
+   && 0
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "\mbox{!`}"]
+   \\
+   &1 + 0
+   \arrow[d, dashed, "h"]
+   \\
+   & a
+  \end{tikzcd}
+  \qquad
+  \begin{tikzcd}
+   1
+   \arrow[dd, "x"]
+   \\
+   \\
+   a
+  \end{tikzcd}
+ \]
 
-We define $\beta_a$ to map any $h$ defined by a pair $(x, \mbox{!`})$ to $x$. Conversely, $\beta^{-1}_a$ maps $x$ to the pair $(x, \mbox{!`})$. But is it a natural transformation? 
+ 我们想在从$1+0$发出的箭头与从$1$发出的箭头之间建立一对一的映射。箭头$h$由一对$(x, \mbox{!`})$决定。由于只有一个$\mbox{!`}$，因此$h$与$x$之间存在一个双射。
 
-To answer that, we need to consider what happens when we change focus from $a$ to some $b$ that is connected to it through an arrow $g \colon a \to b$. We have two options now:
-\begin{itemize}
-\item Make $h$ switch focus by post-composing both $x$ and $\mbox{!`}$ with $g$. We get a new pair $(y = g \circ x, \mbox{!`})$. Follow it by $\beta_b$.
-\item Use $\beta_a$ to map $(x, \mbox{!`})$ to $x$. Follow it with the post-composition $(g \circ -)$. 
-\end{itemize}
-In both cases we get the same arrow $y = g \circ x$. So the mapping $\beta$ is natural. Therefore $1 + 0$ is isomorphic to $1$.
+ 我们定义$\beta_a$将由一对$(x, \mbox{!`})$定义的任何$h$映射到$x$。反过来，$\beta^{-1}_a$将$x$映射到一对$(x, \mbox{!`})$。但这是一个自然变换吗？
 
-In Haskell, we can define the two functions that form the isomorphism, but there is no way of directly expressing the fact that they are the inverse of each other.
-\begin{haskell}
-f :: Either () Void -> ()
-f (Left ()) = ()
-f (Right _) = ()
+ 要回答这个问题，我们需要考虑当我们从$a$切换到通过箭头$g \colon a \to b$与$a$连接的某个$b$时会发生什么。我们现在有两个选项：
+ \begin{itemize}
+  \item 使$h$通过后组合$x$和$\mbox{!`}$与$g$来切换焦点。我们得到一个新对$(y = g \circ x, \mbox{!`})$。然后使用$\beta_b$。
+  \item 使用$\beta_a$将$(x, \mbox{!`})$映射到$x$。然后跟随$(g \circ -)$进行后组合。
+ \end{itemize}
+ 在这两种情况下，我们都得到相同的箭头$y = g \circ x$。因此映射$\beta$是自然的。因此$1 + 0$与$1$是同构的。
 
-f_1 :: () -> Either () Void
-f_1 _ = Left ()
-\end{haskell}
-The underscore wildcard in a function definition means that the argument is ignored. The second clause in the definition of \hask{f} is redundant, since there are no terms of the type \hask{Void}. 
+ 在Haskell中，我们可以定义构成同构的两个函数，但没有直接表达它们是彼此逆的方式。
+ \begin{haskell}
+  f :: Either () Void -> ()
+  f (Left ()) = ()
+  f (Right _) = ()
 
-\subsection{Something Plus Zero}
-A very similar argument can be used to show that $a + 0 \cong a$. The following diagram explains it.
-\[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && 0
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "\mbox{!`}"]
- \\
-&a + 0
-\arrow[d, dashed, "h"]
-\\
-& x
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
- a
- \arrow[dd, "f"]
- \\
- \\
- x
- \end{tikzcd}
-\]
+  f_1 :: () -> Either () Void
+  f_1 _ = Left ()
+ \end{haskell}
+ 函数定义中的下划线通配符表示该参数被忽略。函数\hask{f}的第二个子句是多余的，因为\hask{Void}类型没有项。
 
-We can translate this argument to Haskell by implementing a (polymorphic) function \hask{h} that works for any type \hask{a}. 
+ \subsection{Something Plus Zero\\某物加零}
 
-\begin{exercise}
-Implement, in Haskell, the two functions that form the isomorphism between \hask{(Either a Void)} and \hask{a}.
-\end{exercise}
+ 一个非常相似的论证可以用来证明$a + 0 \cong a$。以下图解释了这一点。
 
-We could use a similar argument to show that $0 + a \cong a$, but there is a more general property of sum types that obviates that.
-\subsection{Commutativity}
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "f"']
+   && 0
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "\mbox{!`}"]
+   \\
+   &a + 0
+   \arrow[d, dashed, "h"]
+   \\
+   & x
+  \end{tikzcd}
+  \qquad
+  \begin{tikzcd}
+   a
+   \arrow[dd, "f"]
+   \\
+   \\
+   x
+  \end{tikzcd}
+ \]
 
-There is a nice left-right symmetry in the diagrams that define the sum type, which suggests that it satisfies the commutativity rule, $a + b \cong b + a$. 
+ 我们可以通过实现一个（多态）函数\hask{h}，它适用于任何类型\hask{a}，将此论证转化为Haskell。
 
-Let's consider mappings out of both sides of this formula. You can easily see that, for every $h$ that is determined by a pair $(f, g)$ on the left, there is a corresponding $h'$ given by a pair $(g, f)$ on the right. That establishes the bijection of arrows.
+ \begin{exercise}
+  在Haskell中实现两个函数，这两个函数形成了\hask{(Either a Void)}与\hask{a}之间的同构。
+ \end{exercise}
 
-\[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& x
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
- b
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "g"']
- && a
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "f"]
- \\
-&b + a
-\arrow[d, dashed, "h'"]
-\\
-& x
- \end{tikzcd}
-\]
+ 我们可以使用类似的论证来证明$0 + a \cong a$，但和类型的更一般属性使得这点显得多余。
+ \subsection{Commutativity\\交换性}
 
-\begin{exercise}
-Show that the bijection defined above is natural. Hint: Both $f$ and $g$ change focus by post-composition with $k \colon x \to y$.
-\end{exercise}
-\begin{exercise}
-Implement, in Haskell, the function that witnesses the isomorphism between \hask{(Either a b)} and \hask{(Either b a)}. Notice that this function is its own inverse.
-\end{exercise}
+ 和类型定义中的图具有漂亮的左右对称性，这表明它满足交换规则，即$a + b \cong b + a$。
 
-\subsection{Associativity}
+ 让我们考虑公式两边的映射。你可以很容易地看到，对于左侧由一对$(f, g)$决定的每个$h$，右侧有一个对应的$h'$，它由一对$(g, f)$给出。这就建立了箭头之间的双射。
 
-Just like in arithmetic, the sum that we have defined is associative:
-\[(a + b) + c \cong a + (b + c) \]
-It's easy to write the mapping out for the left-hand side:
-\begin{haskell}
-h :: Either (Either a b) c -> x
-h (Left (Left a))  = f1 a
-h (Left (Right b)) = f2 b
-h (Right c)        = f3 c
-\end{haskell}
-Notice the use of nested patterns like \hask{(Left (Left a))}, etc. The mapping is fully defined by a triple of functions. The same functions can be used to define the mapping out of the right-hand side:
-\begin{haskell}
-h' :: Either a (Either b c) -> x
-h' (Left a)          = f1 a
-h' (Right (Left b))  = f2 b
-h' (Right (Right c)) = f3 c
-\end{haskell}
-This establishes a one-to-one mapping between triples of functions that define the two mappings out. This mapping is natural because all changes of focus are done using post-composition. Therefore the two sides are isomorphic.
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & x
+  \end{tikzcd}
+  \qquad
+  \begin{tikzcd}
+   b
+   \arrow[dr,  bend left, "\text{Left}"']
+   \arrow[ddr, bend right, "g"']
+   && a
+   \arrow[dl, bend right, "\text{Right}"]
+   \arrow[ddl, bend left, "f"]
+   \\
+   &b + a
+   \arrow[d, dashed, "h'"]
+   \\
+   & x
+  \end{tikzcd}
+ \]
 
-This code can also be displayed in diagrammatical form. Here's the diagram for the left hand side of the isomorphism:
-\[
- \begin{tikzcd}
- a
- \arrow[rd, "L"']
- \arrow[rrddd, bend right, red, "f_1"']
- && b
- \arrow[ld, "R"]
- \arrow[ddd, bend left=60, red, "f_2"]
-&&c
- \arrow[lldd, "R"]
- \arrow[llddd, bend left, red, "f_3"]
- \\
- & a + b
-  \arrow[rd, "L"']
- \\
-&&(a + b) + c
- \arrow[d, dashed, "h"]
-\\
-&& x
- \end{tikzcd}
-\]
-\subsection{Functoriality}
-Since the sum is defined by the mapping out property, it was easy to see what happens when we change focus: it changes ``naturally'' with the foci of the arrows that define the product. But what happens when we move the sources of those arrows? 
+ \begin{exercise}
+  证明上面定义的双射是自然的。提示：$f$和$g$通过与$k \colon x \to y$的后组合来改变焦点。
+ \end{exercise}
 
-Suppose that we have arrows that map $a$ and $b$ to some $a'$ and $b'$:
-\begin{align*}f &\colon a \to a' \\
-g &\colon b \to b' 
-\end{align*}
-The composition of these arrows with the constructors $\text{Left}$ and $\text{Right}$, respectively, can be used to define the mapping between the sums:
-\[
- \begin{tikzcd}
- a
- \arrow[d, "f"]
- \arrow[dr,  bend left, "\text{Left}"']
-  && b
- \arrow[d, "g"]
- \arrow[dl, bend right, "\text{Right}"]
- \\
- a'
- \arrow[rd, "\text{Left}"']
-&a + b
-\arrow[d, dashed, "h"]
-& b'
-\arrow[ld, "\text{Right}"]
-\\
-& a' + b'
- \end{tikzcd}
-\]
-The pair of arrows, $(\text{Left} \circ f, \text{Right} \circ g)$ uniquely defines the arrow $h \colon a + b \to a' + b'$.
+ \begin{exercise}
+  在Haskell中实现见证\hask{(Either a b)}与\hask{(Either b a)}之间同构的函数。注意，这个函数本身是它的逆。
+ \end{exercise}
 
-This property of the sum is called \emph{functoriality}. You can imagine it as allowing you to transform the two objects \emph{inside} the sum and get a new sum. We also say that functoriality lets us \index{lifting}\emph{lift} a pair of arrows in order to operate on sums.
+ \subsection{Associativity\\结合性}
 
-\begin{exercise}
-Show that functoriality preserves composition. Hint: take two composable arrows, $g \colon b \to b'$ and $g' \colon b' \to b''$ and show that applying $g' \circ g$ gives the same result as first applying $g$ to transform $a + b$ to $a + b'$ and then applying $g'$ to transform $a + b'$ to $a + b''$.
-\end{exercise}
+ 正如在算术中，我们定义的和是结合的：
+ \[(a + b) + c \cong a + (b + c)\]
+ 编写左侧的映射很容易：
+ \begin{haskell}
+  h :: Either (Either a b) c -> x
+  h (Left (Left a))  = f1 a
+  h (Left (Right b)) = f2 b
+  h (Right c)        = f3 c
+ \end{haskell}
+ 注意使用嵌套模式，如\hask{(Left (Left a))}等。该映射完全由三个函数定义。可以使用相同的函数来定义右侧的映射：
+ \begin{haskell}
+  h' :: Either a (Either b c) -> x
+  h' (Left a)          = f1 a
+  h' (Right (Left b))  = f2 b
+  h' (Right (Right c)) = f3 c
+ \end{haskell}
+ 这建立了两个定义映射的函数组之间的一对一映射。这种映射是自然的，因为所有的焦点转换都是通过后组合完成的。因此，两边是同构的。
 
-\begin{exercise}
-Show that functoriality preserves identity. Hint: use $id_b$ and show that it is mapped to $id_{a+b}$.
-\end{exercise}
+ 这个代码也可以用图形化的形式展示。以下是同构左侧的图：
 
-\subsection{Symmetric Monoidal Category}
-When a child learns addition we call it arithmetic. When a grownup learns addition we call it a cocartesian category.
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[rd, "L"']
+   \arrow[rrddd, bend right, red, "f_1"']
+   && b
+   \arrow[ld, "R"]
+   \arrow[ddd, bend left=60, red, "f_2"]
+   &&c
+   \arrow[lldd, "R"]
+   \arrow[llddd, bend left, red, "f_3"]
+   \\
+   & a + b
+   \arrow[rd, "L"']
+   \\
+   &&(a + b) + c
+   \arrow[d, dashed, "h"]
+   \\
+   && x
+  \end{tikzcd}
+ \]
 
-Whether we are adding numbers, composing arrows, or constructing sums of objects, we are re-using the same idea of decomposing complex things into their simpler components.  
+ \subsection{Functoriality\\函子性}
 
-As Lao Tzu would say, when things come together to form a new thing, and the operation is associative, and it has a neutral element, we know how to deal with ten thousand things.
+ 由于和是由映射出的性质定义的，所以很容易看出当我们改变焦点时会发生什么：它会随着定义积的箭头焦点的变化而“自然地”变化。但当我们移动这些箭头的源时，会发生什么呢？
 
-The sum type we have defined satisfies these properties:
-\begin{align*}
-a + 0 &\cong a \\
-a + b &\cong b + a \\
-(a + b) + c &\cong a + (b + c)
-\end{align*}
-and it's functorial. A category with this type of operation is called \emph{symmetric monoidal}. When the operation is the sum (coproduct), it's called \emph{cocartesian}. In the next chapter we'll see another monoidal structure that's called \emph{cartesian} without the ``co.''
+ 假设我们有箭头，将$a$和$b$映射到某个$a'$和$b'$：
+ \begin{align*}f &\colon a \to a' \\
+ g &\colon b \to b'
+ \end{align*}
+ 这些箭头与构造器$\text{Left}$和$\text{Right}$分别组合，定义了和之间的映射：
 
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[d, "f"]
+   \arrow[dr,  bend left, "\text{Left}"']
+   && b
+   \arrow[d, "g"]
+   \arrow[dl, bend right, "\text{Right}"]
+   \\
+   a'
+   \arrow[rd, "\text{Left}"']
+   &a + b
+   \arrow[d, dashed, "h"]
+   & b'
+   \arrow[ld, "\text{Right}"]
+   \\
+   & a' + b'
+  \end{tikzcd}
+ \]
+ 箭头对$(\text{Left} \circ f, \text{Right} \circ g)$唯一地定义了箭头$h \colon a + b \to a' + b'$。
 
+ 这种和的性质称为\emph{函子性}。你可以想象它允许你在和的内部转换两个对象，并获得一个新的和。我们还说函子性允许我们\emph{提升}一对箭头以操作和。
+
+ \begin{exercise}
+  证明函子性保持组合。提示：取两条可组合的箭头，$g \colon b \to b'$和$g' \colon b' \to b''$，证明应用$g' \circ g$给出与首先应用$g$将$a + b$变换为$a + b'$，然后应用$g'$将$a + b'$变换为$a + b''$相同的结果。
+ \end{exercise}
+
+ \begin{exercise}
+  证明函子性保持身份。提示：使用$id_b$并证明它被映射到$id_{a+b}$。
+ \end{exercise}
+
+ \subsection{Symmetric Monoidal Category\\对称幺半范畴}
+
+ 当一个孩子学习加法时，我们称之为算术。当一个成年人学习加法时，我们称之为余笛卡尔范畴。
+
+ 无论我们是加数字，组合箭头，还是构造对象的和，我们都在重复使用将复杂事物分解为其简单组成部分的相同思想。
+
+ 正如老子所说，当事物结合形成新事物时，如果操作是结合的，并且有一个中性元素，我们就知道如何处理万事万物。
+
+ 我们定义的和类型满足这些属性：
+ \begin{align*}
+  a + 0 &\cong a \\
+  a + b &\cong b + a \\
+  (a + b) + c &\cong a + (b + c)
+ \end{align*}
+ 并且它是函子性的。具有这种操作的范畴称为\emph{对称幺半范畴}。当操作是和（余积）时，它被称为\emph{余笛卡尔}。在下一章中，我们将看到另一种被称为\emph{笛卡尔}的幺半结构，不带“余”字。
 \end{document}
