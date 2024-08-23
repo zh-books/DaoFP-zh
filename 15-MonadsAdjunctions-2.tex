@@ -1182,19 +1182,19 @@
 
     组合$R \circ L$可以在Haskell中写成\hask{((x -> r) -> r)}，这与定义续延单子的（协变）自函子相同。
 
-    \section{Monad Transformers（Monad变换器）}
+    \section{Monad Transformers（单子变换器）}
 
-    假设你想要组合多个效果，例如，将状态（state）和可能的失败（failure）结合在一起。一个选择是从头定义你自己的monad。你可以定义一个函子（functor）：
+    假设你想要结合多种效果，例如状态（state）和失败的可能性（failure）。一种选择是从头定义你自己的单子。你可以定义一个函子（functor）：
     \begin{haskell}
         newtype MaybeState s a = MS (s -> Maybe (a, s))
         deriving Functor
     \end{haskell}
-    并配合使用一个函数来提取结果（或者报告失败）：
+    以及用于提取结果（或报告失败）的函数：
     \begin{haskell}
         runMaybeState :: MaybeState s a -> s -> Maybe (a, s)
         runMaybeState (MS h) s = h s
     \end{haskell}
-    接着，你可以为它定义一个Monad实例：
+    然后为其定义单子实例：
     \begin{haskell}
         instance Monad (MaybeState s) where
         return a = MS (\s -> Just (a, s))
@@ -1202,11 +1202,11 @@
         Nothing -> Nothing
         Just (a, s') -> runMaybeState (k a) s')
     \end{haskell}
-    并且，如果你足够勤奋的话，检查它是否满足monad定律。
+    接着，若你足够勤奋，可以验证它是否满足单子定律（monad laws）。
 
-    没有一种通用的方法可以组合monad。从这个意义上说，monad不是可组合的（composable）。然而，我们知道伴随函子（adjunctions）是可组合的。我们还看到了如何通过伴随函子得到monad，并且我们很快就会看到，每个monad都可以通过这种方式获得。所以，如果我们可以匹配伴随函子，那么它们生成的monad将自动组合。
+    对于组合单子，没有通用的配方。从这个意义上讲，单子是不具备组合性的。然而，我们知道伴随（adjunctions）是可组合的。我们已经看到如何从伴随中得到单子，并且正如我们很快就会看到的，每个单子都可以通过这种方式获得。因此，如果我们能够匹配伴随，它们生成的单子将自动组合。
 
-    考虑两个可组合的伴随函子：
+    考虑两个可组合的伴随：
     \[
         \begin{tikzcd}
             \mathcal{C}
@@ -1220,9 +1220,9 @@
             \arrow[ll, bend right, "L"']
         \end{tikzcd}
     \]
-    在这张图中有三个monad。存在“内在的”monad $R' \circ L'$ 和“外在的”monad $R \circ L$ 以及复合的 $R \circ R' \circ L' \circ L$。
+    在这个图中有三个单子：内层单子$R' \circ L'$，外层单子$R \circ L$，以及组合单子$R \circ R' \circ L' \circ L$。
 
-    如果我们将内在的monad称为 $T = R' \circ L'$，那么 $R \circ T \circ L$ 就是复合monad，称为“monad变换器”（monad transformer），因为它将monad $T$ 转换为一个新的monad。
+    如果我们将内层单子称为$T = R' \circ L'$，那么$R \circ T \circ L$就是所谓的组合单子，即单子变换器（monad transformer），因为它将单子$T$转换为一个新的单子。
 
     \[
         \begin{tikzcd}
@@ -1236,24 +1236,24 @@
         \end{tikzcd}
     \]
 
-    在我们的例子中，我们可以将 \hask{Maybe} 视为内在的monad：
+    在我们的例子中，我们可以将\hask{Maybe}视为内层单子：
     \[ T a = 1 + a \]
-    它通过生成状态monad的外在伴随函子 $L_s \dashv R_s$ 进行转换：
+    它通过生成状态单子的外层伴随$L_s \dashv R_s$进行变换：
     \[ L_s a = a \times s \]
     \[ R_s c = c^s \]
     结果是：
     \[ (R_s \circ T \circ L_s) a = (1 + a \times s)^s\]
-    或者，在Haskell中：
+    在Haskell中，它的形式为：
     \begin{haskell}
         s -> Maybe (a, s)
     \end{haskell}
-    这与我们定义的 \hask{MaybeState} monad 一致。
+    这与我们定义的\hask{MaybeState}单子一致。
 
-    通常情况下，内在monad $T$ 是由它的单位元（unit）$\eta^i$ 和乘法（multiplication）$\mu^i$ 定义的（上标 $i$ 代表“内在的”）。外在伴随函子由它的单位元 $\eta^o$ 和余单位元（counit）$\varepsilon^o$ 定义。
+    通常，内层单子$T$由其单子单元$\eta^i$和乘法$\mu^i$定义（上标$i$表示“inner”）。外层伴随由其单子单元$\eta^o$和辅元$\varepsilon^o$定义。
 
-    复合monad的单位元是一个自然变换：
+    组合单子的单元是一个自然变换：
     \[ \eta \colon Id \to R \circ T \circ L \]
-    通过以下字符串图（string diagram）表示：
+    它由如下字符串图给出：
     \[
         \begin{tikzpicture}
             \def\xright{0.7};
@@ -1281,12 +1281,12 @@
 
         \end{tikzpicture}
     \]
-    这是经过唇形变换的内在单位 $R \circ \eta^i \circ L$ 和外在单位 $\eta^o$ 的垂直组合。在具体构成上：
+    它是用$R \circ \eta^i \circ L$扩展的内层单元和外层单元$\eta^o$的垂直组合。其成分为：
     \[ \eta_a = R(\eta^i_{L a}) \circ \eta^o_a\]
 
-    复合monad的乘法是一个自然变换：
+    组合单子的乘法是一个自然变换：
     \[ \mu \colon R \circ T \circ L \circ R \circ T \circ L \to R \circ T \circ L \]
-    通过以下字符串图表示：
+    它由如下字符串图给出：
 
     \[
         \begin{tikzpicture}
@@ -1320,57 +1320,30 @@
             \node [below] at (\xl, \ybot) {$R$};
             \node [below] at (\xr, \ybot) {$L$};
             \node [below] at (\xrt, \ybot) {$T$};
-            \node [below] at (\xrr, \ybot) {$R$};
-
-            \filldraw[fill=blue!50!green!20, draw=white, draw=white] (\xleftmost, \ytop) rectangle (\xrightmost, \ybot);
-
-% left area
-            \path [fill=orange!30] (\xleftmost, \ybot) to  (\xll, \ybot) to (\xll, \ymidbot) [out=90, in=-90] to (\xlm, \ymidtop) to  (\xlm, \ytop) to [out=180, in=180] (\xleftmost, \ytop);
-% right area
-            \path [fill=orange!30] (\xrightmost, \ybot) to (\xrr, \ybot) to (\xrr, \ymidbot) [out=90, in=-90] to (\xrm, \ymidtop) to (\xrm, \ytop) to [out=0, in=180]  (\xrightmost, \ytop);
-% cap
-            \draw [fill=orange!30] (\xl, \ybot) to [out=90, in=180] (\xmid, \yeps) to [out=0, in=90] (\xr, \ybot);
-% fork
-            \draw (\xlt, \ybot) to [out=90, in=180] (\xmid, \ymu) to [out=0, in=90] (\xrt, \ybot);
-
-% left curve
-            \draw (\xll, \ybot) to (\xll, \ymidbot) [out=90, in=-90] to (\xlm, \ymidtop) to  (\xlm, \ytop);
-% right curve
-            \draw (\xrr, \ybot) to (\xrr, \ymidbot) [out=90, in=-90] to (\xrm, \ymidtop) to (\xrm, \ytop);
-% epsilon
-            \filldraw [black] (\xmid, \yeps) circle (1 pt);
-            \node [below] at (\xmid, \yeps) {$\varepsilon^o$};
-
-% mu
-            \filldraw [black] (\xmid, \ymu) circle (1 pt);
-            \node [below] at (\xmid, \ymu) {$\mu^i$};
-            \draw (\xmid, \ymu) -- (\xmid, \ytop);
-
+            \def\xrightmost{2}
         \end{tikzpicture}
     \]
-    这是经过多重唇形变换的外在余单位元：
-    \[ R \circ T \circ \varepsilon^o \circ T \circ L \]
-    然后是经过唇形变换的内在乘法 $R \circ \mu^i \circ L$。在具体构成上：
+    这是由外层辅元$\varepsilon^o$扩展的乘法$\mu^i$的垂直组合。其成分为：
     \[ \mu_c = R(\mu^i_{L c}) \circ (R \circ T) (\varepsilon^o_{(T\circ L)c})\]
 
-    \subsection{State Monad Transformer（状态monad变换器）}
+    \subsection{State monad transformer（状态单子变换器）}
 
-    让我们逐步解析这些方程，以应用于状态monad变换器。状态monad由柯里化伴随（currying adjunction）生成。左函子 $L_s$ 是乘积函子 \hask{(a, s)}，而右函子 $R_s$ 是指数函子（exponential），又称为读者函子（reader functor）\hask{(s -> a)}。
+    让我们展开这些方程式，看看状态单子变换器的情况。状态单子是由柯里化伴随（currying adjunction）生成的。左函子$L_s$是乘积函子\hask{(a, s)}，右函子$R_s$是指数（exponential），也称为读者函子（reader functor）\hask{(s -> a)}。
 
-    如前所述，外在余单位元 $\varepsilon^o_a$ 是函数应用：
+    正如我们之前看到的，外层辅元$\varepsilon^o_a$是函数应用：
     \begin{haskell}
         counit :: (s -> a, s) -> a
         counit (f, x) = f x
     \end{haskell}
-    而单位元 $\eta^o_a$ 是柯里化对偶构造函数：
+    单元$\eta^o_a$是柯里化的对偶构造函数：
     \begin{haskell}
         unit :: a -> s -> (a, s)
         unit x = \s -> (x, s)
     \end{haskell}
 
-    我们将保持内在monad $(T, \eta^i, \mu^i)$ 的任意性。在Haskell中，我们将这个三元组称为 \hask{m}, \hask{return}, 和 \hask{join}。
+    我们将保持内层单子$(T, \eta^i, \mu^i)$的任意性。在Haskell中，我们将此三元组称为\hask{m}，\hask{return}和\hask{join}。
 
-    通过将状态monad变换器应用于monad $T$，我们得到的复合monad是 $R \circ T \circ L$ 或者在Haskell中：
+    通过应用状态单子变换器到单子$T$，我们得到的组合单子是$R \circ T \circ L$，或者在Haskell中：
     \begin{haskell}
         newtype StateT s m a = StateT (s -> m (a, s))
     \end{haskell}
@@ -1380,20 +1353,20 @@
         runStateT (StateT h) s = h s
     \end{haskell}
 
-    monad变换器的单位元是 $\eta^o$ 和 $R \circ \eta^i \circ L$ 的垂直组合。在具体构成上：
+    单子变换器的单元是$\eta^o$和$R \circ \eta^i \circ L$的垂直组合。其成分为：
     \[ \eta_a = R(\eta^i_{L a}) \circ \eta^o_a \]
 
-    这个公式中有很多细节，让我们逐步分析。从右边开始：我们有伴随的单位元 $a$ 分量，这是从 $a$ 到 $R (L a)$ 的箭头。在Haskell中，这是函数 \hask{unit}。
+    在这个公式中有许多部分，因此我们逐步分析它。我们从右边开始：我们有伴随单元的$a$成分，它是从$a$到$R (L a)$的箭头。在Haskell中，它是函数\hask{unit}。
     \begin{haskell}
         unit :: a -> s -> (a, s)
     \end{haskell}
-    让我们在某个 \hask{x :: a} 上计算这个函数。结果是另一个函数 \hask{s -> (a, s)}。我们将这个函数作为参数传递给 $R(\eta^i_{L a})$。
+    让我们在某个\hask{x :: a}上评估此函数。结果是另一个函数\hask{s -> (a, s)}。我们将此函数作为参数传递给$R(\eta^i_{L a})$。
 
-    $\eta^i_{L a}$ 是内在monad的 \hask{return} 在 $L a$ 上的分量。这里，$L a$ 是类型 \hask{(a, s)}。所以我们将多态函数 \hask{return :: a -> m a} 实例化为函数 \hask{(a, s) -> m (a, s)}。（类型推断器会为我们自动执行这个操作。）
+    $\eta^i_{L a}$是\hask{return}的内层单子的成分，取自$L a$。在这里，$L a$的类型是\hask{(a, s)}。所以我们将多态函数\hask{return :: a -> m a}实例化为函数\hask{(a, s) -> m (a, s)}。（类型推断器将自动为我们执行此操作。）
 
-    接着，我们用 $R$ 提升这个 \hask{return} 的分量。这里，$R$ 是指数 $(-)^s$，所以它通过后组合（post-composition）来提升函数。它将 \hask{return} 后组合到任何传递给它的函数中。在我们的例子中，这是由 \hask{unit} 生成的函数。注意，类型匹配：我们正在将 \hask{(a, s) -> m (a, s)} 后组合到 \hask{s -> (a, s)} 之后。
+    接下来，我们使用$R$提升\hask{return}的这个成分。在这里，$R$是指数$(-)^s$，因此它通过后组合（post-composition）提升一个函数。它将\hask{return}后组合到传递给它的任何函数上。在我们的例子中，那是由\hask{unit}生成的函数。注意类型是匹配的：我们在\hask{s -> (a, s)}之后进行后组合\hask{(a, s) -> m (a, s)}。
 
-    我们可以将这个组合的结果写为：
+    我们可以将此组合的结果写为：
     \begin{haskell}
         return x = StateT (return . \s -> (x, s))
     \end{haskell}
@@ -1401,261 +1374,43 @@
     \begin{haskell}
         return x = StateT (\s -> return (x, s))
     \end{haskell}
-    我们插入了数据构造函数 \hask{StateT} 以使类型检查器满意。这是复合monad的 \hask{return}，是以内在monad的 \hask{return} 表示的。
+    我们插入了数据构造函数\hask{StateT}以使类型检查器满意。这是复合单子的\hask{return}，用内层单子的\hask{return}表示。
 
-    同样的推理可以应用于某个 $a$ 处复合 $\mu$ 的分量公式：
+    相同的推理可以应用于某个$a$的复合$\mu$的公式：
 
     \[ \mu_a = R(\mu^i_{L a}) \circ (R \circ T) (\varepsilon^o_{(T\circ L) a})\]
-    内在 $\mu^i$ 是monad \hask{m} 的 \hask{join}。应用 $R$ 将其转化为后组合。
+    内层$\mu^i$是单子\hask{m}的\hask{join}。应用$R$将其转化为后组合。
 
-    外在 $\varepsilon^o$ 是取自 $T(L a)$ 或 \hask{m (a, s)} 的函数应用。它是一个类型的函数：
+    外层$\varepsilon^o$是在$T(L a)$上应用的函数或\hask{m (a, s)}。它是一个类型为：
     \begin{haskell}
         (s -> m (a, s), s) -> m (a, s)
     \end{haskell}
-    插入适当的数据构造函数后，可以将其写为 \hask{uncurry runStateT}：
+    的函数，通过插入适当的数据构造函数，可以将其写为\hask{uncurry runStateT}：
     \begin{haskell}
         uncurry runStateT :: (StateT s m a, s) -> m (a, s)
     \end{haskell}
-    应用 $(R \circ T)$ 使用函子 $R$ 和 $T$ 的组合来提升 $\varepsilon$ 的分量。前者作为后组合实现，后者是monad \hask{m} 的 \hask{fmap}。
+    $(R \circ T)$的应用通过$R$和$T$的函子组合提升了此$\varepsilon$的成分。前者是通过后组合实现的，后者是单子\hask{m}的\hask{fmap}。
 
-    将这些组合在一起，我们得到了状态monad变换器的 \hask{join} 的无点公式（point-free formula）：
+    将所有这些结合在一起，我们得到状态单子变换器的\hask{join}的无点公式：
     \begin{haskell}
         join :: StateT s m (StateT s m a) -> StateT s m a
         join mma = StateT (join . fmap (uncurry runStateT) . runStateT mma)
     \end{haskell}
-    这里，部分应用的 \hask{(runStateT mma)} 从参数 \hask{mma} 中剥离了数据构造函数：
+    在这里，部分应用的\hask{(runStateT mma)}从参数\hask{mma}中剥离了数据构造函数：
     \begin{haskell}
         runStateT mma :: s -> m (a, x)
     \end{haskell}
 
-    我们之前的 \hask{MaybeState} 示例现在可以使用monad变换器重写为：
+    我们之前的\hask{MaybeState}示例现在可以使用单子变换器重写为：
     \begin{haskell}
         type MaybeState s a = StateT s Maybe a
     \end{haskell}
 
-    可以通过将 \hask{StateT} monad变换器应用于身份函子（identity functor）来恢复普通的 \hask{State} monad，身份函子在库中定义了一个 \hask{Monad} 实例（注意，在这个定义中最后的类型变量 \hask{a} 被省略了）：
+    可以通过将\hask{StateT}单子变换器应用于恒等函子（identity functor）来恢复普通的\hask{State}单子，恒等函子在库中定义了一个\hask{Monad}实例（注意，在此定义中跳过了最后一个类型变量\hask{a}）：
     \begin{haskell}
         type State s = StateT s Identity
     \end{haskell}
 
-    其他monad变换器遵循相同的模式。它们在monad变换器库（Monad Transformer Library，\hask{MTL}）中定义。
-
-    \section{Monad Algebras（Monad代数）}
-
-    每个伴随函子生成一个monad，到目前为止，我们已经能够为我们感兴趣的所有monad定义伴随函子。但是，是否每个monad都由伴随函子生成？答案是肯定的，并且通常每个monad都有许多伴随函子——事实上，每个monad都有一整个类别的伴随函子。
-
-    为monad寻找一个伴随函子类似于因式分解。我们希望将一个函子表示为两个其他函子的组合，即 $T = R \circ L$。问题的复杂性在于，这种因式分解还需要找到适当的中间类别。我们将通过研究monad的代数来找到这样的类别。
-
-    monad由一个自函子（endofunctor）定义，我们知道可以为自函子定义代数。数学家通常将monad视为生成表达式的工具，而将代数视为评估这些表达式的工具。然而，monad生成的表达式对这些代数施加了一些兼容性条件。
-
-    例如，你可能会注意到，monad的单位元 $\eta_a \colon a \to T a$ 具有看起来像是代数结构映射 $\alpha \colon T a \to a$ 的逆的类型签名。当然，$\eta$ 是为每种类型定义的自然变换，而代数具有固定的载体类型。然而，我们可以合理地期望，$\eta$ 可能会撤销 $\alpha$ 的作用。
-
-    考虑前面表达式monad \hask{Ex} 的示例。这个monad的一个代数是选择载体类型，比如 \hask{Char}，以及一个箭头：
-    \begin{haskell}
-        alg :: Ex Char -> Char
-    \end{haskell}
-    由于 \hask{Ex} 是一个monad，它定义了一个单位元，或者说 \hask{return}，它是一个多态函数，可以用来从值生成简单的表达式。 \hask{Ex} 的单位元是：
-    \begin{haskell}
-        return x = Var x
-    \end{haskell}
-    我们可以为任意类型实例化这个单位元，特别是为我们代数的载体类型。我们合理地要求，\emph{评估} \hask{Var c}（其中 \hask{c} 是一个字符）应该返回相同的 \hask{c}。换句话说，我们希望：
-    \begin{haskell}
-        alg . return = id
-    \end{haskell}
-    这个条件将立即消除很多代数，例如：
-    \begin{haskell}
-        alg (Var c) = 'a' -- 与monad Ex不兼容
-    \end{haskell}
-
-    我们想要施加的第二个条件是，与monad兼容的代数应该尊重替换。monad允许我们使用 \hask{join} 扁平化嵌套表达式。代数允许我们评估这些表达式。
-
-    有两种方式可以做到这一点：我们可以将代数应用于一个扁平化的表达式，或者我们可以先应用它到内部表达式（使用 \hask{fmap}），然后再评估结果表达式。
-    \begin{haskell}
-        alg (join mma) = alg (fmap alg mma)
-    \end{haskell}
-    其中 \hask{mma} 是嵌套类型 \hask{Ex (Ex Char)}。
-
-    在范畴理论中，这两个条件定义了monad代数（monad algebra）。
-
-    我们说 $(a, \alpha \colon T a \to a)$ 是monad $(T, \mu, \eta)$ 的一个 \emph{monad代数}，如果以下图表交换：
-    \[
-        \begin{tikzcd}
-            a
-            \arrow[r, "\eta_a"]
-            \arrow[dr, "id_a"']
-            & T a
-            \arrow[d, red, "\alpha"]
-            \\
-            & a
-        \end{tikzcd}
-        \hspace{30pt}
-        \begin{tikzcd}
-            T(T a)
-            \arrow[r, red, "T \alpha "]
-            \arrow[d, "\mu_a"]
-            &T a
-            \arrow[d, red, "\alpha"]
-            \\
-            T a
-            \arrow[r, red, "\alpha"]
-            & a
-        \end{tikzcd}
-    \]
-    这些规律有时被称为monad代数的单位定律和乘法定律。
-
-    由于monad代数只是代数的特例，它们构成了代数的子范畴。回忆一下，代数态射（algebra morphisms）是满足以下条件的箭头：
-    \[
-        \begin{tikzcd}
-            T a
-            \arrow[r, "T f"]
-            \arrow[d, "\alpha"]
-            & T b
-            \arrow[d, "\beta"]
-            \\
-            a
-            \arrow[r, "f"]
-            & b
-        \end{tikzcd}
-    \]
-
-    根据这个定义，我们可以将第二个monad代数图表重新解释为断言monad代数的结构映射 $\alpha$（底部箭头）也是一个代数态射，从 $(T a, \mu_a)$ 到 $(a, \alpha)$。这将在接下来的内容中发挥重要作用。
-
-    \subsection{Eilenberg-Moore范畴（Eilenberg-Moore Category）}
-
-    给定monad $T$ 在 $ \mathcal{C}$ 上的monad代数的范畴称为Eilenberg-Moore范畴，记作 $ \mathcal{C}^T$。事实证明，它是一个很好的选择，可以让我们将monad $T$ 因式分解为一对伴随函子的组合。
-
-    过程如下：我们定义一对函子，证明它们形成了一个伴随关系，然后证明由这个伴随关系生成的monad就是原来的monad。
-
-    首先，有一个显而易见的遗忘函子（forgetful functor），我们称之为 $U^T$，从 $ \mathcal{C}^T$ 到 $ \mathcal{C}$。它将一个代数 $(a, \alpha)$ 映射到它的载体 $a$，并将代数态射视为载体之间的常规态射。
-
-    更有趣的是，有一个自由函子（free functor）$F^T$，它是 $U^T$ 的左伴随函子。
-    \[
-        \begin{tikzcd}
-            \mathcal{C}^T
-            \arrow[rr, bend right, "U^T"']
-            &&
-            \mathcal{C}
-            \arrow[ll, bend right, "F^T"']
-        \end{tikzcd}
-    \]
-
-    在对象上，$F^T$ 将 $ \mathcal{C}$ 的一个对象 $a$ 映射到一个\emph{monad代数}，即 $\cat{C}^T$ 中的一个对象。对于这个代数的载体，我们选择 $T a$ 而不是 $a$。对于结构映射，即映射 $T (T a) \to T a$，我们选择monad乘法的分量 $\mu_a \colon T(T a) \to T a$。
-
-    很容易检查这个代数 $(T a, \mu_a)$ 确实是一个monad代数——所需的交换条件遵循monad定律。实际上，将代数 $(T a, \mu_a)$ 代入monad代数的图表中，我们得到（代数部分用红色表示）：
-    \[
-        \begin{tikzcd}
-            T a
-            \arrow[r, "\eta_{T a}"]
-            \arrow[dr, "id_{T a}"']
-            & T(T a)
-            \arrow[d, red, "\mu_a"]
-            \\
-            & T a
-        \end{tikzcd}
-        \hspace{30pt}
-        \begin{tikzcd}
-            T(T(T a))
-            \arrow[r, red, "T \mu_a "]
-            \arrow[d, "\mu_{T a}"]
-            &T(T a)
-            \arrow[d, red, "\mu_a"]
-            \\
-            T (T a)
-            \arrow[r, red, "\mu_a"]
-            & T a
-        \end{tikzcd}
-    \]
-    第一个图表只是左侧monad单位定律的分量。箭头 $\eta_{T a}$ 对应于 $\eta \circ T$ 的唇形变换。第二个图表是 $\mu$ 的结合律（associativity）与两个唇形变换 $\mu \circ T$ 和 $T \circ \mu$ 用分量表示。
-
-    为了证明我们有一个伴随关系，我们将定义两个自然变换来作为伴随关系的单位和余单位。
-
-    对于伴随关系的单位，我们选择monad $T$ 的单位元 $\eta$。它们具有相同的签名——在分量中，$\eta_a \colon a \to U^T (F^T a)$。
-
-    余单位是一个自然变换：
-    \[ \varepsilon \colon F^T \circ U^T \to Id \]
-    余单位在 $(a, \alpha)$ 处的分量是从 $a$ 生成的自由代数（即 $(T a, \mu_a)$）回到 $(a, \alpha)$ 的代数态射。正如我们之前所见，$\alpha$ 本身就是这样的态射。因此，我们可以选择 $\varepsilon_{(a, \alpha)} = \alpha$。
-
-    这些定义的 $\eta$ 和 $\varepsilon$ 的三角恒等式遵循monad和monad代数的单位定律。
-
-    对于所有伴随函子而言，复合 $U^T \circ F^T$ 是一个monad。我们将展示这个monad与我们最初的monad相同。实际上，在对象上，复合 $U^T (F^T a)$ 首先将 $a$ 映射到一个自由monad代数 $(T a, \mu)$，然后遗忘结构映射。净结果是将 $a$ 映射到 $T a$，这正是原来的monad所做的。
-
-    在箭头上，它使用 $T$ 提升箭头 $f \colon a \to b$。从 $(T a, \mu_a)$ 到 $(T b, \mu_b)$ 的箭头 $T f$ 是一个代数态射的事实源自 $\mu$ 的自然性：
-    \[
-        \begin{tikzcd}
-            T (T a)
-            \arrow[r, "T( T f)"]
-            \arrow[d, "\mu_a"]
-            & T (T b)
-            \arrow[d, "\mu_b"]
-            \\
-            T a
-            \arrow[r, "T f"]
-            & T b
-        \end{tikzcd}
-    \]
-
-    最后，我们必须证明monad $U^T \circ F^T$ 的单位元和余单位与我们原始monad的单位元和余单位相同。
-
-    单位元是相同的，构造上就是这样。
-
-    $U^T \circ F^T$ 的monad乘法由伴随关系单位的唇形变换 $U^T \circ \varepsilon \circ F^T$ 给出。在分量中，这意味着在 $(T a, \mu_a)$ 处实例化 $\varepsilon$，这给了我们 $\mu_a$（$U^T$ 对箭头的作用是平凡的）。这确实是原始monad的乘法。
-
-    我们已经证明，对于任何monad $T$，我们都可以定义Eilenberg-Moore范畴和一对伴随函子，这些函子可以分解这个monad。
-
-    \subsection{Kleisli范畴（Kleisli Category）}
-
-    在每个Eilenberg-Moore范畴中，都有一个较小的Kleisli范畴在努力挣脱出来。这个较小的范畴是我们在前一节中构造的自由函子的像（image）。
-
-    尽管表面上看，自由函子的像并不一定定义一个子范畴。诚然，它将恒等映射到恒等，并将组合映射到组合。然而，如果源范畴中的两个箭头不能组合，而在目标范畴中却可以组合，问题就会出现。如果第一个箭头的目标被映射到与第二个箭头的源相同的对象，那么这种情况就可能发生。在下面的例子中，$F f$ 和 $F g$ 是可组合的，但它们的组合 $F g \circ F f$ 可能不在第一个范畴的像中。
-
-    \[
-        \begin{tikzcd}
-            a
-            \arrow[d, "f"]
-            \\ b
-            \\ c
-            \arrow[d, "g"]
-            \\ d
-        \end{tikzcd}
-        \hspace{30pt}
-        \begin{tikzcd}
-            F a
-            \arrow[d, "F f"]
-            \arrow[dd, dashed, bend left=90, "F g \circ F f"]
-            \\ F b = F c
-            \arrow[d, "F g"]
-            \\ F d
-        \end{tikzcd}
-    \]
-
-    然而，自由函子 $F^T$ 将不同的对象映射到不同的自由代数中，因此它的像确实是 $\mathcal{C}^T$ 的一个子范畴。
-
-    我们之前已经遇到过Kleisli范畴。有多种构造相同范畴的方法，其中最简单的一种是用Kleisli箭头（Kleisli arrows）描述Kleisli范畴。
-
-    一个monad $(T, \eta, \mu)$ 的Kleisli范畴记作 $\mathcal{C}_T$。它的对象与 $\mathcal{C}$ 的对象相同，但 $\mathcal{C}_T$ 中从 $a$ 到 $b$ 的一个箭头由 $\mathcal{C}$ 中的一个箭头表示，这个箭头从 $a$ 到 $T b$。你可能认出它是我们之前定义的Kleisli箭头 \hask{ a -> m b}。由于 $T$ 是一个monad，这些Kleisli箭头可以使用“鱼”（fish）操作符 \hask{<=<} 进行组合。
-
-    为了建立伴随关系：
-    \[
-        \begin{tikzcd}
-            \mathcal{C}_T
-            \arrow[rr, bend right, "R^T"']
-            &&
-            \mathcal{C}
-            \arrow[ll, bend right, "L_T"']
-        \end{tikzcd}
-    \]
-    我们定义左函子 $L_T \colon \mathcal{C} \to \mathcal{C}_T$ 在对象上为恒等。在箭头上，我们仍然需要定义它的作用。它应将一个常规箭头 $f \colon a \to b$ 映射到一个从 $a$ 到 $b$ 的Kleisli箭头。这个Kleisli箭头 $a \twoheadrightarrow b$ 由 $\mathcal{C}$ 中的一个箭头表示，从 $a$ 到 $T b$。这样的箭头总是存在，它是复合 $\eta_b \circ f$：
-    \[ L_T f \colon a \xrightarrow{f} b \xrightarrow{\eta_b} T b\]
-
-    右函子 $R_T \colon \mathcal{C}_T \to \mathcal{C}$ 在对象上定义为将Kleisli范畴中的 $a$ 映射到 $\mathcal{C}$ 中的对象 $T a$。给定一个Kleisli箭头 $a \twoheadrightarrow b$，它由一个箭头 $g \colon a \to T b$ 表示，$R_T$ 将其映射为一个箭头 $R_T a \to R_T b$，即 $\mathcal{C}$ 中的一个箭头 $T a \to T b$。我们将这个箭头视为复合 $\mu_b \circ T g$：
-    \[  T a \xrightarrow{T g} T(T b) \xrightarrow{\mu_b} T b\]
-
-    为了建立这个伴随关系，我们将展示同构集的同构性：
-    \[\mathcal{C}_T(L_T a, b) \cong \mathcal{C}(a, R_T b)\]
-    左侧的一个元素是一个Kleisli箭头 $a \twoheadrightarrow b$，由 $f \colon a \to T b$ 表示。我们可以在右侧找到相同的箭头，因为 $R_T b$ 是 $T b$。因此，同构性存在于 $\mathcal{C}^T$ 中的Kleisli箭头与 $\mathcal{C}$ 中表示它们的箭头之间。
-
-    复合 $R_T \circ L_T$ 等于 $T$，实际上，可以证明这个伴随关系生成了原来的monad。
-
-    通常，可能有许多生成相同monad的伴随关系。伴随函子本身形成了一个2-范畴，因此可以使用伴随态射（2-范畴中的1-胞腔）比较伴随函子。事实证明，Kleisli伴随关系是在所有生成给定monad的伴随关系中初始的对象。对偶地，Eilenberg-Moore伴随关系是终极的。
+    其他单子变换器遵循相同的模式。它们定义在单子变换器库\hask{MTL}中。
 
 \end{document}
