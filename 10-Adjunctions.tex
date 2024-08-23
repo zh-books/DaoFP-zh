@@ -507,657 +507,655 @@
         你会如何测试柯里化伴随的第二个三角恒等式？提示：\hask{triangle'}的结果是一个函数，所以你无法直接显示它，但你可以调用它。
     \end{exercise}
 
-    \section{Adjunctions Using Universal Arrows}
-
-We've seen the definition of an adjunction using the isomorphism of hom-sets, and another one using the pair of unit/counit. It turns out that we can define an adjunction using just one element of this pair, as long as it satisfies certain universality condition. To see that, we will construct a new category whose objects are arrows. 
-
-We've seen before an example of such a category---the slice category $\cat C/ c$ that collects all the arrows that converge on $c$. Such a category describes the view of the object $c$ from every possible angle in $\cat C$. 
-
-\subsection{Comma category}
-When dealing with an adjunction:
-\[  \mathcal{C} (L d, c) \cong \mathcal{D}( d , R c)\]
-we are observing the object $c$ from a narrower perspective defined by the functor $L$. Think of $L$ as defining a model of the category $\cat D$ inside $\cat C$. We are interested in the view of $c$ from the perspective of this model. The arrows that describe this view form the comma category $L/c$.
-
-
-\[
-\begin{tikzpicture}
-  \def\Xa{2.0};
-  \def\Xb{-2.0};
-  
-  \def\Ytip{-0.9};
-  \def\Yo{0.5}; % oval
-  \def\Yb{-2.0}; % labels
-         \draw (\Xa, 0)[fill=blue!50!green!20]  ellipse (1.6 and 1.6);
-         \draw (\Xb , 0) ellipse (1.6 and 1.6);
-         % oval
-         \draw (\Xb , \Yo)[fill=blue!50!green!20] ellipse (1 and 0.5);
-         
-        % apex
-        \filldraw (\Xb, \Ytip) circle (1pt);
-        \node at ( \Xb, \Ytip - 0.3) { $c$ };
-        
-        % image
-        \filldraw (\Xa, \Yo) circle (1pt);
-        \node at ( \Xa, \Yo + 0.3) { $d$ };
-        
-	% middle of the cone
-	\draw[->] (\Xb, \Yo) -- (\Xb, \Ytip + 0.15);
-	\node at (\Xb - 0.2, \Ytip + 0.5) {$f$};
-        	% sides of the cone
-	%\draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
-	%\draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
-
-        % categories
-        \node at (\Xa, \Yb) { $\mathcal D$ };
-        \node at (\Xb, \Yb) { $\mathcal C$ };
-        \node[blue] at (0, \Yb + 0.6) { $L$ };
-
-        % functor middle
-        \filldraw (\Xb, \Yo) circle (1pt);
-        \node[blue] at ( \Xb, \Yo + 0.25) { $L d$ };
-	\draw[->, blue, dashed] (\Xa, \Yo) -- (\Xb + 0.1, \Yo);
-	% functor 
-	\draw [<-, blue, dashed] (\Xb + 0.1, \Yo + 0.6)   --   (\Xa - 0.3, \Yo + 1.1);
-	\draw [<-,blue, dashed] (\Xb + 0.1, \Yo - 0.6) -- (\Xa - 0.6, \Ytip - 0.6);
-\end{tikzpicture}
-\]
-
-
-
-An object in the \index{comma category}\emph{comma category} $L/c$ is a pair $\langle d, f \rangle$, where $d$ is an object of $\cat D$ and $f \colon L d \to c$ is an arrow in $\cat C$. 
-
-A morphism from $\langle d, f \rangle$ to $\langle d', f' \rangle$ is an arrow $h \colon d \to d'$ that makes the diagram on the left commute:
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, "L h"]
- && L d'
- \arrow[ld, "f'"]
- \\
- &c
-  \end{tikzcd}
- \hspace{30pt}
-\begin{tikzcd}
- d
- \arrow[rr, "h"]
- && d'
-  \end{tikzcd}
-\]
-
-\subsection{Universal arrow}
-
-The universal arrow from $L$ to $c$ is defined as the terminal object in the comma category $L / c$. Let's unpack this definition. The terminal object in $L/c$ is a pair $\langle t, \tau \rangle$ with a unique morphism from any object $\langle d, f \rangle$. Such a morphism is an arrow $h \colon d \to t$ that satisfies the commuting condition:
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, dashed, "L h"]
- && L t
- \arrow[ld, red, "\tau"]
- \\
- &c
-  \end{tikzcd}
-\]
-In other words, for any $f$ in the hom-set $\cat C (L d, c)$ there is a unique element $h$ in the hom-set $\cat D (d, t)$ such that:
-\[ f = \tau \circ L h \]
-Such a one-to-one mapping between elements of two hom-sets hints at the underlying adjunction. 
-
-\subsection{Universal arrows from adjunctions}
-
-Let's first convince ourselves that, when the functor $L$ has a right adjoint $R$, then for every $c$ there exists a universal arrow from $L$ to $c$. Indeed, this arrow is given by the pair $\langle R c, \varepsilon_c \rangle$, where $\varepsilon$ is the counit of the adjunction. First of all, the component of the counit has the right signature for the object in the comma category $L/c$:
-\[ \varepsilon_c \colon L (R c) \to c \]
-
-We'd like to show that $\langle R c, \varepsilon_c \rangle$ is the terminal object in $L/c$. That is, for any object $\langle d, f \colon L d \to c \rangle$ there is a unique $h \colon d \to R c$ such that $f = \varepsilon_c \circ L h$:
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, dashed, "L h"]
- && L (R c)
- \arrow[ld, red, "\varepsilon_c"]
- \\
- &c
-  \end{tikzcd}
-\]
-To prove this, let's write one of the naturality conditions for $\phi_{d c}$ as the function of $d$:
-\[  \phi_{d c} \colon \mathcal{C} (L d, c) \to \mathcal{D}( d , R c)\]
-For any arrow $h \colon d \to d'$ the following diagram must commute:
-\[
- \begin{tikzcd}
- \mathcal{C}(L d', c)
- \arrow[d, leftrightarrow, "\phi_{d', c}"]
- \arrow[r, "- \circ L h"]
- &
- \mathcal{C}(L d, c)
-  \arrow[d, leftrightarrow, "\phi_{d, c}"]
- \\
- \mathcal{D}(d', R c)
- \arrow[r, "- \circ h"]
-& \mathcal{D}(d, R c)
- \end{tikzcd}
-\]
-We can use the Yoneda trick by setting $d'$ to $R c$.
-
-\[
- \begin{tikzcd}
- \mathcal{C}(L (R c), c)
- \arrow[d, leftrightarrow, "\phi_{R c, c}"]
- \arrow[r, "- \circ L h"]
- &
- \mathcal{C}(L d, c)
-  \arrow[d, leftrightarrow, "\phi_{d, c}"]
- \\
- \mathcal{D}(R c, R c)
- \arrow[r, "- \circ h"]
-& \mathcal{D}(d, R c)
- \end{tikzcd}
-\]
-We can now pick the special element of the hom-set $\cat D(R c, R c)$, namely the identity arrow $id_{R c}$ and propagate it through the rest of the diagram. The upper left corner becomes $\varepsilon_c$, the lower right corner becomes $h$, and the upper right corner becomes the adjoint to $h$, which we called $f$:
-
-\[
- \begin{tikzcd}
-\varepsilon_c
- \arrow[d, leftrightarrow, "\phi_{R c, c}"]
- \arrow[r, maps to, "- \circ L h"]
- &
-f
-  \arrow[d, leftrightarrow, "\phi_{d, c}"]
- \\
-id_{R c}
- \arrow[r, maps to, "- \circ h"]
-& h
- \end{tikzcd}
-\]
-The upper arrow then gives us the sought after equality $f = (- \circ L h) \varepsilon_c = \varepsilon_c \circ L h$.
-
-\subsection{Adjunction from universal arrows}
-
-The converse result is even more interesting. If, for every $c$, we have a universal arrow from $L$ to $c$, that is a terminal object $\langle t_c, \varepsilon_c \rangle$ in the comma category $L/c$, then we can construct a functor $R$ that is the right adjoint to $L$. The action of this functor on objects is given by $R c = t_c$, and the family $\varepsilon_c$ is automatically natural in $c$, and it forms the counit of the adjunction.
-
-There is also a dual statement: An adjunction can be constructed starting from a family of universal arrows $\eta_d$, which form initial objects in the comma category $d/R$. 
-
-These results will help us prove the Freyd's adjoint functor theorem. 
-
-\section{Properties of Adjunctions}
-
-\subsection{Left adjoints preserve colimits}
-
-We defined colimits as universal cocones. For every cocone---that is a natural transformation from the diagram $D \colon \cat J \to \cat C$ to the constant functor $\Delta_x$---there's supposed to be a unique factorizing morphism from the colimit $\text{Colim}\, D$ to $x$. This condition can be written as a one-to-one correspondence between the set of cocones and a particular hom-set:
-\[ [\cat J, \mathcal{C}](D, \Delta_x)  \cong \mathcal{C}( \text{Colim} \, D, x) \]
-The factorizing condition is encoded in the naturality of this isomorphism.
-
-It turns out that the set of cocones, which is an object in $\Set$, is itself a \emph{limit} of the following $\Set$-valued functor $F \colon \cat J \to \Set$:
-\[ F j = \cat C(D j, x) \]
-
-To show this, we'll start with the limit of $F$ and end up with the set of cocones. You may recall that a limit of a $\Set$-valued functor is equal to a set of cones with the apex $1$ (the singleton set). In our case, each such cone describes a selection of morphisms from the corresponding hom-set $\cat C(D j, x)$:
-\[
- \begin{tikzcd}
-  & 1
-\arrow[ddr, ""]
- \arrow[ddl, ""']
- \arrow[ddd, ""]
- \\
-\\
-\cat C( D j_1, x)
-\arrow[rr, red]
-\arrow[rd, red]
-&& \cat C( D j_2, x)
-\arrow[dl, red]
-\\
-& \cat C( D j_3, x)
- \end{tikzcd}
-\]
-Each of these morphisms has as target the same object $x$, so they form the sides of a cocone with the apex $x$. 
-\[
-\begin{tikzcd}
- D j_1
- \arrow[rr, red]
- \arrow[dr, red]
- \arrow[dddr, ""']
- && D j_2
-\arrow[dl, red]
- \arrow[dddl, ""]
- \\
- & D j_3
- \arrow[dd, ""]
- \\
- \\
- & x
- \end{tikzcd}
- \]
-The commuting conditions for the cone with the apex $1$ are simultaneously the commuting condition for this cocone with the apex $x$. But these are exactly the cocones in the set $ [\cat J, \mathcal{C}](D, \Delta_x)$.
-
-We can therefore replace the original set of cocones with the limit of $\cat C (D-, x)$ to get:
-\[ \text{Lim}\; \cat C (D-, x) \cong \cat C( \text{Colim}\,  D, x) \]
-The contravariant hom-functor is sometimes notated as:
-\[ h_x = \cat C(-, x) \]
-In this notation we can write:
-\[ Lim \, (h_x \circ D) \cong h_x (Colim \, D) \]
-The limit of a hom-functor acting on a diagram $D$ is isomorphic to the hom-functor acting on a colimit of this diagram. This is usually abbreviated to: The hom-functor preserves colimits. (With the understanding that the contravariant hom-functor turns colimits into limits.)
-
-A functor that preserves colimits is called \index{co-continuous functor}co-continuous. Thus the contravariant hom-functor is co-continuous.
-
-Now suppose that we have the adjunction $L \dashv R$, where $L \colon \cat C \to \cat D$ and $R$ goes in the opposite direction. We want to show that the left functor $L$ preserves colimits, that is:
-\[ L (\text{Colim} \, D) \cong \text{Colim} (L \circ D) \]
-for any diagram $D \colon \cat J \to \cat C$ for which the colimit exists.
-
-We'll use the Yoneda lemma to show that the mappings out of both sides to an arbitrary $x$ are isomorphic:
-\[ \cat D( L (\text{Colim} \, D), x) \cong \cat D (\text{Colim} (L \circ D), x) \]
-We apply the adjunction to the left hand side to get:
-\[ \cat D( L (\text{Colim} \, D), x) \cong \cat C (\text{Colim}\, D, R x) \]
-Preservation of colimits by the hom-functor gives us:
-\[ \cong \text{Lim}\; \cat C(D -, R x) \]
-Using the adjunction again, we get:
-\[ \cong \text{Lim}\; \cat D((L \circ D) -, x) \]
-And the second application of preservation of colimits gives us the desired result:
-\[ \cong  \cat D((\text{Colim}\;(L \circ D), x) \]
-Since this is true for any $x$, we get our result.
-
-We can use this result to reformulate our earlier proof of distributivity in a cartesian closed category. We use the fact that the product is the left adjoint of the exponential. Left adjoints preserve colimits. A coproduct is a colimit, therefore:
-\[(b + c) \times a \cong b \times a + c \times a \]
-Here, the left functor is $L x = x \times a$, and the diagram $D$ selects a pair of objects $b$ and $c$. 
-
-\subsection{Right adjoints preserve limits}
-Using a dual argument, we can show that right adjoints preserve limits, that is:
-\[ R (\text{Lim}\, D) \cong \text{Lim}\, (R \circ D) \]
-
-We start by showing that the (covariant) hom-functor preserves limits. 
-\[ \text{Lim}\; \cat C( x, D-) \cong \mathcal{C}(x, \text{Lim}\,D) \]
-This follows from the argument that a set of cones that defines the limit is isomorphic to the limit of the $\Set$-valued functor:
-\[ F j = \cat C(x, D j) \]
-A functor that preserves limits is called \index{continuous functor}continuous.
-
-To show that, given the adjunction $L \dashv R$, the right functor $R \colon \cat D \to \cat C$ preserves limits, we use the Yoneda argument:
-\[ \cat C(x, R (\text{Lim}\, D)) \cong \cat C (x, \text{Lim}\, (R \circ D)) \]
-Indeed, we have:
-\[ \cat C(x, R (\text{Lim}\, D)) \cong \cat D(L x, \text{Lim}\, D) \cong \text{Lim}\; \cat D(L x, D-) \cong \cat C(x, \text{Lim}\, (R \circ D))\]
-
-
-\section{Freyd's adjoint functor theorem}
-
-In general functors are lossy---they are not invertible. In some cases we can make up the lost information by replacing it with the ``best guess.'' If we do it in an organized manner, we end up with an adjunction. The question is: given a functor between two categories, what are the conditions under which we can construct its adjoint. 
-
-The answer to this question is given by the Freyd's adjoint functor theorem. At first it might seem like this is a technical theorem involving a very abstract construction called the solution set condition. We'll see later that this condition translates directly to a programming technique called defunctionalization. 
-
-In what follows, we'll focus our attention on constructing the right adjoint to a functor $L \colon \cat D \to \cat C$. A dual reasoning can be used to solve the converse problem of finding the left adjoint to a functor $R \colon \cat C \to \cat D$.
-
-The first observation is that, since the left functor in an adjunction preserves colimits, we have to postulate that our functor $L$  preserves colimits. This gives us a hint that the construction of the right adjoint relies on the ability to construct colimits in $\cat D$, and being able to somehow transport them back to $\cat C$ using $L$. 
-
-We could demand that all colimits, large and small, exist in $\cat D$ but this condition is too strong. Even a small category that has all colimits is automatically a preorder---that is, it can't have more than one morphism between any two objects. 
-
-But let's ignore size problems for a moment, and see how one would construct the right adjoint to a colimit-preserving functor $L$, whose source category $\cat D$ is small and has all colimits, large and small (thus it is a preorder).
-
-\subsection{Freyd's theorem in a preorder}
-
-The easiest way to define the right adjoint to $L$ is to construct, for every object $c$, a universal arrow from $L$ to $c$. Such an arrow is the terminal object in the comma category $L/c$---the category of arrows which originate in the image of $L$ and converge on the object $c$.
-
-\[
-\begin{tikzpicture}
-  \def\Xa{2.0};
-  \def\Xb{-2.0};
-  
-  \def\Ytip{-0.9};
-  \def\Yo{0.5}; % oval
-  \def\Yb{-2.0}; % labels
-         \draw (\Xa, 0)[fill=blue!50!green!20]  ellipse (1.6 and 1.6);
-         \draw (\Xb , 0) ellipse (1.6 and 1.6);
-         % oval
-         \draw (\Xb , \Yo)[fill=blue!50!green!20] ellipse (1 and 0.5);
-         
-        % apex
-        \filldraw (\Xb, \Ytip) circle (1pt);
-        \node at ( \Xb, \Ytip - 0.3) { $c$ };
-        
-        % image
-        \filldraw (\Xa, \Yo) circle (1pt);
-        \node at ( \Xa, \Yo + 0.3) { $d$ };
-        
-	% middle of the cone
-	\draw[->] (\Xb, \Yo) -- (\Xb, \Ytip + 0.15);
-        	% sides of the cone
-	\draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
-	\draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
-
-        % categories
-        \node at (\Xa, \Yb) { $\mathcal D$ };
-        \node at (\Xb, \Yb) { $\mathcal C$ };
-        \node[blue] at (0, \Yb + 0.6) { $L$ };
-
-        % functor middle
-        \filldraw (\Xb, \Yo) circle (1pt);
-        \node[blue] at ( \Xb, \Yo + 0.25) { $L d$ };
-	\draw[->, blue, dashed] (\Xa, \Yo) -- (\Xb + 0.1, \Yo);
-	% functor 
-	\draw [blue, dashed] (\Xb - 0.1, \Yo + 0.5    )   --   (\Xa - 0.3, \Yo + 1.1);
-	\draw [blue, dashed] (\Xb - 0.3, \Yo - 0.5) -- (\Xa - 0.6, \Ytip - 0.6);
-\end{tikzpicture}
-\]
-
-The important observation is that this comma category describes a cocone in $\cat C$. The base of this cocone is formed by those objects in the image of $L$ that have an unobstructed view of $c$. The arrows in the base of the cocone are the morphisms in $L/c$. These are exactly the arrows that make the sides of the cocone commute.
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, "L h"]
- && L d'
- \arrow[ld, "f'"]
- \\
- &c
-  \end{tikzcd}
- \hspace{30pt}
-\begin{tikzcd}
- d
- \arrow[rr, "h"]
- && d'
-  \end{tikzcd}
-\]
-
-The base of this cocone can then be projected back to $\cat D$. There is a projection $\pi_c$ which maps every pair $(d, f)$ in  $L/c$ back to $d$, thus forgetting the arrow $f$. It also maps every morphism in $L/c$ to an arrow in $\cat D$ that gave rise to it. This way $\pi_c$ defines a diagram in $\cat D$. The colimit of this diagram exists, because we have assumed that all colimits exist in $\cat D$. Let's call this colimit $t_c$:
-\[ t_c = \text{colim}\; \pi_c \]
-
-\[
-\begin{tikzpicture}
-  \def\Xa{2.0};
-  \def\Xb{-2.0};
-  
-  \def\Ytip{-0.9};
-  \def\Yo{0.5}; % oval
-  \def\Yb{-2.0}; % labels
-         \draw (\Xa, 0)[fill=blue!50!green!20]   ellipse (1.6 and 1.6);
-         \draw (\Xb , 0) ellipse (1.6 and 1.6);
-         % oval
-         \draw (\Xb , \Yo)[fill=blue!50!green!20]  ellipse (1 and 0.5);
-
-        % apex
-        \filldraw (\Xb, \Ytip) circle (1pt);
-        \node at ( \Xb, \Ytip - 0.3) { $c$ };
-                
-        	% sides of the cone
-	\draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
-	\draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
-
-         % second oval
-         \draw (\Xa , \Yo) [fill=orange!30]  ellipse (1 and 0.5);
-          
-        % apex
-        \filldraw (\Xa, \Ytip) circle (1pt);
-        \node at ( \Xa, \Ytip - 0.3) { $t_c$ };
-
-        	% sides of the cone
-	\draw (\Xa, \Ytip) -- (\Xa + 0.95, \Yo - 0.15);
-	\draw (\Xa, \Ytip) -- (\Xa - 0.95, \Yo - 0.15);
-
-        % categories
-        \node at (\Xa, \Yb) { $\mathcal D$ };
-        \node at (\Xb, \Yb) { $\mathcal C$ };
-        \node[blue] at (0, \Yo) { $\pi_c$ };
-
-	% functor 
-	\draw [->, blue, dashed] (\Xb, \Yo + 0.5) --  (\Xb + 2.2, \Yo + 0.5);
-	\draw [->, blue, dashed] (\Xb, \Yo - 0.5)  -- (\Xb + 2.2, \Yo - 0.5);
-\end{tikzpicture}
-\]
-
-Let's see if we can use this $t_c$ to construct a terminal object in $L/c$. We have to find an arrow, let's call it $\varepsilon_c \colon L t_c \to c$, such that the pair $\langle t_c, \varepsilon_c \rangle$ is terminal in $L/c$. 
-
-Notice that $L$ maps the diagram generated by $\pi_c$ back to the base of the cocone defined by $L/c$. The projection $\pi_c$ did nothing more than to ignore the sides of this cocone, leaving its base intact. 
-
-We now have two cocones in $\cat C$ with the same base: the original one with the apex $c$ and the new one obtained by applying $L$ to the cocone in $\cat D$. Since $L$ preserves colimits, the colimit of the new cocone is $L t_c$---the image of the colimit $t_c$:
-
-\[ \text{colim} \; (L \circ \pi_c) = L ( \text{colim} \; \pi_c) = L t_c\]
-
-By universal construction, we deduce that there must be a unique cocone morphism from the colimit $L t_c$ to $c$. That morphism, which we'll call $\varepsilon_c$, makes all the relevant triangles commute. 
-
-What remains to be shown is that $\langle t_c, \varepsilon_c \rangle$ is terminal in $L/c$, that is, for any  $\langle d, f \colon L d \to c \rangle$ there is a unique comma-category morphism $h \colon d \to t_c$ that makes the following triangle commute:
-
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, dashed, "L h"]
- && L t_c
- \arrow[ld, red, "\varepsilon_c"]
- \\
- &c
-  \end{tikzcd}
-\]
-
-Notice that any such $d$ is automatically part of the diagram produced by $\pi_c$ (it's the result of $\pi_c$ acting on $\langle d, f \rangle$). We know that $t_c$ is the limit of the $\pi_c$ diagram. So there must be a wire from $d$ to $t_c$ in the limiting cocone. We pick this wire as our $h$. 
-
-\[
-\begin{tikzpicture}
-  \def\Xa{2.1};
-  \def\Xb{-2.1};
-  
-  \def\Ytip{0};
-  \def\Ybot{-2};
-  \def\Yo{0}; % oval
-  \def\Yf{-1.2}; % label
-         % first oval
-         \draw (\Xb , \Yo)[fill=blue!50!green!20]  ellipse (1.8 and 0.8);
-
-         % second oval
-         \draw (\Xa , \Yo) [fill=orange!30]  ellipse (1.8 and 0.8);
-          
-        % apex L tc
-        \filldraw (\Xb, \Ytip) circle (1pt);
-        \node at ( \Xb - 0.5, \Ytip) { $L t_c$ };
-        
-        % apex c
-        \filldraw (\Xb, \Ybot) circle (1pt);
-        \node at ( \Xb, \Ybot - 0.3) { $c$ };
-                
-        	% sides of the cone L h
-	\draw[red, ->]  (\Xb + 0.95, \Yo) -- (\Xb + 0.1, \Ytip);
-	\node[red] at (\Xb + 0.5, \Ytip + 0.3) {$L h$};
-
-        % apex tc
-        \filldraw (\Xa, \Ytip) circle (1pt);
-        \node at ( \Xa, \Ytip - 0.3) { $t_c$ };
-
-        	% sides of the cone h
-	\draw [->, red] (\Xa + 0.95, \Yo) -- (\Xa + 0.1, \Ytip);
-	\node[red] at ( \Xa + 0.6, \Ytip + 0.3) { $h$ };
-	
-	% d
-        \filldraw (\Xa + 1, \Yo) circle (1pt);
-        \node at ( \Xa + 1.3, \Yo) { $d$ };
-
-	% L d
-        \filldraw (\Xb + 1, \Yo) circle (1pt);
-        \node at ( \Xb + 1.3, \Yo) { $L d$ };
-        
-        % f
-        \draw[->] (\Xb + 1, \Yo) to (\Xb + 0.05, \Ybot + 0.1);
-        \node at (\Xb + 0.7, \Yf) {$f$};
-        
-        % epsilon
-        \draw[->, dashed] (\Xb, \Ytip) -- (\Xb, \Ybot);
-        \node at (\Xb - 0.3, \Yf) {$\varepsilon_c$};
-
-\end{tikzpicture}
-\]
-The commuting condition then follows from $\varepsilon_c$ being a morphism between two cocones. It is a unique cocone morphism simply because $\cat D$ is a preorder.
-
-This proves that there is a universal arrow $\langle t_c, \varepsilon_c \rangle$ for every $c$, therefore we have a functor $R$ defined on objects as $R c = t_c$ that is the right adjoint to $L$.
-
-\subsection{Solution set condition}
-
-The problem with the previous proof is that comma categories in most practical cases are large: their objects don't form a set. But maybe we can approximate the comma category by selecting a smaller but representative set of objects and arrows?
-
-To select the objects, we'd use a mapping from some indexing set $I$. We define a set of objects $d_i$ where $i \in I$. Since we are trying to approximate the comma category $L/c$, we select objects together with arrows $f_i \colon L d_i \to c$. 
-
-The relevant part of the comma category is encoded in morphism between objects satisfying the commuting condition. We could try to specialize this condition to only apply inside our family of objects, but that would not be enough. We have to find a way to probe all other objects of the comma category. 
-
-To do this, we reinterpret the commuting condition as a recipe for factorizing an arbitrary $f \colon L d \to c$ through some pair $\langle d_i, f_i \rangle$:
-\[
- \begin{tikzcd}
- L d
- \arrow[rd, "f"']
- \arrow[rr, "L h"]
- && \textcolor{red}{L d_i}
- \arrow[ld, red, "f_i"]
- \\
- &c
-  \end{tikzcd}
-\]
-
-A \index{solution set}\emph{solution set} is a family of pairs $\langle d_i, f_i \colon L d_i \to c \rangle $ indexed by a set $I$ that can be used to factor any pair $\langle d, f \colon L d \to c \rangle $. It means that there exists an index $i \in I$ and an arrow $h \colon d \to d_i$ that factorizes $f$:
-\[ f = f_i \circ L h \]
-
-Another way of expressing this property is to say that there exists a \index{weakly terminal set}\emph{weakly terminal} set of object in the comma category $L/c$. A weakly terminal set has the property that for any object in the category there is a morphism to at least one object in the set.
-
-Previously we've seen that having the terminal object in the comma category $L/c$ for every $c$ is enough to define the adjunction. It turns out that we can achieve the same goal using the solution set. 
-
-The assumptions of the Freyd's adjoint functor theorem state that we have a colimit-preserving functor $L \colon \cat D \to \cat C$ from a small co-complete category. Both these conditions relate to \emph{small} diagrams. If we can pick a solution set $\langle d_i, f_i \colon L d_i \to c \rangle $ for every $c$, then the right adjoint $R$ exists. Solution sets for different $c$'s may be different.
-
-We've seen before that in a cocomplete category the existence of a weakly terminal set is enough to define a terminal object. In our case it means that, for any $c$, we can construct the universal arrow from $L$ to $c$. And this is enough to define the whole adjunction.
-
-A dual version of the adjoint functor theorem can be used to construct the left adjoint.
-
-\subsection{Defunctionalization}
-
-Every programming language lets us define functions, but not all languages support higher level functions (functions taking functions as arguments, functions returning functions, or data types constructed from functions) or anonymous functions (a.k.a., lambdas). It turns out that, even in such languages, higher order functions can be implemented using the process called defunctionalization. This technique is based on the adjoint functor theorem. Moreover, defunctionalization can be used whenever passing functions around is impractical, for instance in a distributed system.
-
-The idea behind defunctionalization is that the function type is defined as the right adjoint to the product. 
-\[ \cat C(e \times a, b) \cong \cat C(e, b^a) \]
-The adjoint functor theorem can be used to approximate this adjoint. 
-
-In general, any finite program can only have a finite number of function definitions. These functions (together with the environments they capture) form the solution set that we can use to construct the function type. In practice, we do it only for a small subset of functions which occur as arguments to, or are returned from, other functions.
-
-A typical example of the usage of higher order functions is in continuation passing style. For instance, here's a function that calculates the sum of the elements of a list. But instead of returning the sum it calls a continuation \hask{k} with the result:
-\begin{haskell}
-sumK :: [Int] -> (Int -> r) -> r
-sumK [] k = k 0
-sumK (i : is) k =
-  sumK is (\s -> k (i + s))
-\end{haskell}
-If the list is empty, the function calls the continuation with zero. Otherwise it calls itself recursively, with two arguments: the tail of the list \hask{is}, and a new continuation:
-\begin{haskell}
-\s -> k (i + s)
-\end{haskell}
-This new continuation calls the previous continuation \hask{k}, passing it the sum of the head of the list and its argument \hask{s} (which is the accumulated sum). 
-
-Notice that this lambda is a closure: It's a function of one variable \hask{s}, but it also has access to \hask{k} and \hask{i} from its environment.
-
-To extract the final sum, we call our recursive function with the trivial continuation, the identity:
-\begin{haskell}
-sumList :: [Int] -> Int
-sumList as = sumK as (\i -> i)
-\end{haskell}
-
-Anonymous functions are convenient, but nothing prevents us from using named functions. However, if we want to factor out the continuations, we have to be explicit about passing in the environments. 
-
-For instance, we can replace our first lambda:
-\begin{haskell}
-\s -> k (i + s)
-\end{haskell}
-with the function \hask{more}, but we have to explicitly pass the pair \hask{(i, k)} as the environment of the type \hask{(Int, Int -> r)}:
-\begin{haskell}
-more :: (Int, Int -> r) -> Int -> r
-more (i, k) s = k (i + s)
-\end{haskell}
-The other lambda, the identity, uses the empty environment, so it becomes:
-\begin{haskell}
-done :: Int -> Int
-done i = i
-\end{haskell}
-Here's the implementation of our algorithm using these two named functions:
-\begin{haskell}
-sumK' :: [Int] -> (Int -> r) -> r
-sumK' [] k = k 0
-sumK' (i : is) k =
-  sumK' is (more (i, k))
-\end{haskell}
-
-\begin{haskell}
-sumList :: [Int] -> Int
-sumList is = sumK' is done
-\end{haskell}
-
-In fact, if all we are interested in is calculating the sum, we can replace the polymorphic type \hask{r} with \hask{Int} with no other changes.
-
-This implementation still uses higher order functions. In order to eliminate them, we have to analyze what it means to pass a function as an argument. Such a function can only be used in one way: it can be applied to its arguments. This property of a function type is expressed as the counit of the currying adjunction:
-\[ \varepsilon \colon b^a \times a \to b \]
-or, in Haskell, as a higher-order function:
-\begin{haskell}
-apply :: (a -> b, a) -> b
-\end{haskell}
-This time we are interested in constructing the counit from first principles. We've seen that this can be accomplished using the comma category. In our case, an object of the comma category for the product functor $L_a = (-) \times a$ is a pair 
-\[(e, f \colon (e \times a) \to b) \]
-or, in Haskell:
-\begin{haskell}
-data Comma a b e = Comma e ((e, a) -> b)
-\end{haskell}
-A morphism in this category between $(e, f)$ and $(e', f')$ is an arrow $h \colon e \to e'$, which satisfies the commuting condition:
-\[ f' \circ h = f \]
-We interpret this morphism as ``reducing'' the environment $e$ down to $e'$. The arrow $f'$ is able to produce the same output of the type $b$ using a potentially smaller environment given by $h (e)$. For instance $e$ may contain variables that are irrelevant for computing $b$ from $a$, and $h$ projects them out. 
-
-\[
- \begin{tikzcd}
- e \times a
- \arrow[rd, "f"']
- \arrow[rr, "h \times a"]
- && e' \times a
- \arrow[ld, "f'"]
- \\
- &b
-  \end{tikzcd}
- \hspace{30pt}
-\begin{tikzcd}
- e
- \arrow[rr, "h"]
- && e'
-  \end{tikzcd}
-\]
-
-
-In fact, we performed this kind of reduction when defining \hask{more} and \hask{done}. In principle, we could have passed the tail \hask{is} to both functions, since it's accessible at the point of call. But we knew that they didn't need it.
-
-Using the Freyd's theorem, we could define the function object $a \to b$ as the colimit of the diagram defined by the comma category. Such a colimit is essentially a giant coproduct of all environments modulo identifications given by comma-category morphisms. This identification does the job of reducing the environment needed by $a \to b$ to the bare minimum. 
-
-In our example, the continuations we're interested in are functions \hask{Int -> Int}. In fact we are not interested in generating the generic function type \hask{Int -> Int}; just the minimal one that would accommodate our two functions \hask{more} and \hask{done}. We can do it by creating a very small solution set. 
-
-In our case the solution set consists of pairs $(e_i, f_i \colon e_i \times a \to b)$ such that any pair $(e, f \colon e \times a \to b)$ can be factorized through one of the $f_i$'s. More precisely, the only two environments we're interested in are \hask{(Int, Int ->Int)} for \hask{more}, and the empty environment \hask{()} for \hask{done}. 
-
-In principle, our solution set should allow for the factorization of every object of the comma category, that is a pair of the type:
-\begin{haskell}
-(e, (e, Int) -> Int)
-\end{haskell}
-but here we are only interested in two specific functions. Also, we are not concerned with the uniqueness of the representation so, instead of using a colimit (as we did for the adjoint functor theorem), we'll just use a coproduct of all the environments of interest. We end up with the following data type that is the sum of the two environments, \hask{()} and \hask{(Int, Int -> Int)}, we're interested in. We end up with the type:
-\begin{haskell}
-data Kont = Done | More Int Kont
-\end{haskell}
-Notice that we have recursively encoded the \hask{Int->Int} part of the environment as \hask{Kont}. Thus we have also removed the need to use functions as arguments to data constructors.
-
-If you look at this definition carefully, you will discover that it's the definition of a list of \hask{Int}, modulo some renamings. Every call to \hask{More} pushes another integer on the \hask{Kont} stack. This interpretation agrees with our intuition that recursive algorithms require some kind of a runtime stack. 
-
-We are now ready to implement our approximation to the counit of the adjunction. It's composed from the bodies of the two functions, with the understanding that recursive calls also go through \hask{apply}:
-\begin{haskell}
-apply :: (Kont, Int) -> Int
-apply (Done, i) = i
-apply (More i k, s) = apply (k, i + s)
-\end{haskell}
-Compare this with our earlier:
-\begin{haskell}
-done i = i
-more (i, k) s = k (i + s)
-\end{haskell}
-
-
-The main algorithm can now be rewritten without any higher order functions or lambdas:
-\begin{haskell}
-sumK'' :: [Int] -> Kont -> Int
-sumK'' [] k = apply (k, 0)
-sumK'' (i : is) k = sumK'' is (More i k)
-\end{haskell}
-
-\begin{haskell}
-sumList'' is = sumK'' is Done
-\end{haskell}
-
-The main advantage of defunctionalization is that it can be used in distributed environments. Arguments to remote functions, as long as they are data structures and not functions, can be serialized and sent along the wire. All that's needed is for the receiver to have access to \hask{apply}. 
+    \section{Adjunctions Using Universal Arrows（使用泛箭的伴随）}
+
+    我们已经看到了使用同态集的同构来定义伴随的方式，以及使用单位元/伴随元对来定义伴随的另一种方式。事实证明，只要满足某种普遍性条件，我们可以只使用该对中的一个元素来定义伴随。为了理解这一点，我们将构造一个新的范畴，其对象是箭头。
+
+    我们之前见过一个这样的范畴的例子——切片范畴（slice category）$\cat C/ c$，它收集了所有汇聚于$c$的箭头。这样的范畴描述了从$\cat C$中每个可能的角度来看$c$对象的视图。
+
+    \subsection{Comma Category（逗号范畴）}
+    当处理一个伴随关系时：
+    \[  \mathcal{C} (L d, c) \cong \mathcal{D}( d , R c)\]
+    我们正在从由函子$L$定义的较窄视角观察对象$c$。可以将$L$视为定义了一个范畴$\cat D$在$\cat C$内部的模型。我们感兴趣的是从这个模型的角度来看$c$的视图。描述这个视图的箭头构成了逗号范畴$L/c$。
+
+    \[
+        \begin{tikzpicture}
+            \def\Xa{2.0};
+            \def\Xb{-2.0};
+
+            \def\Ytip{-0.9};
+            \def\Yo{0.5}; % oval
+            \def\Yb{-2.0}; % labels
+            \draw (\Xa, 0)[fill=blue!50!green!20]  ellipse (1.6 and 1.6);
+            \draw (\Xb , 0) ellipse (1.6 and 1.6);
+            % oval
+            \draw (\Xb , \Yo)[fill=blue!50!green!20] ellipse (1 and 0.5);
+
+            % apex
+            \filldraw (\Xb, \Ytip) circle (1pt);
+            \node at ( \Xb, \Ytip - 0.3) { $c$ };
+
+            % image
+            \filldraw (\Xa, \Yo) circle (1pt);
+            \node at ( \Xa, \Yo + 0.3) { $d$ };
+
+            % middle of the cone
+            \draw[->] (\Xb, \Yo) -- (\Xb, \Ytip + 0.15);
+            \node at (\Xb - 0.2, \Ytip + 0.5) {$f$};
+            % sides of the cone
+            %\draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
+            %\draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
+
+            % categories
+            \node at (\Xa, \Yb) { $\mathcal D$ };
+            \node at (\Xb, \Yb) { $\mathcal C$ };
+            \node[blue] at (0, \Yb + 0.6) { $L$ };
+
+            % functor middle
+            \filldraw (\Xb, \Yo) circle (1pt);
+            \node[blue] at ( \Xb, \Yo + 0.25) { $L d$ };
+            \draw[->, blue, dashed] (\Xa, \Yo) -- (\Xb + 0.1, \Yo);
+            % functor
+            \draw [<-, blue, dashed] (\Xb + 0.1, \Yo + 0.6)   --   (\Xa - 0.3, \Yo + 1.1);
+            \draw [<-,blue, dashed] (\Xb + 0.1, \Yo - 0.6) -- (\Xa - 0.6, \Ytip - 0.6);
+        \end{tikzpicture}
+    \]
+
+    逗号范畴$L/c$中的一个对象是一个对$\langle d, f \rangle$，其中$d$是$\cat D$的一个对象，$f \colon L d \to c$是$\cat C$中的一个箭头。
+
+    从$\langle d, f \rangle$到$\langle d', f' \rangle$的态射是一个箭头$h \colon d \to d'$，它使得左边的图表交换：
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, "L h"]
+            && L d'
+            \arrow[ld, "f'"]
+            \\
+            &c
+        \end{tikzcd}
+        \hspace{30pt}
+        \begin{tikzcd}
+            d
+            \arrow[rr, "h"]
+            && d'
+        \end{tikzcd}
+    \]
+
+    \subsection{Universal Arrow（泛箭）}
+
+    从$L$到$c$的泛箭被定义为逗号范畴$L/c$中的终对象。让我们展开这个定义。$L/c$中的终对象是一个对$\langle t, \tau \rangle$，它具有从任意对象$\langle d, f \rangle$的唯一态射。这样的态射是一个箭头$h \colon d \to t$，它满足交换条件：
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, dashed, "L h"]
+            && L t
+            \arrow[ld, red, "\tau"]
+            \\
+            &c
+        \end{tikzcd}
+    \]
+    换句话说，对于同态集$\cat C (L d, c)$中的任意$f$，在同态集$\cat D (d, t)$中有一个唯一的元素$h$，使得：
+    \[ f = \tau \circ L h \]
+    两个同态集之间的这种一对一映射暗示了潜在的伴随关系。
+
+    \subsection{从伴随推导出的泛箭}
+
+    让我们首先确认，当函子$L$有一个右伴随$R$时，对于每一个$c$，存在从$L$到$c$的一个泛箭。事实上，这个箭头由对$\langle R c, \varepsilon_c \rangle$给出，其中$\varepsilon$是伴随的伴随元。首先，伴随元的分量具有适用于逗号范畴$L/c$中对象的签名：
+    \[ \varepsilon_c \colon L (R c) \to c \]
+
+    我们想要证明$\langle R c, \varepsilon_c \rangle$是$L/c$中的终对象。也就是说，对于任意对象$\langle d, f \colon L d \to c \rangle$，存在一个唯一的$h \colon d \to R c$，使得$f = \varepsilon_c \circ L h$：
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, dashed, "L h"]
+            && L (R c)
+            \arrow[ld, red, "\varepsilon_c"]
+            \\
+            &c
+        \end{tikzcd}
+    \]
+    为了证明这一点，让我们写出$\phi_{d c}$作为$d$的函数的一个自然性条件：
+    \[  \phi_{d c} \colon \mathcal{C} (L d, c) \to \mathcal{D}( d , R c)\]
+    对于任意箭头$h \colon d \to d'$，下图必须交换：
+    \[
+        \begin{tikzcd}
+            \mathcal{C}(L d', c)
+            \arrow[d, leftrightarrow, "\phi_{d', c}"]
+            \arrow[r, "- \circ L h"]
+            &
+            \mathcal{C}(L d, c)
+            \arrow[d, leftrightarrow, "\phi_{d, c}"]
+            \\
+            \mathcal{D}(d', R c)
+            \arrow[r, "- \circ h"]
+            & \mathcal{D}(d, R c)
+        \end{tikzcd}
+    \]
+    我们可以通过将$d'$设置为$R c$来使用Yoneda技巧。
+
+    \[
+        \begin{tikzcd}
+            \mathcal{C}(L (R c), c)
+            \arrow[d, leftrightarrow, "\phi_{R c, c}"]
+            \arrow[r, "- \circ L h"]
+            &
+            \mathcal{C}(L d, c)
+            \arrow[d, leftrightarrow, "\phi_{d, c}"]
+            \\
+            \mathcal{D}(R c, R c)
+            \arrow[r, "- \circ h"]
+            & \mathcal{D}(d, R c)
+        \end{tikzcd}
+    \]
+    我们现在可以选择同态集$\cat D(R c, R c)$的特殊元素，即恒等箭头$id_{R c}$，并将其传播到其余的图表中。左上角变为$\varepsilon_c$，右下角变为$h$，右上角变为与$h$对应的箭头，我们称其为$f$：
+
+    \[
+        \begin{tikzcd}
+            \varepsilon_c
+            \arrow[d, leftrightarrow, "\phi_{R c, c}"]
+            \arrow[r, maps to, "- \circ L h"]
+            &
+            f
+            \arrow[d, leftrightarrow, "\phi_{d, c}"]
+            \\
+            id_{R c}
+            \arrow[r, maps to, "- \circ h"]
+            & h
+        \end{tikzcd}
+    \]
+    然后，顶部的箭头给出了我们所寻找的等式$f = (- \circ L h) \varepsilon_c = \varepsilon_c \circ L h$。
+
+    \subsection{从泛箭推导出的伴随}
+
+    反过来说，结果更加有趣。如果对于每个$c$，我们都有从$L$到$c$的一个泛箭，即逗号范畴$L/c$中的终对象$\langle t_c, \varepsilon_c \rangle$，那么我们可以构造一个函子$R$，它是$L$的右伴随。该函子对对象的作用由$R c = t_c$给出，并且$\varepsilon_c$在$c$中自动是自然的，并且构成了伴随的伴随元。
+
+    还有一个对偶的陈述：可以从泛箭$\eta_d$的族开始构造一个伴随，这些泛箭构成了逗号范畴$d/R$中的初始对象。
+
+    这些结果将帮助我们证明Freyd的伴随函子定理。
+
+    \section{伴随的性质}
+
+    \subsection{左伴随保持余极限}
+
+    我们将余极限定义为泛余锥。对于每个余锥——即从图式$D \colon \cat J \to \cat C$到常函子$\Delta_x$的自然变换——应该有一个从余极限$\text{Colim}\, D$到$x$的唯一分解态射。这个条件可以写为余锥集和特定同态集之间的一对一对应：
+    \[ [\cat J, \mathcal{C}](D, \Delta_x)  \cong \mathcal{C}( \text{Colim} \, D, x) \]
+    分解条件被编码在这个同构的自然性中。
+
+    事实证明，余锥集是$\Set$中的一个对象，它本身是以下$\Set$值函子$F \colon \cat J \to \Set$的\emph{极限}：
+    \[ F j = \cat C(D j, x) \]
+
+    为了展示这一点，我们将从$F$的极限开始，并最终得到余锥集。您可能记得，一个$\Set$值函子的极限等于以单集$1$为顶点的锥的集合。在我们的例子中，每个这样的锥描述了从相应的同态集$\cat C(D j, x)$中选择态射：
+    \[
+        \begin{tikzcd}
+            & 1
+            \arrow[ddr, ""]
+            \arrow[ddl, ""']
+            \arrow[ddd, ""]
+            \\
+            \\
+            \cat C( D j_1, x)
+            \arrow[rr, red]
+            \arrow[rd, red]
+            && \cat C( D j_2, x)
+            \arrow[dl, red]
+            \\
+            & \cat C( D j_3, x)
+        \end{tikzcd}
+    \]
+    这些态射的目标都是相同的对象$x$，因此它们构成了以$x$为顶点的余锥的边。
+    \[
+        \begin{tikzcd}
+            D j_1
+            \arrow[rr, red]
+            \arrow[dr, red]
+            \arrow[dddr, ""']
+            && D j_2
+            \arrow[dl, red]
+            \arrow[dddl, ""]
+            \\
+            & D j_3
+            \arrow[dd, ""]
+            \\
+            \\
+            & x
+        \end{tikzcd}
+    \]
+    以$1$为顶点的锥的交换条件同时也是以$x$为顶点的这个余锥的交换条件。但这些正是集$[\cat J, \mathcal{C}](D, \Delta_x)$中的余锥。
+
+    因此，我们可以用$\cat C(D-, x)$的极限替换原始的余锥集，以得到：
+    \[ \text{Lim}\; \cat C (D-, x) \cong \cat C( \text{Colim}\,  D, x) \]
+    同态函子的逆变同态函子有时记为：
+    \[ h_x = \cat C(-, x) \]
+    在这个记号中，我们可以写成：
+    \[ Lim \, (h_x \circ D) \cong h_x (Colim \, D) \]
+    作用于图式$D$的同态函子的极限同构于作用于该图式的余极限的同态函子。这通常被缩写为：同态函子保持余极限。（理解为逆变同态函子将余极限转化为极限。）
+
+    保持余极限的函子称为\index{co-continuous functor}余连续函子。因此，逆变同态函子是余连续的。
+
+    现在假设我们有伴随$L \dashv R$，其中$L \colon \cat C \to \cat D$，$R$反方向运行。我们想要证明左函子$L$保持余极限，即：
+    \[ L (\text{Colim} \, D) \cong \text{Colim} (L \circ D) \]
+    对于任何存在余极限的图式$D \colon \cat J \to \cat C$。
+
+    我们将使用Yoneda引理来证明两边映射到任意$x$的映射是同构的：
+    \[ \cat D( L (\text{Colim} \, D), x) \cong \cat D (\text{Colim} (L \circ D), x) \]
+    我们将伴随应用于左边，以得到：
+    \[ \cat D( L (\text{Colim} \, D), x) \cong \cat C (\text{Colim}\, D, R x) \]
+    同态函子保持余极限给我们：
+    \[ \cong \text{Lim}\; \cat C(D -, R x) \]
+    再次使用伴随，我们得到：
+    \[ \cong \text{Lim}\; \cat D((L \circ D) -, x) \]
+    同态函子的第二次应用保持余极限给出了我们想要的结果：
+    \[ \cong  \cat D((\text{Colim}\;(L \circ D), x) \]
+    因为这对任何$x$都是成立的，所以我们得到了我们的结果。
+
+    我们可以使用这个结果来重新表述我们在笛卡尔封闭范畴中的分配律的早期证明。我们使用了积是指数的左伴随的事实。左伴随保持余极限。余积是一个余极限，因此：
+    \[(b + c) \times a \cong b \times a + c \times a \]
+    这里，左函子是$L x = x \times a$，图式$D$选择一对对象$b$和$c$。
+
+    \subsection{右伴随保持极限}
+
+    使用对偶论证，我们可以证明右伴随保持极限，即：
+    \[ R (\text{Lim}\, D) \cong \text{Lim}\, (R \circ D) \]
+
+    我们首先证明同态函子保持极限。
+    \[ \text{Lim}\; \cat C( x, D-) \cong \mathcal{C}(x, \text{Lim}\,D) \]
+    这可以从一个论证得出，即定义极限的锥集同构于$\Set$值函子的极限：
+    \[ F j = \cat C(x, D j) \]
+    保持极限的函子称为\index{continuous functor}连续函子。
+
+    为了证明给定的伴随$L \dashv R$，右函子$R \colon \cat D \to \cat C$保持极限，我们使用Yoneda论证：
+    \[ \cat C(x, R (\text{Lim}\, D)) \cong \cat C (x, \text{Lim}\, (R \circ D)) \]
+    实际上，我们有：
+    \[ \cat C(x, R (\text{Lim}\, D)) \cong \cat D(L x, \text{Lim}\, D) \cong \text{Lim}\; \cat D(L x, D-) \cong \cat C(x, \text{Lim}\, (R \circ D))\]
+
+
+    \section{Freyd的伴随函子定理}
+
+    一般来说，函子是有损的——它们不可逆。在某些情况下，我们可以通过用“最佳猜测”替换丢失的信息来弥补这一点。如果我们以有组织的方式进行，我们最终会得到一个伴随。问题是：给定两个范畴之间的一个函子，在什么条件下我们可以构造出它的伴随？
+
+    Freyd的伴随函子定理给出了这个问题的答案。起初，这似乎是一个涉及非常抽象构造的技术性定理，称为解集条件。我们稍后会看到，这个条件直接转化为一种编程技术，称为去函数化。
+
+    在接下来的内容中，我们将重点放在构造一个函子$L \colon \cat D \to \cat C$的右伴随上。可以使用对偶推理来解决寻找函子$R \colon \cat C \to \cat D$的左伴随的相反问题。
+
+    第一个观察是，由于伴随中的左函子保持余极限，我们必须假定我们的函子$L$保持余极限。这给了我们一个提示，即右伴随的构造依赖于在$\cat D$中构造余极限的能力，并能够通过某种方式将它们带回$\cat C$，使用$L$。
+
+    我们可以要求$\cat D$中的所有余极限，无论大小，都存在，但这个条件太强了。即使是一个拥有所有余极限的小范畴也会自动成为预序——也就是说，在任何两个对象之间都不能有多个态射。
+
+    但是让我们暂时忽略大小问题，看看如何为一个保持余极限的函子$L$定义右伴随，其源范畴$\cat D$是小的并且具有所有余极限，无论大小（因此它是一个预序）。
+
+    \subsection{Freyd定理在预序中的应用}
+
+    定义$L$的右伴随的最简单方法是为每个对象$c$构造一个从$L$到$c$的泛箭。这样的箭头是逗号范畴$L/c$中的终对象——这个范畴中的箭头起源于$L$的像，并汇聚于对象$c$。
+
+    \[
+        \begin{tikzpicture}
+            \def\Xa{2.0};
+            \def\Xb{-2.0};
+
+            \def\Ytip{-0.9};
+            \def\Yo{0.5}; % oval
+            \def\Yb{-2.0}; % labels
+            \draw (\Xa, 0)[fill=blue!50!green!20]  ellipse (1.6 and 1.6);
+            \draw (\Xb , 0) ellipse (1.6 and 1.6);
+            % oval
+            \draw (\Xb , \Yo)[fill=blue!50!green!20] ellipse (1 and 0.5);
+
+            % apex
+            \filldraw (\Xb, \Ytip) circle (1pt);
+            \node at ( \Xb, \Ytip - 0.3) { $c$ };
+
+            % image
+            \filldraw (\Xa, \Yo) circle (1pt);
+            \node at ( \Xa, \Yo + 0.3) { $d$ };
+
+            % middle of the cone
+            \draw[->] (\Xb, \Yo) -- (\Xb, \Ytip + 0.15);
+            % sides of the cone
+            \draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
+            \draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
+
+            % categories
+            \node at (\Xa, \Yb) { $\mathcal D$ };
+            \node at (\Xb, \Yb) { $\mathcal C$ };
+            \node[blue] at (0, \Yb + 0.6) { $L$ };
+
+            % functor middle
+            \filldraw (\Xb, \Yo) circle (1pt);
+            \node[blue] at ( \Xb, \Yo + 0.25) { $L d$ };
+            \draw[->, blue, dashed] (\Xa, \Yo) -- (\Xb + 0.1, \Yo);
+            % functor
+            \draw [blue, dashed] (\Xb - 0.1, \Yo + 0.5    )   --   (\Xa - 0.3, \Yo + 1.1);
+            \draw [blue, dashed] (\Xb - 0.3, \Yo - 0.5) -- (\Xa - 0.6, \Ytip - 0.6);
+        \end{tikzpicture}
+    \]
+
+    重要的观察是这个逗号范畴描述了$\cat C$中的一个余锥。这个余锥的基底由那些能够不受阻碍地看到$c$的对象构成。这些基底中的箭头是$L/c$中的态射。正是这些箭头构成了余锥的边。
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, "L h"]
+            && L d'
+            \arrow[ld, "f'"]
+            \\
+            &c
+        \end{tikzcd}
+        \hspace{30pt}
+        \begin{tikzcd}
+            d
+            \arrow[rr, "h"]
+            && d'
+        \end{tikzcd}
+    \]
+
+    然后可以将这个余锥的基底投影回$\cat D$。存在一个投影$\pi_c$，它将$L/c$中的每一对$(d, f)$映射回$d$，从而忽略了箭头$f$。它还将$L/c$中的每个态射映射到产生它的$\cat D$中的箭头。通过这种方式，$\pi_c$定义了一个在$\cat D$中的图式。这个图式的余极限存在，因为我们假设在$\cat D$中存在所有余极限。我们称这个余极限为$t_c$：
+    \[ t_c = \text{colim}\; \pi_c \]
+
+    \[
+        \begin{tikzpicture}
+            \def\Xa{2.0};
+            \def\Xb{-2.0};
+
+            \def\Ytip{-0.9};
+            \def\Yo{0.5}; % oval
+            \def\Yb{-2.0}; % labels
+            \draw (\Xa, 0)[fill=blue!50!green!20]   ellipse (1.6 and 1.6);
+            \draw (\Xb , 0) ellipse (1.6 and 1.6);
+            % oval
+            \draw (\Xb , \Yo)[fill=blue!50!green!20]  ellipse (1 and 0.5);
+
+            % apex
+            \filldraw (\Xb, \Ytip) circle (1pt);
+            \node at ( \Xb, \Ytip - 0.3) { $c$ };
+
+            % sides of the cone
+            \draw (\Xb, \Ytip) -- (\Xb + 0.95, \Yo - 0.15);
+            \draw (\Xb, \Ytip) -- (\Xb - 0.95, \Yo - 0.15);
+
+            % second oval
+            \draw (\Xa , \Yo) [fill=orange!30]  ellipse (1 and 0.5);
+
+            % apex
+            \filldraw (\Xa, \Ytip) circle (1pt);
+            \node at ( \Xa, \Ytip - 0.3) { $t_c$ };
+
+            % sides of the cone
+            \draw (\Xa, \Ytip) -- (\Xa + 0.95, \Yo - 0.15);
+            \draw (\Xa, \Ytip) -- (\Xa - 0.95, \Yo - 0.15);
+
+            % categories
+            \node at (\Xa, \Yb) { $\mathcal D$ };
+            \node at (\Xb, \Yb) { $\mathcal C$ };
+            \node[blue] at (0, \Yo) { $\pi_c$ };
+
+            % functor
+            \draw [->, blue, dashed] (\Xb, \Yo + 0.5) --  (\Xb + 2.2, \Yo + 0.5);
+            \draw [->, blue, dashed] (\Xb, \Yo - 0.5)  -- (\Xb + 2.2, \Yo - 0.5);
+        \end{tikzpicture}
+    \]
+
+    让我们看看是否可以使用这个$t_c$来构造逗号范畴$L/c$中的终对象。我们必须找到一个箭头，我们称之为$\varepsilon_c \colon L t_c \to c$，使得对$\langle t_c, \varepsilon_c \rangle$在$L/c$中是终的。
+
+    请注意，$L$将由$\pi_c$生成的图式映射回由$L/c$定义的余锥的基底。投影$\pi_c$只做了忽略这个余锥的边，而保留其基底。
+
+    我们现在在$\cat C$中有两个余锥，它们具有相同的基底：一个顶点为$c$的原始余锥和一个通过对$\cat D$中的余锥应用$L$得到的新余锥。由于$L$保持余极限，新余锥的余极限是$L t_c$——即余极限$t_c$的像：
+
+    \[ \text{colim} \; (L \circ \pi_c) = L ( \text{colim} \; \pi_c) = L t_c\]
+
+    通过泛构造，我们推断出必须存在从余极限$L t_c$到$c$的唯一余锥态射。这个态射，我们称之为$\varepsilon_c$，使得所有相关的三角形交换。
+
+    剩下要证明的是$\langle t_c, \varepsilon_c \rangle$是$L/c$中的终对象，也就是说，对于任意$\langle d, f \colon L d \to c \rangle$，存在一个唯一的逗号范畴态射$h \colon d \to t_c$，使得下图三角形交换：
+
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, dashed, "L h"]
+            && L t_c
+            \arrow[ld, red, "\varepsilon_c"]
+            \\
+            &c
+        \end{tikzcd}
+    \]
+
+    请注意，任何这样的$d$都自动成为由$\pi_c$生成的图式的一部分（它是$\pi_c$作用于$\langle d, f \rangle$的结果）。我们知道$t_c$是$\pi_c$图式的极限。因此，在极限余锥中，必定有一条从$d$到$t_c$的线。我们选择这条线作为我们的$h$。
+
+    \[
+        \begin{tikzpicture}
+            \def\Xa{2.1};
+            \def\Xb{-2.1};
+
+            \def\Ytip{0};
+            \def\Ybot{-2};
+            \def\Yo{0}; % oval
+            \def\Yf{-1.2}; % label
+            % first oval
+            \draw (\Xb , \Yo)[fill=blue!50!green!20]  ellipse (1.8 and 0.8);
+
+            % second oval
+            \draw (\Xa , \Yo) [fill=orange!30]  ellipse (1.8 and 0.8);
+
+            % apex L tc
+            \filldraw (\Xb, \Ytip) circle (1pt);
+            \node at ( \Xb - 0.5, \Ytip) { $L t_c$ };
+
+            % apex c
+            \filldraw (\Xb, \Ybot) circle (1pt);
+            \node at ( \Xb, \Ybot - 0.3) { $c$ };
+
+            % sides of the cone L h
+            \draw[red, ->]  (\Xb + 0.95, \Yo) -- (\Xb + 0.1, \Ytip);
+            \node[red] at (\Xb + 0.5, \Ytip + 0.3) {$L h$};
+
+            % apex tc
+            \filldraw (\Xa, \Ytip) circle (1pt);
+            \node at ( \Xa, \Ytip - 0.3) { $t_c$ };
+
+            % sides of the cone h
+            \draw [->, red] (\Xa + 0.95, \Yo) -- (\Xa + 0.1, \Ytip);
+            \node[red] at ( \Xa + 0.6, \Ytip + 0.3) { $h$ };
+
+            % d
+            \filldraw (\Xa + 1, \Yo) circle (1pt);
+            \node at ( \Xa + 1.3, \Yo) { $d$ };
+
+            % L d
+            \filldraw (\Xb + 1, \Yo) circle (1pt);
+            \node at ( \Xb + 1.3, \Yo) { $L d$ };
+
+            % f
+            \draw[->] (\Xb + 1, \Yo) to (\Xb + 0.05, \Ybot + 0.1);
+            \node at (\Xb + 0.7, \Yf) {$f$};
+
+            % epsilon
+            \draw[->, dashed] (\Xb, \Ytip) -- (\Xb, \Ybot);
+            \node at (\Xb - 0.3, \Yf) {$\varepsilon_c$};
+
+        \end{tikzpicture}
+    \]
+    然后，交换条件从$\varepsilon_c$作为两个余锥之间的态射得出。它是唯一的余锥态射，因为$\cat D$是一个预序。
+
+    这证明了对于每一个$c$，都有一个从$L$到$c$的泛箭，因此我们有一个定义在对象上的函子$R c = t_c$，它是$L$的右伴随。
+
+    \subsection{解集条件}
+
+    前面证明的问题在于，大多数实际情况下的逗号范畴是大的：它们的对象并不构成一个集合。但也许我们可以通过选择较小但有代表性的对象和箭头集来近似逗号范畴？
+
+    为了选择对象，我们可以使用从某个索引集$I$的映射。我们定义一组对象$d_i$，其中$i \in I$。由于我们试图近似逗号范畴$L/c$，我们选择带有箭头$f_i \colon L d_i \to c$的对象。
+
+    逗号范畴的相关部分编码在满足交换条件的对象之间的态射中。我们可以尝试将此条件专门化为仅在我们的对象族内应用，但这还不够。我们必须找到一种方法来探测逗号范畴中的所有其他对象。
+
+    为此，我们将交换条件重新解释为一个分解任意$f \colon L d \to c$通过某个对$\langle d_i, f_i \rangle$的配方：
+    \[
+        \begin{tikzcd}
+            L d
+            \arrow[rd, "f"']
+            \arrow[rr, "L h"]
+            && \textcolor{red}{L d_i}
+            \arrow[ld, red, "f_i"]
+            \\
+            &c
+        \end{tikzcd}
+    \]
+
+    一个\index{solution set}\emph{解集}是一个由索引集$I$索引的对$\langle d_i, f_i \colon L d_i \to c \rangle $的族，可以用来分解任意对$\langle d, f \colon L d \to c \rangle $。这意味着存在一个索引$i \in I$和一个箭头$h \colon d \to d_i$，它分解$f$：
+    \[ f = f_i \circ L h \]
+
+    表达这个属性的另一种方式是说在逗号范畴$L/c$中存在一个\index{weakly terminal set}\emph{弱终}的对象集。一个弱终集具有的属性是，对于范畴中的任何对象，都存在一个到该集中的至少一个对象的态射。
+
+    我们之前已经看到，对于每个$c$，逗号范畴$L/c$中的终对象的存在足以定义伴随。事实证明，我们可以使用解集实现同样的目标。
+
+    Freyd的伴随函子定理的假设规定我们有一个从一个小的完备范畴到另一个范畴的保持余极限的函子$L \colon \cat D \to \cat C$。这两个条件都与\emph{小}图式有关。如果我们可以为每个$c$选择一个解集$\langle d_i, f_i \colon L d_i \to c \rangle $，那么右伴随$R$存在。不同的$c$的解集可能不同。
+
+    我们之前已经看到，在一个完备范畴中，弱终集的存在足以定义一个终对象。在我们的情况下，这意味着对于任何$c$，我们都可以构造从$L$到$c$的泛箭。而这足以定义整个伴随。
+
+    伴随函子定理的对偶版本可用于构造左伴随。
+
+    \subsection{去函数化}
+
+    每种编程语言都允许我们定义函数，但并非所有语言都支持高阶函数（以函数为参数的函数，返回函数的函数，或由函数构造的数据类型）或匿名函数（又称lambda）。事实证明，即使在这种语言中，高阶函数也可以通过称为去函数化的过程来实现。这种技术基于伴随函子定理。此外，每当传递函数是不切实际的时候，例如在分布式系统中，都可以使用去函数化。
+
+    去函数化背后的思想是函数类型被定义为积的右伴随。
+    \[ \cat C(e \times a, b) \cong \cat C(e, b^a) \]
+    伴随函子定理可以用来近似这个伴随。
+
+    一般来说，任何有限的程序只能有有限数量的函数定义。这些函数（连同它们捕获的环境）形成了解集，我们可以用它来构造函数类型。在实践中，我们只为少数作为参数的函数或从其他函数返回的函数执行此操作。
+
+    使用高阶函数的典型例子是继续传递风格。例如，下面是一个计算列表元素和的函数。但它不是返回和，而是使用结果调用一个继续\hask{k}：
+    \begin{haskell}
+        sumK :: [Int] -> (Int -> r) -> r
+        sumK [] k = k 0
+        sumK (i : is) k =
+        sumK is (\s -> k (i + s))
+    \end{haskell}
+    如果列表为空，则该函数调用继续，和为零。否则，它以两个参数递归调用自己：列表\hask{is}的尾部和一个新的继续：
+    \begin{haskell}
+        \s -> k (i + s)
+    \end{haskell}
+    这个新的继续调用先前的继续\hask{k}，并传递列表头的和及其参数\hask{s}（这是累积的和）。
+
+    请注意，这个lambda是一个闭包：它是一个变量\hask{s}的函数，但它也可以访问来自其环境的\hask{k}和\hask{i}。
+
+    要提取最终的和，我们用平凡的继续调用我们的递归函数，即恒等：
+    \begin{haskell}
+        sumList :: [Int] -> Int
+        sumList as = sumK as (\i -> i)
+    \end{haskell}
+
+    匿名函数很方便，但没有什么能阻止我们使用命名函数。然而，如果我们想要将继续提取出来，我们必须明确传递环境。
+
+    例如，我们可以替换我们的第一个lambda：
+    \begin{haskell}
+        \s -> k (i + s)
+    \end{haskell}
+    用函数\hask{more}，但我们必须显式传递对\hask{(i, k)}作为类型\hask{(Int, Int -> r)}的环境：
+    \begin{haskell}
+        more :: (Int, Int -> r) -> Int -> r
+        more (i, k) s = k (i + s)
+    \end{haskell}
+    另一个lambda，恒等，使用空环境，因此它变为：
+    \begin{haskell}
+        done :: Int -> Int
+        done i = i
+    \end{haskell}
+    以下是使用这两个命名函数的算法实现：
+    \begin{haskell}
+        sumK' :: [Int] -> (Int -> r) -> r
+        sumK' [] k = k 0
+        sumK' (i : is) k =
+        sumK' is (more (i, k))
+    \end{haskell}
+
+    \begin{haskell}
+        sumList :: [Int] -> Int
+        sumList is = sumK' is done
+    \end{haskell}
+
+    事实上，如果我们只对计算和感兴趣，我们可以将多态类型\hask{r}替换为\hask{Int}，而不做其他更改。
+
+    这个实现仍然使用高阶函数。为了消除它们，我们必须分析传递函数作为参数的含义。这样的函数只能以一种方式使用：可以将其应用于其参数。函数类型的这个属性表示为柯里化伴随的伴随元：
+    \[ \varepsilon \colon b^a \times a \to b \]
+    或者，在Haskell中，表示为一个高阶函数：
+    \begin{haskell}
+        apply :: (a -> b, a) -> b
+    \end{haskell}
+    这次我们有兴趣从第一个原理构造伴随元。我们已经看到，这可以通过逗号范畴实现。在我们的例子中，积函子$L_a = (-) \times a$的逗号范畴的一个对象是一个对
+    \[(e, f \colon (e \times a) \to b) \]
+    或者，在Haskell中：
+    \begin{haskell}
+        data Comma a b e = Comma e ((e, a) -> b)
+    \end{haskell}
+    这个范畴中$(e, f)$和$(e', f')$之间的态射是一个箭头$h \colon e \to e'$，它满足交换条件：
+    \[ f' \circ h = f \]
+    我们将这个态射解释为“缩减”环境$e$到$e'$。箭头$f'$能够使用由$h (e)$给出的可能较小的环境产生相同类型为$b$的输出。例如，$e$可能包含与从$a$计算$b$无关的变量，而$h$将它们投影出去。
+
+    \[
+        \begin{tikzcd}
+            e \times a
+            \arrow[rd, "f"']
+            \arrow[rr, "h \times a"]
+            && e' \times a
+            \arrow[ld, "f'"]
+            \\
+            &b
+        \end{tikzcd}
+        \hspace{30pt}
+        \begin{tikzcd}
+            e
+            \arrow[rr, "h"]
+            && e'
+        \end{tikzcd}
+    \]
+
+
+    事实上，我们在定义\hask{more}和\hask{done}时执行了这种类型的缩减。原则上，我们可以将尾部\hask{is}传递给这两个函数，因为它在调用点是可访问的。但我们知道它们不需要它。
+
+    使用Freyd的定理，我们可以将函数对象$a \to b$定义为由逗号范畴定义的图式的余极限。这样的余极限本质上是所有环境的巨大余积，模态射的识别。这种识别将$a \to b$所需的环境减少到最低限度。
+
+    在我们的例子中，我们感兴趣的继续是函数\hask{Int -> Int}。事实上，我们并不想生成通用的函数类型\hask{Int -> Int}；只是要容纳我们的两个函数\hask{more}和\hask{done}的最小函数。我们可以通过创建一个非常小的解集来实现它。
+
+    在我们的例子中，解集由对$(e_i, f_i \colon e_i \times a \to b)$组成，使得任何对$(e, f \colon e \times a \to b)$都可以通过其中一个$f_i$的分解。更确切地说，我们感兴趣的唯一两个环境是\hask{(Int, Int ->Int)}用于\hask{more}，以及空环境\hask{()}用于\hask{done}。
+
+    原则上，我们的解集应该允许分解逗号范畴的每个对象，即类型为：
+    \begin{haskell}
+        (e, (e, Int) -> Int)
+    \end{haskell}
+    但这里我们只对两个特定函数感兴趣。同样，我们并不关心表示的唯一性，因此，我们将使用所有感兴趣环境的余积（如我们在伴随函子定理中所做的），而不是使用余极限。我们最终得到了以下数据类型，它是我们感兴趣的两个环境\hask{()}和\hask{(Int, Int -> Int)}的和。我们最终得到了以下类型：
+    \begin{haskell}
+        data Kont = Done | More Int Kont
+    \end{haskell}
+    请注意，我们递归地将环境的\hask{Int->Int}部分编码为\hask{Kont}。因此，我们还消除了使用函数作为数据构造函数参数的需要。
+
+    如果仔细观察这个定义，你会发现它是一个\hask{Int}列表的定义，模一些重命名。每次调用\hask{More}都会在\hask{Kont}堆栈上推送另一个整数。这个解释与我们的直觉一致，即递归算法需要某种运行时堆栈。
+
+    我们现在准备实现我们的伴随元的近似。它由两个函数的主体组成，理解是递归调用也通过\hask{apply}：
+    \begin{haskell}
+        apply :: (Kont, Int) -> Int
+        apply (Done, i) = i
+        apply (More i k, s) = apply (k, i + s)
+    \end{haskell}
+    将此与我们之前的比较：
+    \begin{haskell}
+        done i = i
+        more (i, k) s = k (i + s)
+    \end{haskell}
+
+
+    现在可以重写我们的主要算法，而不使用任何高阶函数或lambdas：
+    \begin{haskell}
+        sumK'' :: [Int] -> Kont -> Int
+        sumK'' [] k = apply (k, 0)
+        sumK'' (i : is) k = sumK'' is (More i k)
+    \end{haskell}
+
+    \begin{haskell}
+        sumList'' is = sumK'' is Done
+    \end{haskell}
+
+    去函数化的主要优势在于它可以在分布式环境中使用。远程函数的参数，只要它们是数据结构而不是函数，就可以序列化并通过网络传递。所需的只是接收者可以访问\hask{apply}。
 
 \section{Free/Forgetful Adjunctions}
 The two functors in the adjunction play different roles: the picture of the adjunction is not symmetric. Nowhere is this illustrated better than in the case of the free/forgetful adjunctions. 
