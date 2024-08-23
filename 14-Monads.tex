@@ -1165,6 +1165,7 @@
 
     \begin{haskell}
         runAction :: StackAction k -> [Int] -> ([Int], k)
+        runAction (St act) ns = act ns
     \end{haskell}
 
     我们将代数定义为自由 Monad 的两个构造函数（\hask{Pure} 和 \hask{Free}）对应的一对多态函数：
@@ -1214,264 +1215,263 @@
             showAlg :: MAlg StackF (Const String) a
         \end{haskell}
     \end{exercise}
+    \section{单胚函子 (Monoidal Functors)}
 
-\section{Monoidal Functors}
+    我们已经看到了几个单胚范畴 (monoidal categories) 的例子。这类范畴具有某种二元运算，例如笛卡尔积、和、复合（在自函子的范畴中），等等。它们还具有一个特殊的对象，作为该二元运算的单位元。在严格单胚范畴 (strict monoidal categories) 中，单位和结合律是严格满足的，而在其他情况下，它们则是满足同构条件。
 
-We've seen several examples of monoidal cateogries. Such categories are equipped with some kind of binary operation, e.g., a cartesian product, a sum, composition (in the category of endofunctors), etc. They also have a special object that serves as the unit with respect to that binary operation. Unit and associativity laws are satisfied either on the nose (in strict monoidal categories) or up to isomorphism.
+    每当我们有某种结构的多个实例时，我们可能会问自己：是否有一个关于这些东西的整体范畴？在这种情况下：单胚范畴是否构成了自己的一个范畴？为了使这成为可能，我们需要定义单胚范畴之间的箭头。
 
-Every time we have more than one instance of some structure, we may ask ourselves the question: is there a whole category of such things? In this case: do monoidal categories form their own category? For this to work we would have to define arrows between monoidal categories.
+    一个\emph{单胚函子 (monoidal functor)} $F$ 从单胚范畴 $(\mathcal{C}, \otimes, i)$ 映射到另一个单胚范畴 $(\mathcal{D}, \oplus, j)$ 时，会将张量积 (tensor product) 映射到张量积，将单位元映射到单位元——所有这些都是在同构条件下进行的：
+    \begin{align*}
+        F a \oplus F b &\cong F (a \otimes b) \\
+        j &\cong F i
+    \end{align*}
+    这里，左侧是目标范畴中的张量积和单位元，右侧是源范畴中的对应物。
 
-A \emph{monoidal functor} $F$ from a monoidal category $(\mathcal{C}, \otimes, i)$ to another monoidal category $(\mathcal{D}, \oplus, j)$ maps tensor product to tensor product and unit to unit---all up to isomorphism:
-\begin{align*}
-F a \oplus F b &\cong F (a \otimes b) \\
-j &\cong F i
-\end{align*}
-Here, on the left-hand side we have the tensor product and the unit in the target category, and on the right their counterparts in the source category.
+    如果所讨论的两个单胚范畴不是严格的，即单位和结合律仅在同构条件下满足，则还需要额外的相容性条件，以确保单位元和结合元被正确映射。
 
-If the two monoidal categories in question are not strict, that is the unit and associativity laws are satisfied only up to isomorphism, there are additional coherency conditions that ensure that unitors are mapped to unitors and associators are mapped to associators.
+    以单胚函子为箭头的单胚范畴构成的范畴称为$\mathbf{MonCat}$。实际上，它是一个2-范畴，因为可以定义在单胚函子之间的结构保持自然变换。
 
-The category of monoidal categories with monoidal functors as arrows is called $\mathbf{MonCat}$. In fact it's a 2-category, since one can define structure-preserving natural transformations between monoidal functors.
+    \subsection{松弛单胚函子 (Lax Monoidal Functors)}
 
-\subsection{Lax monoidal functors}
+    单胚范畴的一个好处是它们允许我们定义单子 (monoids)。你可以轻易地发现，单胚函子将单子映射到单子。但实际上，你并不需要单胚函子的全部功能来实现这一点。让我们考虑为了将单子映射到单子，函数子需要满足的最低要求。
 
-One of the perks of monoidal categories is that they allow us to define monoids. You can easily convince yourself that monoidal functors map monoids to monoids. It turns out that you don't need the full power of monoidal functors to accomplish that. Let's consider what the minimal requirements are  for a functor to map monoids to monoids.
+    让我们从单胚范畴 $(\mathcal{C}, \otimes, i)$ 中的一个单子 $(m, \mu, \eta)$ 开始。考虑一个将 $m$ 映射到 $F m$ 的函子 $F$。我们希望 $F m$ 在目标单胚范畴 $(\mathcal{D}, \oplus, j)$ 中也是一个单子。为此，我们需要找到两个映射：
+    \begin{align*}
+        \eta' &\colon j \to F m \\
+        \mu' &\colon F m \oplus F m \to F m
+    \end{align*}
+    并使其满足单胚律。
 
-Let's start with a monoid $(m, \mu, \eta)$ in the monoidal category $(\mathcal{C}, \otimes, i)$. Consider a functor $F$ that maps $m$ to $F m$. We want $F m$ to be a monoid in the target monoidal category $(\mathcal{D}, \oplus, j)$. For that we need to find two mappings:
-\begin{align*}
-\eta' &\colon j \to F m \\
- \mu' &\colon F m \oplus F m \to F m
-\end{align*}
-satisfying monoidal laws.
+    因为 $m$ 是一个单子，我们有可用的原始映射的提升：
+    \begin{align*}
+        F \eta &\colon F i \to F m \\
+        F \mu &\colon F (m \otimes m) \to F m
+    \end{align*}
 
-Since $m$ is a monoid, we do have at our disposal the liftings of the original mappings:
-\begin{align*}
- F \eta &\colon F i \to F m \\
- F \mu &\colon F (m \otimes m) \to F m
-\end{align*}
+    为了实现 $\eta'$ 和 $\mu'$，我们还需要两个额外的箭头：
+    \begin{align*}
+        j &\to F i \\
+        F m \oplus F m &\to F (m \otimes m)
+    \end{align*}
+    一个单胚函子会提供这样的箭头。然而，为了我们要完成的工作，这些箭头并不需要是可逆的。
 
-What we are missing, in order to implement $\eta'$ and $\mu'$, are two additional arrows:
-\begin{align*}
-j &\to F i\\
- F m \oplus F m &\to F (m \otimes m)
- \end{align*}
-A monoidal functor would provide such arrows. However, for what we're trying it accomplish, we don't need these arrows to be invertible.
+    一个\emph{松弛单胚函子 (lax monoidal functor)} 是一个配备有态射 $\phi_i$ 和自然变换 $\phi_{ab}$ 的函子：
+    \begin{align*}
+        \phi_i &\colon j \to F i \\
+        \phi_{a b} &\colon F a \oplus F b \to F (a \otimes b)
+    \end{align*}
+    它们满足适当的单位性和结合性条件。
 
-A \emph{lax monoidal functor} is a functor equipped with a morphism $\phi_i$ and a natural transformation $\phi_{ab}$:
-\begin{align*}
-\phi_i &\colon j \to F i \\
-\phi_{a b} &\colon F a \oplus F b \to F (a \otimes b)
-\end{align*}
-satisfying the appropriate unitality and associativity conditions.
+    这样的函子将单子 $(m, \mu, \eta)$ 映射到单子 $(F m, \mu', \eta')$，其中：
+    \begin{align*}
+        \eta' &= F \eta \circ \phi_i \\
+        \mu' &= F \mu \circ \phi_{a b}
+    \end{align*}
 
-Such a functor maps a monoid $(m, \mu, \eta)$ to a monoid $(F m, \mu', \eta')$ with:
-\begin{align*}
-\eta' &= F \eta \circ \phi_i \\
-\mu' &= F \mu \circ \phi_{a b}
-\end{align*}
+    松弛单胚函子的最简单例子是一个保留通常笛卡尔积的自函子。我们可以在 Haskell 中将其定义为一个类型类：
 
-The simplest example of a lax monoidal functor is an endofunctor that preserves the usual cartesian product. We can define it in Haskell as a typeclass:
+    \begin{haskell}
+        class Monoidal f where
+        unit  :: f ()
+        (>*<) :: f a -> f b -> f (a, b)
+    \end{haskell}
+    与 $\phi_{a b}$ 对应的我们有一个中缀运算符，根据 Haskell 的惯例，它以柯里化形式编写。
 
-\begin{haskell}
-class Monoidal f where
-  unit  :: f ()
-  (>*<) :: f a -> f b -> f (a, b)
+    \begin{exercise}
+        实现列表函子的 \hask{Monoidal} 实例。
+    \end{exercise}
+
+    \subsection{函子强度 (Functorial Strength)}
+
+    还有另一种方式，函子可以与单胚结构进行交互，这在编程时显而易见。我们理所当然地认为函数能够访问环境。这样的函数被称为闭包 (closures)。
+
+    例如，这里有一个从环境中捕获变量 \hask{a} 并将其与其参数配对的函数：
+    \begin{haskell}
+        \x -> (a, x)
+    \end{haskell}
+    这个定义在孤立情况下没有意义，但在环境中包含变量 \hask{a} 时，它是有意义的，例如：
+    \begin{haskell}
+        pairWith :: Int -> (String -> (Int, String))
+        pairWith a = \x -> (a, x)
+    \end{haskell}
+    通过调用 \hask{pairWith 5} 返回的函数``闭合''了环境中的5。
+
+    现在考虑以下修改，它返回一个包含闭包的单例列表：
+    \begin{haskell}
+        pairWith' :: Int -> [String -> (Int, String)]
+        pairWith' a = [\x -> (a, x)]
+    \end{haskell}
+    作为程序员，你会很惊讶如果这不工作。但我们在这里所做的是非常微妙的：我们将环境``偷渡''到列表函子之下。根据我们的λ演算 (lambda calculus) 模型，一个闭包是从环境和函数参数的积中得到的一个态射。这里的lambda实际上是一个 \hask{(Int, String)} 类型的函数，它在一个列表函子内部定义，但它捕获了定义在列表之外的值 \hask{a}。
+
+    让我们能够将环境偷渡到函子之下的属性称为\index{strength, functorial}\emph{函子强度 (functorial strength)} 或者\emph{张量强度 (tensorial strength)}，可以在 Haskell 中实现为：
+    \begin{haskell}
+        strength :: Functor f => (e, f a) -> f (e, a)
+        strength (e, as) = fmap (e, ) as
+    \end{haskell}
+    符号 \hask{(e, )} 被称为\index{tuple section}\emph{元组截断 (tuple section)}，相当于对对构造器 (pair constructor) 的偏应用：\hask{(,) e}。
+
+    在范畴论中，一个自函子 $F$ 的强度定义为一个将张量积 (tensor product) 偷渡到函子中的自然变换：
+    \[ \sigma \colon a \otimes F(b) \to F (a \otimes b) \]
+    还有一些附加条件，以确保它与单胚范畴中的单位元和结合元良好地配合。
+
+    我们能够为任意函子实现 \hask{strength}，这意味着在 Haskell 中，每个函子都是强的。这就是为什么我们在函子内部访问环境时不必担心。
+
+    更重要的是，在 Haskell 中，每个 monad 由于是函子，因此也是强的。这也是为什么每个 monad 都自动是 \hask{Monoidal} 的。
+    \begin{haskell}
+        instance Monad m => Monoidal m where
+        unit = return ()
+        ma >*< mb = do
+        a <- ma
+        b <- mb
+        return (a, b)
+    \end{haskell}
+    如果你将这段代码解糖 (desugar) 以使用 monadic 绑定和 lambda，你会注意到最终的 \hask{return} 需要访问定义在外部环境中的 \hask{a} 和 \hask{b}。如果没有 monad 是强的，这将是不可能的。
+
+    然而，在范畴论中，并非每个单胚范畴中的自函子都是强的。现在的神秘咒语是，我们所工作的范畴是自丰 (self-enriched) 的，并且在 Haskell 中定义的每个自函子都是丰的 (enriched)。我们将在讨论丰范畴 (enriched categories) 时回到这一点。在 Haskell 中，强度归结为我们总是可以对部分应用的对构造器 \hask{(a, )} 进行 \hask{fmap}。
+
+    \subsection{应用函子 (Applicative Functors)}
+
+    在编程中，应用函子的想法源自以下问题：一个函子让我们可以提升一个变量的函数。我们如何提升一个有两个或多个变量的函数？
+
+    通过类似于 \hask{fmap} 的方式，我们想要有一个函数：
+    \begin{haskell}
+        liftA2 :: (a -> b -> c) -> f a -> f b -> f c
+    \end{haskell}
+
+    一个有两个参数的函数——在这里是其柯里化形式——是一个返回函数的单参数函数。所以，假设 \hask{f} 是一个函子，我们可以对 \hask{liftA2} 的第一个参数进行 \hask{fmap}，其类型为：
+    \begin{haskell}
+        a -> (b -> c)
+    \end{haskell}
+    应用于第二个参数 \hask{(f a)} 来得到：
+    \begin{haskell}
+        f (b -> c)
+    \end{haskell}
+    问题是，我们不知道如何将 \hask{f (b -> c)} 应用于剩下的参数 \hask{(f b)}。
+
+    允许我们这么做的函子类称为 \hask{Applicative}。事实证明，一旦我们知道如何提升一个二参数函数，我们就可以提升任意数量的参数函数，除了零个参数。一个零参数函数只是一个值，所以提升它意味着实现一个函数：
+    \begin{haskell}
+        pure :: a -> f a
+    \end{haskell}
+    这里是 Haskell 的定义：
+    \begin{haskell}
+        class Functor f => Applicative f where
+        pure  :: a -> f a
+        (<*>) :: f (a -> b) -> f a -> f b
+    \end{haskell}
+    将函数应用于带参数的函子定义为一个中缀运算符 \hask{<*>}，通常称为``splat''。
+
+    还有一个 \hask{fmap} 的中缀版本：
+    \begin{haskell}
+        (<$>) :: Functor f => (a -> b) -> f a -> f b
+    \end{haskell}
+    可以用它来实现这个简洁的 \hask{liftA2}：
+    \begin{haskell}
+        liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
+        liftA2 g as bs = g <$> as <*> bs
 \end{haskell}
-Corresponding to $\phi_{a b}$ we have an infix operator which, according to Haskell conventions, is written in its curried form.
+两个运算符都绑定到左侧，这使得这个语法模仿了常规函数应用。
+
+应用函子还必须满足一组定律：
+\begin{haskell}
+pure id <*> v = v                            -- 恒等性 (Identity)
+pure f <*> pure x = pure (f x)               -- 同态性 (Homomorphism)
+u <*> pure y = pure ($ y) <*> u              -- 交换性 (Interchange)
+pure (.) <*> u <*> v <*> w = u <*> (v <*> w) -- 组合性 (Composition)
+\end{haskell}
 
 \begin{exercise}
-Implement the \hask{Monoidal} instance for the list functor.
+实现 $\emph{\hask{liftA3}}$，一个使用应用函子提升一个三参数函数的函数。
 \end{exercise}
 
-\subsection{Functorial strength}
-
-There is another way a functor may interact with monoidal structure, one that hides in plain sight when we do programming. We take it for granted that functions have access to the environment. Such functions are called closures.
-
-For instance, here's a function that captures a variable \hask{a} from the environment and pairs it with its argument:
-\begin{haskell}
-\x -> (a, x)
-\end{haskell}
-This definition makes no sense in isolation, but it does when the environment contains the variable \hask{a}, e.g.,
-\begin{haskell}
-pairWith :: Int -> (String -> (Int, String))
-pairWith a = \x -> (a, x)
-\end{haskell}
-The function returned by calling \hask{pairWith 5} ``closes over'' the 5 from its environment.
-
-Now consider the following modification, which returns a singleton list that contains the closure:
-\begin{haskell}
-pairWith' :: Int -> [String -> (Int, String)]
-pairWith' a = [\x -> (a, x)]
-\end{haskell}
-As a programmer you'd be very surprised if this didn't work. But what we do here is highly nontrivial: we are smuggling the environment \emph{under} the list functor. According to our model of lambda calculus, a closure is a morphism from the product of the environment and the function argument. Here the lambda, which is really a function of \hask{(Int, String)}, is defined inside a list functor, but it captures the value \hask{a} that is defined \emph{outside} the list.
-
-The property that lets us smuggle the environment under a functor is called \index{strength, functorial}\emph{functorial strength} or \emph{tensorial strength} and can be implemented in Haskell as:
-\begin{haskell}
-strength :: Functor f => (e, f a) -> f (e, a)
-strength (e, as) = fmap (e, ) as
-\end{haskell}
-The notation \hask{(e, )} is called a \index{tuple section}\emph{tuple section} and is equivalent to the partial application of the pair constructor: \hask{(,) e}.
-
-In category theory, strength for an endofunctor $F$ is defined as a natural transformation that smuggles a tensor product into a functor:
-\[ \sigma \colon a \otimes F(b) \to F (a \otimes b) \]
-There are some additional conditions which ensure that it works nicely with the unitors and the associator of the monoidal category in question.
-
-The fact that we were able to implement \hask{strength} for an arbitrary functor means that, in Haskell, every functor is strong. This is the reason why we don't have to worry about accessing the environment from inside a functor.
-
-Even more importantly, every monad in Haskell is strong by virtue of being a functor. This is also why every monad is automatically \hask{Monoidal}.
-\begin{haskell}
-instance Monad m => Monoidal m where
-  unit = return ()
-  ma >*< mb = do
-    a <- ma
-    b <- mb
-    return (a, b)
-\end{haskell}
-If you desugar this code to use monadic bind and lambdas, you'll notice that the final \hask{return} needs access to both \hask{a} and \hask{b}, which are defined in outer environments. This would be impossible without a monad being strong.
-
-In category theory, though, not every endofunctor in a monoidal category is strong. For now, the magic incantation is that the category we're working with is self-enriched, and every endofunctor defined in Haskell is enriched. We'll come back to it when we talk about enriched categories. In Haskell, strength boils down to the fact that we can always \hask{fmap} a partially applied pair constructor \hask{(a, )}.
-
-\subsection{Applicative functors}
-
-In programming, the idea of applicative functors arose from the following question: A functor lets us lift a function of one variable. How can we lift a function of two or more variables?
-
-By analogy with \hask{fmap}, we'd like to have a function:
-\begin{haskell}
-liftA2 :: (a -> b -> c) -> f a -> f b -> f c
-\end{haskell}
-
-A function of two arguments---here, in its curried form---is a function of one argument returning a function. So, assuming that \hask{f} is a functor, we can \hask{fmap} the first argument of \hask{liftA2}, which has the type:
-\begin{haskell}
-a -> (b -> c)
-\end{haskell}
-over the second argument \hask{(f a)} to get:
-\begin{haskell}
-f (b -> c)
-\end{haskell}
-The problem is, we don't know how to apply \hask{f (b -> c)} to the remaining argument \hask{(f b)}.
-
-The class of functors that let us do that is called \hask{Applicative}. It turns out that, once we know how to lift a two-argument function, we can lift functions of any number of arguments, except zero. A zero-argument function is just a value, so lifting it means implementing a function:
-\begin{haskell}
-pure :: a -> f a
-\end{haskell}
-Here's the Haskell definition:
-\begin{haskell}
-class Functor f => Applicative f where
-    pure  :: a -> f a
-    (<*>) :: f (a -> b) -> f a -> f b
-\end{haskell}
-The application of a functorful of functions to a functorful of arguments is defined as an infix operator \hask{<*>} that is customarily called ``splat.''
-
-There is also an infix version of \hask{fmap}:
-\begin{haskell}
-(<$>) :: Functor f => (a -> b) -> f a -> f b
-\end{haskell}
-which can be used in this terse implementation of \hask{liftA2}:
-\begin{haskell}
-liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
-liftA2 g as bs = g <$> as <*> bs
-\end{haskell}
-Both operators bind to the left, which makes this syntax mimic regular function application.
-
-An applicative functor must also satisfy a set of laws:
-\begin{haskell}
-pure id <*> v = v                            -- Identity
-pure f <*> pure x = pure (f x)               -- Homomorphism
-u <*> pure y = pure ($ y) <*> u              -- Interchange
-pure (.) <*> u <*> v <*> w = u <*> (v <*> w) -- Composition
-\end{haskell}
-
-\begin{exercise}
-Implement $\emph{\hask{liftA3}}$, a function that lifts a 3-argument function using an applicative functor.
-\end{exercise}
-
-\subsection{Closed functors}
-If you squint at the definition of the splat operator:
+\subsection{闭函子 (Closed Functors)}
+如果你细看 splat 运算符的定义：
 \begin{haskell}
 (<*>) :: f (a -> b) -> (f a -> f b)
 \end{haskell}
-you may see it as mapping function objects to function objects.
+你可能会将它看作是从函数对象映射到函数对象。
 
-This becomes clearer if you consider a functor between two categories, both of them closed. You may start with a function object $b^a$ in the source category and apply the functor $F$ to it:
+当你考虑一个在两个闭范畴之间的函子时，这一点变得更加清晰。你可以从源范畴中的一个函数对象 $b^a$ 开始，并将函子 $F$ 应用于它：
 \[ F (b^a) \]
-Alternatively, you may map the two objects $a$ and $b$ and construct a function object between them in the target category:
+或者，你可以将这两个对象 $a$ 和 $b$ 进行映射，并在目标范畴中构造它们之间的一个函数对象：
 \[ (F b)^{F a} \]
-If we demand that the two ways be isomorphic, we get a definition of a strict \emph{closed functor}. But, as was the case with monoidal functors, we are more interested in the lax version, which is equipped with a one-way natural transformation:
+如果我们要求这两种方式是同构的，我们就得到了一个严格的\emph{闭函子 (closed functor)}的定义。但正如单胚函子的情况一样，我们对松弛版本更感兴趣，它配备了一个单向的自然变换：
 \[ F (b^a) \to (F b)^{F a} \]
-If $F$ is an endofunctor, this translates directly into the definition of the splat operator.
+如果 $F$ 是一个自函子，这直接转换为 splat 运算符的定义。
 
-The full definition of a lax closed functor includes the mapping of the monoidal unit and some coherence conditions. All said, an applicative functor is a lax closed functor.
+松弛闭函子的完整定义包括单胚单位的映射和一些相容性条件。总的来说，一个应用函子是一个松弛闭函子。
 
-In a closed cartesian category, the exponential is related to the cartesian product through the currying adjunction. It's no surprise then, that in such a category lax monoidal and lax closed (applicative) endofunctors are the same.
+在一个闭笛卡尔范畴 (closed cartesian category) 中，指数与笛卡尔积通过柯里化伴随 (currying adjunction) 相关联。因此，在这样的范畴中，松弛单胚和松弛闭（应用）自函子是相同的。
 
-We can easily express this in Haskell:
+我们可以在 Haskell 中轻松表达这一点：
 \begin{haskell}
 instance (Functor f, Monoidal f) => Applicative f where
-  pure a = fmap (const a) unit
-  fs <*> as = fmap apply (fs >*< as)
+pure a = fmap (const a) unit
+fs <*> as = fmap apply (fs >*< as)
 \end{haskell}
-where \hask{const} is a function that ignores its second argument:
+其中 \hask{const} 是一个忽略其第二个参数的函数：
 \begin{haskell}
 const :: a -> b -> a
 const a b = a
 \end{haskell}
-and \hask{apply} is the uncurried function application:
+而 \hask{apply} 是非柯里化的函数应用：
 \begin{haskell}
 apply :: (a -> b, a) -> b
 apply (f, a) = f a
 \end{haskell}
-And the other way around we have:
+反过来，我们有：
 \begin{haskell}
 instance Applicative f => Monoidal f where
-  unit = pure ()
-  as >*< bs = (,) <$> as <*> bs
+unit = pure ()
+as >*< bs = (,) <$> as <*> bs
 \end{haskell}
-In the latter, we used the pair constructor \hask{(,)} as a two-argument function.
+在后者中，我们使用了对构造器 \hask{(,)} 作为一个双参数函数。
 
-\subsection{Monads and applicatives}
+\subsection{Monad 和 Applicative}
 
-Since in a cartesian closed category every monad\footnote{Again, the correct incantation is ``every enriched monad''} is lax monoidal, it is automatically applicative. We can show it directly by implementing \hask{ap}, which has the same type signature as the splat operator:
+由于在笛卡尔闭范畴中，每个 monad\footnote{正确的咒语是“每个丰 monad (enriched monad)”}都是松弛单胚的，因此它自动是 applicative 的。我们可以直接通过实现 \hask{ap} 来显示这一点，后者具有与 splat 运算符相同的类型签名：
 \begin{haskell}
 ap :: (Monad m) => m (a -> b) -> m a -> m b
 ap fs as = do
-    f <- fs
-    a <- as
-    return (f a)
+f <- fs
+a <- as
+return (f a)
 \end{haskell}
 
-This connection is expressed in the Haskell definition of a \hask{Monad} by having \hask{Applicative} as its superclass:
+这一联系在 Haskell 的 \hask{Monad} 定义中通过将 \hask{Applicative} 作为其超类来表示：
 \begin{haskell}
 class Applicative m => Monad m where
-    (>>=)       :: forall a b. m a -> (a -> m b) -> m b
-    return      :: a -> m a
-    return      = pure
+(>>=)       :: forall a b. m a -> (a -> m b) -> m b
+return      :: a -> m a
+return      = pure
 \end{haskell}
-Notice the default implementation of \hask{return} as \hask{pure}.
+注意到 \hask{return} 作为 \hask{pure} 的默认实现。
 
-The converse is not true: not every \hask{Applicative} is a \hask{Monad}. The standard counterexample is the \hask{Applicative} instance for a list functor that uses zipping:
+反过来并不成立：并非每个 \hask{Applicative} 都是一个 \hask{Monad}。标准的反例是列表函子的 \hask{Applicative} 实例，它使用拉链 (zipping)：
 \begin{haskell}
 instance Applicative [] where
-  pure = repeat
-  fs <*> as = zipWith apply fs as
+pure = repeat
+fs <*> as = zipWith apply fs as
 \end{haskell}
-Of course, the list functor is also a monad, so there is another \hask{Applicative} instance based on that. Its splat operator applies every function to every argument.
+当然，列表函子也是一个 monad，所以基于此还有另一个 \hask{Applicative} 实例。它的 splat 运算符将每个函数应用于每个参数。
 
-In programming, monad is more powerful than applicative. That's because monadic code lets you examine the contents of a monadic value and branch depending on it. This is true even for the \hask{IO} monad which otherwise provides no means of extracting the value. In this example we are branching on the contents of an \hask{IO} object:
+在编程中，monad 比 applicative 更强大。这是因为 monadic 代码让你可以检查一个 monadic 值的内容并根据它进行分支。即使对于 \hask{IO} monad 也是如此，后者否则并不提供提取值的方法。在这个例子中，我们根据一个 \hask{IO} 对象的内容进行分支：
 \begin{haskell}
 main :: IO ()
 main = do
-  s <- getLine
-  if s == "yes"
-  then putStrLn "Thank you!"
-  else putStrLn "Next time."
+s <- getLine
+if s == "yes"
+then putStrLn "Thank you!"
+else putStrLn "Next time."
 \end{haskell}
-Of course, the inspection of the value is postponed until the runtime interpreter of \hask{IO} gets hold of this code.
+当然，值的检查被推迟到 \hask{IO} 的运行时解释器获取这段代码时才进行。
 
-Applicative composition using the splat operator doesn't allow for one part of the computation to inspect the result of the other. This a limitation that can be turned into an advantage. The absence of dependencies makes it possible to run the computations in parallel.  Haskell's parallel libraries use applicative programming extensively.
+使用 splat 运算符的 Applicative 组合不允许计算的一部分检查另一部分的结果。这种限制可以转化为优势。没有依赖关系的情况下，可以并行运行计算。Haskell 的并行库广泛使用了应用式编程。
 
-On the other hand, monads let us use the very convenient \hask{do} syntax, which is arguably more readable than the applicative syntax. Fortunately, there is a language extension \hask{ApplicativeDo}, which instructs the compiler to selectively use applicative constructs in interpreting \hask{do} blocks, whenever there are no dependencies.
+另一方面，monads 允许我们使用非常方便的 \hask{do} 语法，这比应用语法更具可读性。幸运的是，有一个语言扩展 \hask{ApplicativeDo}，它指示编译器在解释 \hask{do} 块时选择性地使用应用结构，前提是没有依赖关系。
 
 \begin{exercise}
-Verify \hask{Applicative} laws for the zip instance of the list functor.
+验证列表函子的 zip 实例的 \hask{Applicative} 定律。
 \end{exercise}
 
 
