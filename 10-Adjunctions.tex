@@ -1157,212 +1157,215 @@
 
     去函数化的主要优势在于它可以在分布式环境中使用。远程函数的参数，只要它们是数据结构而不是函数，就可以序列化并通过网络传递。所需的只是接收者可以访问\hask{apply}。
 
-\section{Free/Forgetful Adjunctions}
-The two functors in the adjunction play different roles: the picture of the adjunction is not symmetric. Nowhere is this illustrated better than in the case of the free/forgetful adjunctions. 
+    \section{自由/遗忘伴随（Free/Forgetful Adjunctions）}
+    在伴随关系中，两种函子扮演着不同的角色：伴随关系的图示并不是对称的。没有什么比自由/遗忘伴随关系更能说明这一点了。
 
-A forgetful functor is a functor that ``forgets'' some of the structure of its source category. This is not a rigorous definition but, in most cases, it's pretty obvious what structure is being forgotten. Very often the target category is just the category of sets, which is considered the epitome of structurelessness. The result of the forgetful functor in that case is called the ``underlying'' set, and the functor itself is often called $U$. 
+    遗忘函子（forgetful functor）是指“遗忘”了其源范畴某些结构的函子。这并不是一个严格的定义，但在大多数情况下，遗忘了哪些结构是显而易见的。通常，目标范畴只是集合范畴（$\mathbf{Set}$），这被认为是没有结构的典范。在这种情况下，遗忘函子的结果被称为“底层集合”（underlying set），而该函子本身通常称为$U$。
 
-More precisely, we say that a functor forgets \emph{structure} if the mapping of hom-sets is not surjective, that is, there are arrows in the target hom-set that have no corresponding arrows in the source hom-set. Intuitively, it means that the arrows in the source have some structure to preserve, so there are fewer of them; and that structure is absent in the target. 
+    更确切地说，我们说一个函子遗忘了\emph{结构}，如果它的同态集的映射不是满射的，即在目标同态集中有些箭头在源同态集中没有对应的箭头。直观上，这意味着源范畴中的箭头具有某些要保留的结构，所以它们的数量较少；而在目标范畴中这种结构是不存在的。
 
-The left adjoint to a forgetful functor is called a \emph{free functor}.
+    遗忘函子的左伴随函子被称为\emph{自由函子}（free functor）。
 
-\[
- \begin{tikzcd}
-F x
-\arrow[d, bend right, red, dashed]
-\arrow[d, dashed]
-\arrow[d, bend left, blue, dashed]
-  &&
-  x
-\arrow[d, bend right, red, dashed]
-\arrow[d, dashed]
-\arrow[d, bend left, blue, dashed]
- \arrow[ll, bend right, "F"']
- \\
-y
-   \arrow[rr, bend right, "U"']
- &&
- U y
-  \end{tikzcd}
-\]
+    \[
+        \begin{tikzcd}
+            F x
+            \arrow[d, bend right, red, dashed]
+            \arrow[d, dashed]
+            \arrow[d, bend left, blue, dashed]
+            &&
+            x
+            \arrow[d, bend right, red, dashed]
+            \arrow[d, dashed]
+            \arrow[d, bend left, blue, dashed]
+            \arrow[ll, bend right, "F"']
+            \\
+            y
+            \arrow[rr, bend right, "U"']
+            &&
+            U y
+        \end{tikzcd}
+    \]
 
-A classic example of a free/forgetful adjunction is the construction of the free monoid.
+    自由/遗忘伴随的一个经典例子是自由幺半群（free monoid）的构造。
 
+    \subsection{幺半群范畴（The Category of Monoids）}
+    在一个幺半范畴$\mathcal{C}$中，幺半群构成自己的范畴$\mathbf{Mon}(\mathcal{C})$。它的对象是幺半群，而它的箭头是保留幺半结构的$\mathcal{C}$中的箭头。
 
-\subsection{The category of monoids}
-Monoids in a monoidal category $\mathcal{C}$ form their own category $\mathbf{Mon}(\mathcal{C})$. Its objects are monoids, and its arrows are the arrows of $\mathcal{C}$ that preserve the monoidal structure. 
+    下图解释了从一个幺半群$(M_1, \eta_1, \mu_1)$到另一个幺半群$(M_2, \eta_2, \mu_2)$的幺半群态射$f$的含义：
 
-The following diagram explains what it means for $f$ to be a monoid morphism, going from a monoid $(M_1, \eta_1, \mu_1)$ to a monoid $(M_2, \eta_2, \mu_2)$:
-\[
- \begin{tikzcd}
- & M_1
- \arrow[dd, "f"]
- & M_1 \otimes M_1
- \arrow[l, "\mu_1"]
- \arrow[dd, "f \otimes f"]
- \\
- I
- \arrow[ru, "\eta_1"]
- \arrow[rd, "\eta_2"']
- \\
- & M_2
- & M_2 \otimes M_2
- \arrow[l, "\mu_2"]
-  \end{tikzcd}
-\]
-A monoid morphism $f$ must map unit to unit, which means that:
-\[ f \circ \eta_1 = \eta_2 \]
-and it must map multiplication to multiplication:
-\[ f \circ \mu_1 = \mu_2 \circ (f \otimes f)\]
-Remember, the tensor product $\otimes$ is functorial, so it can lift pairs of arrows, as in $f \otimes f$.
+    \[
+        \begin{tikzcd}
+            & M_1
+            \arrow[dd, "f"]
+            & M_1 \otimes M_1
+            \arrow[l, "\mu_1"]
+            \arrow[dd, "f \otimes f"]
+            \\
+            I
+            \arrow[ru, "\eta_1"]
+            \arrow[rd, "\eta_2"']
+            \\
+            & M_2
+            & M_2 \otimes M_2
+            \arrow[l, "\mu_2"]
+        \end{tikzcd}
+    \]
 
-In particular, the category $\mathbf{Set}$ is monoidal, with cartesian product and the terminal object providing the monoidal structure. 
+    幺半群态射$f$必须将单位映射为单位，即：
+    \[ f \circ \eta_1 = \eta_2 \]
+    并且它必须将乘法映射为乘法：
+    \[ f \circ \mu_1 = \mu_2 \circ (f \otimes f)\]
 
-In particular, monoids in $\mathbf{Set}$ are sets with additional structure. They form their own category $\mathbf{Mon}(\mathbf{Set})$ and there is a forgetful functor $U$ that simply maps the monoid to the set of its elements. When we say that a monoid is a set, we mean the underlying set.
+    请记住，张量积$\otimes$是函子性的，因此它可以提升箭头对，如$f \otimes f$。
 
-\subsection{Free monoid}
+    特别地，范畴$\mathbf{Set}$是单积范畴，具有笛卡尔积和提供单积结构的终对象。
 
-We want to construct the free functor 
-\[ F \colon \mathbf{Set} \to \mathbf{Mon}(\mathbf{Set})\]
-that is adjoint to the forgetful functor $U$. 
+    具体来说，$\mathbf{Set}$中的幺半群是带有附加结构的集合。它们构成自己的范畴$\mathbf{Mon}(\mathbf{Set})$，并且有一个遗忘函子$U$，它简单地将幺半群映射为其元素的集合。当我们说一个幺半群是一个集合时，我们指的是它的底层集合。
 
-We start with an arbitrary set $X$ and an arbitrary monoid $m$. On the right-hand side of the adjunction we have the set of functions from $X$ to $U m$. On the left-hand side, we have a set of highly constrained structure-preserving monoid morphisms from $F X$ to $m$. How can these two hom-sets be isomorphic?
+    \subsection{自由幺半群（Free Monoid）}
 
-In  $\mathbf{Mon}(\mathbf{Set})$, monoids are sets of elements, and monoid morphisms are functions between such sets, satisfying additional constraints: preserving unit and multiplication. 
+    我们要构造自由函子
+    \[ F \colon \mathbf{Set} \to \mathbf{Mon}(\mathbf{Set})\]
+    它是遗忘函子$U$的伴随函子。
 
-Arrows in $\mathbf{Set}$, on the other hand, are just functions with no additional constraints. So, in general, there are fewer arrows between monoids than there are between their underlying sets. 
+    我们从一个任意集合$X$和一个任意幺半群$m$开始。在伴随关系的右侧，我们有从$X$到$U m$的函数集。在左侧，我们有一个从$F X$到$m$的高度受约束的保结构幺半群态射集。如何使这两个同态集同构呢？
 
-\[
- \begin{tikzcd}
-F X
-\arrow[d, bend right, red, dashed]
-\arrow[d, dashed]
-\arrow[d, bend left, blue, dashed]
-  &&
-X
-\arrow[d, bend right, red, dashed]
-\arrow[d, dashed]
-\arrow[d, bend left, blue, dashed]
- \arrow[ll, bend right, "F"']
- \\
-m
-   \arrow[rr, bend right, "U"']
- &&
- U m
-  \end{tikzcd}
-\]
+    在$\mathbf{Mon}(\mathbf{Set})$中，幺半群是元素的集合，幺半群态射是这些集合之间的函数，满足附加约束：保留单位和乘法。
 
-Here's the idea: if we want to have a one to one matching between arrows, we want $F X$ to be much larger than $X$. This way, there will be many more functions from it to $m$---so many that, even after rejecting the ones that don't preserve the structure, we'll still have enough to match every function $f \colon X \to U m$.
+    另一方面，$\mathbf{Set}$中的箭头只是没有附加约束的函数。因此，一般来说，幺半群之间的箭头比它们底层集合之间的箭头要少。
 
-We'll construct the monoid $F X$ starting from the set $X$, and adding more and more elements as we go. We'll call the initial set $X$ the \index{generators of a monoid}\emph{generators} of $F X$. We'll construct a monoid morphism $g \colon F X \to m$ starting with the original function $f$ and extending it to act on more and more elements.
+    \[
+        \begin{tikzcd}
+            F X
+            \arrow[d, bend right, red, dashed]
+            \arrow[d, dashed]
+            \arrow[d, bend left, blue, dashed]
+            &&
+            X
+            \arrow[d, bend right, red, dashed]
+            \arrow[d, dashed]
+            \arrow[d, bend left, blue, dashed]
+            \arrow[ll, bend right, "F"']
+            \\
+            m
+            \arrow[rr, bend right, "U"']
+            &&
+            U m
+        \end{tikzcd}
+    \]
 
-On generators, $x \in X$, $g$ works the same as $f$:
-\[ g x = f x \]
+    这里的想法是：如果我们想要箭头之间有一一对应，我们希望$F X$比$X$大得多。这样一来，从$F X$到$m$的函数会多得多——即使在剔除那些不保留结构的函数后，我们仍然有足够多的函数可以匹配每一个$f \colon X \to U m$。
 
-Since $F X$ is supposed to be a monoid, it has to have a unit. We can't pick one of the generators to be the unit, because it would impose constraints on the part of $g$ that is already fixed by $f$---it would have to map it to the unit $e'$ of $m$. So we'll just add an extra element $e$ to $F X$ and call it the unit. We'll define the action of $g$ on it by saying that it is mapped to the unit $e'$ of $m$:
-\[ g e = e' \]
+    我们将从集合$X$开始构造幺半群$F X$，并在此过程中添加越来越多的元素。我们将初始集合$X$称为$F X$的\index{generators of a monoid}\emph{生成元}。我们将从原始函数$f$开始，逐步扩展它，使其作用于越来越多的元素，从而构造幺半群态射$g \colon F X \to m$。
 
-We also have to define monoidal multiplication in $F X$. Let's start with a product of two generators $a$ and $b$. The result of the multiplication cannot be another generator because, again, that would constrain the part of $g$ that's fixed by $f$---products must be mapped to products. So we have to make all products of generators new elements of $F X$. Again, the action of $g$ on those products is fixed:
-\[ g (a \cdot b)  = g a \cdot g b\]
+    在生成元$x \in X$上，$g$的作用与$f$相同：
+    \[ g x = f x \]
 
-Continuing with this construction, any new multiplication produces a new element of $F X$, except when it can be reduced to an existing element by applying monoid laws. For instance, the new unit $e$ times a generator $a$ must be equal to $a$. But we have made sure that $e$ is mapped to the unit of $m$, so the product $g e \cdot g a$ is automatically equal to $g a$.
+    由于$F X$应该是一个幺半群，因此它必须有一个单位。我们不能选择一个生成元作为单位，因为这会对由$f$固定的$g$部分施加约束——它必须将该生成元映射为$m$的单位$e'$。所以我们只需向$F X$中添加一个额外的元素$e$，并称之为单位。我们通过将$g$映射到$m$的单位$e'$来定义$g$在它上的作用：
+    \[ g e = e' \]
 
-Another way of looking at this construction is to think of the set $X$ as an alphabet. The elements of $F X$ are then strings of characters from this alphabet. The generators are single-letter strings, ``$a$'', ``$b$'', and so on. The unit is an empty string ``''. Multiplication is string concatenation, so  ``$a$'' times ``$b$'' is a new string ``$ab$''. Concatenation is automatically associative and unital, with the empty string as the unit.
+    我们还必须定义$F X$中的幺半乘法。让我们从两个生成元$a$和$b$的乘积开始。乘法的结果不能是另一个生成元，因为这同样会对$f$已经固定的$g$部分施加约束——乘积必须映射为乘积。因此，我们必须将生成元的所有乘积都作为$F X$中的新元素。同样，$g$在这些乘积上的作用是固定的：
+    \[ g (a \cdot b)  = g a \cdot g b\]
 
-The intuition behind free functors is that they generate structure ``freely,'' as in ``with no additional constraints.'' They also do it lazily: instead of performing operations, they just record them. They create generic domain-specific programs that can be executed later by specific interpreters.
+    继续这种构造，任何新的乘法都会产生$F X$的一个新元素，除非它可以通过应用幺半群定律简化为一个已有的元素。例如，新单位$e$乘以生成元$a$必须等于$a$。但我们已经确保$e$映射为$m$的单位，因此乘积$g e \cdot g a$自动等于$g a$。
 
-The free monoid ``remembers to do the multiplication'' at a later time. It stores the arguments to multiplication in a string, but doesn't perform the multiplication. It's only allowed to simplify its records based on generic monoidal laws. For instance, it doesn't have to store the command to multiply by the unit. It can also ``skip the parentheses'' because of associativity. 
+    另一种看待此构造的方法是将集合$X$视为字母表。然后，$F X$的元素是由此字母表中的字符组成的字符串。生成元是单字母字符串，如“$a$”、“$b$”等。单位是一个空字符串“”。乘法是字符串连接，所以“$a$”乘以“$b$”是一个新字符串“$ab$”。连接是自动的结合的和单位的，空字符串作为单位。
 
-\begin{exercise}
-What is the unit and the counit of the free monoid adjunction $F \dashv U$?
-\end{exercise}
+    自由函子背后的直觉是它们“自由地”生成结构，就像“没有额外约束”一样。它们还以懒惰的方式进行：它们记录操作，而不是执行操作。它们创建了特定领域的通用程序，可以由特定的解释器稍后执行。
 
-\subsection{Free monoid in programming}
+    自由幺半群“记住了稍后进行乘法”。它将乘法的参数存储在字符串中，但不执行乘法。它只允许根据通用幺半群定律简化其记录。例如，它不必存储乘以单位的指令。它也可以“跳过括号”，因为它是结合的。
 
-In Haskell, monoids are defined using the following typeclass:
-\begin{haskell}
-class Monoid m where
-  mappend :: m -> m -> m
-  mempty  :: m
-\end{haskell}
-Here, \hask{mappend} is the curried form of the mapping from the product: \hask{(m, m) -> m}. The \hask{mempty} element corresponds to the arrow from the terminal object (unit of the monoidal category), or simply an element of \hask{m}. 
+    \begin{exercise}
+        自由幺半群伴随$F \dashv U$的单位元（unit）和伴随元（counit）是什么？
+    \end{exercise}
 
-A free monoid generated by some type \hask{a}, which serves as a set of generators, is represented by a list type \hask{[a]}. An empty list serves as the unit; and monoid multiplication is implemented as list concatenation, traditionally written in infix form:
-\begin{haskell}
-(++) :: [a] -> [a] -> [a]
-(++) []     ys = ys
-(++) (x:xs) ys = x : xs ++ ys
-\end{haskell}
-A list is an instance of a \hask{Monoid}:
-\begin{haskell}
-instance Monoid [a] where
-  mempty = []
-  mappend = (++)
-\end{haskell}
+    \subsection{编程中的自由幺半群（Free Monoid in Programming）}
 
-To show that it's a free monoid, we have to be able to construct a monoid morphism from the list of \hask{a} to an arbitrary monoid \hask{m}, provided we have an (unconstrained) mapping from \hask{a} to (the underlying set of) \hask{m}. We can't express all of this in Haskell, but we can define the function:
-\begin{haskell}
-foldMap :: Monoid m => (a -> m) -> ([a] -> m)
-foldMap f = foldr mappend mempty . fmap f
-\end{haskell}
-This function transforms the elements of the list to monoidal values using \hask{f} and then folds them using \hask{mappend}, starting with the unit \hask{mempty}. 
+    在Haskell中，幺半群通过以下类型类定义：
+    \begin{haskell}
+        class Monoid m where
+        mappend :: m -> m -> m
+        mempty  :: m
+    \end{haskell}
+    这里，\hask{mappend}是从积映射到映射的柯里化形式：\hask{(m, m) -> m}。元素\hask{mempty}对应于从终对象（单积范畴的单位元）的箭头，或简单地说，是\hask{m}的一个元素。
 
-It's easy to see that an empty list is mapped to the monoidal unit. It's not too hard to see that a concatenation of two lists is mapped to the monoidal product of the results. So, indeed, \hask{foldMap} is a monoid morphism. 
+    由某种类型\hask{a}生成的自由幺半群，即作为生成元的集合，由列表类型\hask{[a]}表示。空列表作为单位；幺半群乘法实现为列表连接，传统上写成中缀形式：
+    \begin{haskell}
+    (++) :: [a] -> [a] -> [a]
+    (++) []     ys = ys
+    (++) (x:xs) ys = x : xs ++ ys
+    \end{haskell}
+    列表是\hask{Monoid}的一个实例：
+    \begin{haskell}
+        instance Monoid [a] where
+        mempty = []
+        mappend = (++)
+    \end{haskell}
 
-Following the intuition of a free monoid being a domain-specific program for multiplying stuff, \hask{foldMap} provides an \emph{interpreter} for this program. It performs all the multiplications that have been postponed. Note that the same program may be interpreted in many different ways, depending on the choice of the concrete monoid and the function \hask{f}.
+    要证明它是一个自由幺半群，我们必须能够从\hask{a}的列表构造一个到任意幺半群\hask{m}的幺半群态射，前提是我们有一个（不受约束的）从\hask{a}到（\hask{m}的底层集合）的映射。我们不能在Haskell中表达这一切，但我们可以定义如下函数：
+    \begin{haskell}
+        foldMap :: Monoid m => (a -> m) -> ([a] -> m)
+        foldMap f = foldr mappend mempty . fmap f
+    \end{haskell}
+    此函数使用\hask{f}将列表元素转换为幺半群值，然后使用\hask{mappend}折叠它们，从单位\hask{mempty}开始。
 
-We'll come back to free monoids as lists in the chapter on algebras.
+    很容易看出，空列表映射为幺半群的单位。也不难看出，两个列表的连接映射为结果的幺半积。因此，确实，\hask{foldMap}是一个幺半群态射。
 
-\begin{exercise}
-Write a program that takes a list of integers and interprets it in two different ways: once using the additive and once using the multiplicative monoid of integers.
-\end{exercise}
+    根据自由幺半群作为领域特定乘法程序的直觉，\hask{foldMap}为该程序提供了一个\emph{解释器}。它执行所有已延迟的乘法操作。请注意，取决于具体幺半群和函数\hask{f}的选择，相同的程序可以用许多不同的方式进行解释。
 
-\section{The Category of Adjunctions}
-We can define composition of adjunctions by taking advantage of the composition of functors that define them. Two adjunctions, $L \dashv R$ and $L' \dashv R'$, are composable if they share the category in the middle:
-\[
- \begin{tikzcd}
-  \mathcal{C}
-  \arrow[rr, bend right, "R'"']
-  &&
-  \mathcal{D}
-  \arrow[ll, bend right, "L'"']
-    \arrow[rr, bend right, "R"']
-&&
-  \mathcal{E}
-  \arrow[ll, bend right, "L"']
- \end{tikzcd}
-\]
-By composing the functors we get a new adjunction $(L' \circ L) \dashv (R \circ R')$. 
+    我们将在关于代数的章节中回到作为列表的自由幺半群。
 
-Indeed, let's consider the hom-set:
-\[ \mathcal{C}(L' (L e), c) \]
-Using the $L' \dashv R'$ adjunction, we can transpose $L'$ to the right, where it becomes $R'$:
-\[ \mathcal{D}(L e, R' c) \]
-and using $L \dashv R$ we can similarly transpose $L$:
-\[ \mathcal{E}( e, R(R' c)) \]
-Combining these two isomorphisms, we get the composite adjunction:
-\[ \mathcal{C}((L' \circ L) e, c) \cong \mathcal{E}( e, (R \circ R') c)\]
+    \begin{exercise}
+        编写一个程序，接受一个整数列表，并以两种不同的方式对其进行解释：一次使用整数的加法幺半群，一次使用整数的乘法幺半群。
+    \end{exercise}
 
-Because functor composition is associative, the composition of adjunctions is also associative. It's easy to see that a pair of identity functors forms a trivial adjunction that serves as the identity with respect to composition of adjunctions. Therefore we can define a category $\mathbf{Adj}(\mathbf{Cat})$ in which objects are categories and arrows are adjunctions (by convention, pointing in the direction of the left adjoint). 
+    \section{伴随的范畴（The Category of Adjunctions）}
+    我们可以通过利用定义它们的函子的组合来定义伴随的组合。如果两个伴随$L \dashv R$和$L' \dashv R'$，它们共享中间的范畴，则它们是可组合的：
+    \[
+        \begin{tikzcd}
+            \mathcal{C}
+            \arrow[rr, bend right, "R'"']
+            &&
+            \mathcal{D}
+            \arrow[ll, bend right, "L'"']
+            \arrow[rr, bend right, "R"']
+            &&
+            \mathcal{E}
+            \arrow[ll, bend right, "L"']
+        \end{tikzcd}
+    \]
+    通过组合函子，我们得到一个新的伴随$(L' \circ L) \dashv (R \circ R')$。
 
-Adjunctions can be defined purely in terms of functors and natural transformations, that is 1-cells and 2-cells in the 2-category $\mathbf{Cat}$. There is nothing special about $\mathbf{Cat}$, and in fact adjunctions can be defined in any 2-category. Moreover, the category of adjunctions is itself a 2-category.
+    实际上，让我们考虑同态集：
+    \[ \mathcal{C}(L' (L e), c) \]
+    使用$L' \dashv R'$伴随，我们可以将$L'$转移到右侧，使其成为$R'$：
+    \[ \mathcal{D}(L e, R' c) \]
+    并且使用$L \dashv R$我们可以类似地将$L$转移：
+    \[ \mathcal{E}( e, R(R' c)) \]
+    结合这两个同构，我们得到复合伴随：
+    \[ \mathcal{C}((L' \circ L) e, c) \cong \mathcal{E}( e, (R \circ R') c)\]
 
-\section{Levels of Abstraction}
+    由于函子组合是结合的，伴随的组合也是结合的。很容易看出，一对恒等函子形成一个平凡的伴随，作为伴随组合的恒等。因此，我们可以定义一个范畴$\mathbf{Adj}(\mathbf{Cat})$，其中对象是范畴，箭头是伴随（按照惯例，指向左伴随的方向）。
 
-Category theory is about structuring our knowledge. In particular, it can be applied to the knowledge of category theory itself. Hence we see a lot of mixing of abstraction levels in category theory. The structures that we see at one level can be grouped into higher-level structures which exhibit even higher levels of structure, and so on. 
+    伴随可以纯粹用函子和自然变换定义，也就是2-范畴$\mathbf{Cat}$中的1-态射和2-态射。$\mathbf{Cat}$没有什么特别之处，实际上伴随可以在任何2-范畴中定义。此外，伴随的范畴本身就是一个2-范畴。
 
-In programming we are used to building hierarchies of abstractions. Values are grouped into types, types into kinds. Functions that operate on values are treated differently than functions that operate on types. We often use different syntax to separate levels of abstractions. Not so in category theory.
+    \section{抽象的层次（Levels of Abstraction）}
 
-A set, categorically speaking, can be described as a discrete category. Elements of the set are objects of this category and, other than the obligatory identity morphisms, there are no arrows between them. 
+    范畴论是关于组织我们的知识的。特别是，它可以应用于范畴论知识本身。因此，我们在范畴论中看到很多抽象层次的混合。在一个层次上看到的结构可以组合成更高层次的结构，这些结构展示了更高层次的结构，依此类推。
 
-The same set can then be seen as an object in the category $\mathbf{Set}$. Arrows in this category are functions between sets.
+    在编程中，我们习惯于构建抽象层次。值被分组为类型，类型被分组为种类。操作值的函数与操作类型的函数被区别对待。我们通常使用不同的语法来分隔抽象层次。在范畴论中并非如此。
 
-The category $\mathbf{Set}$, in turn, is an object in the category $\mathbf{Cat}$. Arrows in $\mathbf{Cat}$ are functors. 
+    从范畴论的角度来看，一个集合可以被描述为一个离散范畴。集合的元素是该范畴的对象，除了强制性的恒等态射外，它们之间没有箭头。
 
-Functors between any two categories $\mathcal{C}$ and $\mathcal{D}$ are objects in the functor category $[\mathcal{C}, \mathcal{D}]$. Arrows in this category are natural transformations.
+    然后，同一个集合可以在范畴$\mathbf{Set}$中被视为一个对象。该范畴中的箭头是集合之间的函数。
 
-We can define functors between functor categories, product categories, opposite categories, and so on, ad infinitum. 
+    范畴$\mathbf{Set}$，反过来，是范畴$\mathbf{Cat}$中的一个对象。$\mathbf{Cat}$中的箭头是函子。
 
-Completing the circle, hom-sets in every category are sets. We can define mappings and isomorphisms between them, reaching across disparate categories. Adjunctions are possible because we can compare hom-sets that live in different categories.
+    任意两个范畴$\mathcal{C}$和$\mathcal{D}$之间的函子是函子范畴$[\mathcal{C}, \mathcal{D}]$中的对象。该范畴中的箭头是自然变换。
+
+    我们可以定义函子范畴之间的函子、积范畴、对偶范畴，依此类推，无限延伸。
+
+    完成这一循环，每个范畴中的同态集都是集合。我们可以定义它们之间的映射和同构，跨越不同的范畴。由于我们可以比较不同范畴中的同态集，因此伴随关系是可能的。
+
 
 \end{document}
