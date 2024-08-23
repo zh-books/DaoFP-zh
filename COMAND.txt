@@ -1,0 +1,2 @@
+pdflatex -interaction=nonstopmode DaoFP.tex
+xelatex -interaction=nonstopmode DaoFP.tex
