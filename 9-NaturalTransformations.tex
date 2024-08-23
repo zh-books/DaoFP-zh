@@ -1514,197 +1514,199 @@ $\alpha^{-1}$ 作用于 $h$ 会在右上角产生 $f$。
     coyoneda_1 y = \h -> contramap h y
 \end{haskell}
 
-\section{Yoneda Embedding}
+\section{Yoneda Embedding（Yoneda 嵌入）}
 
-In a closed category, we have exponential objects that serve as stand-ins for hom-sets. This is obviously a thing in $\Set$, where hom-sets, being sets, are automatically objects in $\Set$. 
+在封闭范畴（closed category）中，我们有指数对象（exponential objects），它们可以作为同态集（hom-sets）的代表。在$\Set$中，同态集本身就是集合，因此它们自动成为$\Set$中的对象。
 
-On the other hand, in the category of categories  $\mathbf{Cat}$, hom-sets are \emph{sets} of functors, and it's not immediately obvious that they can be promoted to objects in $\mathbf{Cat}$---that is, categories. But, as we've seen before, they can! Functors between any two categories form a functor \emph{category}.
+另一方面，在范畴的范畴（category of categories）$\mathbf{Cat}$中，同态集是函子（functors）的集合，并不是一开始就显而易见它们可以提升为$\mathbf{Cat}$中的对象——即一个范畴。但如我们之前所见，它们确实可以！任意两个范畴之间的函子形成了一个函子范畴（functor category）。
 
-Because of that, it's possible to curry functors just like we curried functions. A functor from a product category can be viewed as a functor returning a functor. In other words, $\mathbf{Cat}$ is a closed (symmetric) monoidal category.
+因此，我们可以像柯里化函数那样柯里化函子。从积范畴（product category）到另一个范畴的函子可以看作返回一个函子的函子。换句话说，$\mathbf{Cat}$是一个封闭的（对称的）单体范畴（monoidal category）。
 
-In particular, we can apply currying to the hom-functor $\mathcal{C}(a, b)$. It is a profunctor, or a functor from the product category:
-\[ \mathcal{C}^{op} \times \mathcal{C} \to  \mathbf{Set} \]
-But it's also a contravariant functor in the first argument $a$. And for every $a$ in  $\mathcal{C}^{op}$  it produces a covariant functor $\mathcal{C}(a, -)$, which is an object in the functor category $ [\mathcal{C},  \mathbf{Set}] $. We can write this mapping as:
-\[ \mathcal{C}^{op} \to [\mathcal{C},  \mathbf{Set}] \]
-Alternatively, we can fix $b$ and produce a contravariant functor $\mathcal{C}(-, b)$. This mapping can be written as
-\[ \mathcal{C} \to [\mathcal{C}^{op},  \mathbf{Set}] \]
-Both mappings are functorial, which means that, for instance, an arrow in $\mathcal{C}$ is mapped to a natural transformation in $[\mathcal{C}^{op},  \mathbf{Set}]$.
+特别地，我们可以对同态函子$\mathcal{C}(a, b)$进行柯里化。它是一个跨积范畴的伴随函子（profunctor），或者说是从积范畴到$\mathbf{Set}$的函子：
+$$\mathcal{C}^{op} \times \mathcal{C} \to  \mathbf{Set}$$
+但它在第一个参数$a$上也是一个逆变函子（contravariant functor）。对于$\mathcal{C}^{op}$中的每个$a$，它生成一个协变函子（covariant functor）$\mathcal{C}(a, -)$，这是函子范畴$[\mathcal{C}, \mathbf{Set}]$中的一个对象。我们可以将这个映射写为：
+$$\mathcal{C}^{op} \to [\mathcal{C},  \mathbf{Set}]$$
+或者，我们可以固定$b$并生成一个逆变函子$\mathcal{C}(-, b)$。这个映射可以写成：
+$$\mathcal{C} \to [\mathcal{C}^{op},  \mathbf{Set}]$$
+这两个映射都是函子性的，这意味着，例如，$\mathcal{C}$中的一个箭头会被映射为$[\mathcal{C}^{op},  \mathbf{Set}]$中的一个自然变换（natural transformation）。
 
-These $\mathbf{Set}$-valued functor categories are common enough that they have special names. The functors in $[\mathcal{C}^{op},  \mathbf{Set}]$ are called \index{presheaves}\emph{presheaves}, and the ones in $[\mathcal{C},  \mathbf{Set}]$ are called \index{co-presheaves}\emph{co-presheaves}. (The names come from algebraic topology.)
+这些$\mathbf{Set}$值函子范畴很常见，以至于它们有特别的名称。$[\mathcal{C}^{op},  \mathbf{Set}]$中的函子被称为\emph{presheaves}（预层），而$[\mathcal{C},  \mathbf{Set}]$中的函子被称为\emph{co-presheaves}（对预层）。（这些名称来自代数拓扑。）
 
-Let's focus our attention on the following reading of the hom-functor:
-\[ \mathcal{Y} \colon \mathcal{C} \to [\mathcal{C}^{op},  \mathbf{Set}] \]
-It takes an object $x$ and maps it to a presheaf 
-\[ \mathcal Y_x = \mathcal{C}(-, x) \]
-which can be visualized as the totality of views of $x$ from all possible directions.
+让我们重点关注以下对同态函子的解释：
+$$\mathcal{Y} \colon \mathcal{C} \to [\mathcal{C}^{op},  \mathbf{Set}]$$
+它接受一个对象$x$并将其映射为一个预层
+$$\mathcal{Y}_x = \mathcal{C}(-, x)$$
+这可以被视为从所有可能方向对$x$的全部视图的集合。
 
-Let's also review its action on arrows. The functor $\mathcal{Y}$ lifts an arrow $f \colon x \to y$ to a mapping of presheaves:
-\[ \alpha \colon \mathcal{C}(-, x) \to \mathcal{C}(-, y) \]
-The component of this natural transformation at some $z$ is a function between hom-sets:
-\[ \alpha_z \colon \mathcal{C}(z, x) \to \mathcal{C}(z, y) \]
-which is simply implemented as the post-composition $(f \circ -)$.
+让我们也回顾一下它对箭头的作用。函子$\mathcal{Y}$将箭头$f \colon x \to y$提升为预层之间的映射：
+$$\alpha \colon \mathcal{C}(-, x) \to \mathcal{C}(-, y)$$
+这个自然变换在某个$z$上的分量是同态集之间的一个函数：
+$$\alpha_z \colon \mathcal{C}(z, x) \to \mathcal{C}(z, y)$$
+这简单地通过后合成（post-composition）$(f \circ -)$来实现。
 
-Such a functor $\mathcal{Y}$ can be thought of as creating a model of $\mathcal{C}$ in the presheaf category. But this is no run-of-the-mill model---it's an \emph{embedding} of one category inside another. This particular one is called the \emph{Yoneda embedding} and the functor $\mathcal{Y}$ is called the \index{Yoneda functor}\emph{Yoneda functor}. 
+这样的函子$\mathcal{Y}$可以被认为是在预层范畴中创建了一个$\mathcal{C}$的模型。但这不是一个普通的模型——它是一个将一个范畴嵌入到另一个范畴中的\emph{嵌入}（embedding）。这个特定的嵌入被称为\emph{Yoneda embedding（Yoneda 嵌入）}，而函子$\mathcal{Y}$被称为\emph{Yoneda functor（Yoneda 函子）}。
 
-First of all, every object of $\mathcal{C}$ is mapped to a \emph{different} object (presheaf) in $[\mathcal{C}^{op},  \mathbf{Set}]$. We say that it's \index{injection}\emph{injective on objects}. 
+首先，$\mathcal{C}$的每个对象都被映射为$[\mathcal{C}^{op}, \mathbf{Set}]$中的一个\emph{不同的}对象（预层）。我们说它是\emph{对象上的单射}（injective on objects）。
 
-But that's not all: every arrow in $\mathcal{C}$ is mapped to a \emph{different} arrow. We say that the embedding functor is \index{faithful functor}\emph{faithful}. 
+但这还不是全部：$\mathcal{C}$中的每个箭头都被映射为一个\emph{不同的}箭头。我们说这个嵌入函子是\emph{忠实的函子}（faithful functor）。
 
-If that weren't enough, the mapping of hom-sets is also \index{surjection}\emph{surjective}, meaning that every arrow between objects in $[\mathcal{C}^{op},  \mathbf{Set}]$ comes from some arrow in $\mathcal{C}$. We say that the functor is \index{full functor}\emph{full}. 
+如果这还不够，映射同态集的过程也是\emph{满射的}（surjective），这意味着$[\mathcal{C}^{op},  \mathbf{Set}]$中对象之间的每个箭头都来自$\mathcal{C}$中的某个箭头。我们说这个函子是\emph{充满函子}（full functor）。
 
-Altogether, the embedding is \emph{fully faithful}, that is the mapping of arrows is one-to-one. However, in general, the Yoneda embedding is \emph{not} surjective on objects, hence the word ``embedding.''
+总而言之，这个嵌入是\emph{完全忠实的}（fully faithful），即箭头的映射是一一对应的。然而，一般来说，Yoneda 嵌入在对象上并\emph{不}是满射的，因此称为“嵌入”。
 
-The fact that the embedding is fully faithful is the direct consequence of the Yoneda lemma. Indeed, we know that, for any functor $F \colon \mathcal{C}^{op} \to \mathbf{Set}$, we have a natural isomorphism:
-\[ [\mathcal{C}^{op}, \mathbf{Set}]( \mathcal{C}(-, x), F) \cong F x \]
-In particular, we can substitute another hom-functor $\mathcal{C}(-, y)$ for $F$ to get:
-\[ [\mathcal{C}^{op}, \mathbf{Set}]( \mathcal{C}(-, x), \mathcal{C}(-, y)) \cong \mathcal{C}(x, y)\]
-The left-hand side is the hom-set in the presheaf category and the right-hand side is the hom-set in $\mathcal{C}$. They are isomorphic, which proves that the embedding is fully faithful. In fact, the Yoneda lemma tells us that the isomorphism is natural in $x$ and $y$. 
+这个嵌入完全忠实的事实是Yoneda 引理的直接结果。实际上，我们知道，对于任意函子$F \colon \mathcal{C}^{op} \to \mathbf{Set}$，我们有一个自然同构：
+$$[\mathcal{C}^{op}, \mathbf{Set}](\mathcal{C}(-, x), F) \cong F x$$
+特别地，我们可以将另一个同态函子$\mathcal{C}(-, y)$替换为$F$，得到：
+$$[\mathcal{C}^{op}, \mathbf{Set}](\mathcal{C}(-, x), \mathcal{C}(-, y)) \cong \mathcal{C}(x, y)$$
+左侧是预层范畴中的同态集，而右侧是$\mathcal{C}$中的同态集。它们是同构的，这证明了嵌入是完全忠实的。事实上，Yoneda 引理告诉我们，这个同构在$x$和$y$中是自然的。
 
-Let's have a closer look at this isomorphism. Let's pick an element of the right-hand set $\mathcal{C}(x, y)$--- an arrow $f \colon x \to y$. The isomorphism maps it to a natural transformation whose component at $z$ is a function:
-\[ \mathcal{C}(z, x) \to \mathcal{C}(z, y) \]
-This mapping is implemented as post-composition $(f \circ -)$.
+让我们仔细看看这个同构。让我们选择右侧集合$\mathcal{C}(x, y)$的一个元素——一个箭头$f \colon x \to y$。这个同构将它映射为一个自然变换，其在$z$上的分量是一个函数：
+$$\mathcal{C}(z, x) \to \mathcal{C}(z, y)$$
+这个映射通过后合成$(f \circ -)$实现。
 
-In Haskell, we would write it as:
+在Haskell中，我们会这样写：
 \begin{haskell}
-toNatural :: (x -> y) -> (forall z. (z -> x) -> (z -> y))
-toNatural f = \h -> f . h 
+    toNatural :: (x -> y) -> (forall z. (z -> x) -> (z -> y))
+    toNatural f = \h -> f . h
 \end{haskell}
-In fact, this syntax works too:
+事实上，这种语法也有效：
 \begin{haskell}
-toNatural f = (f . )
+    toNatural f = (f . )
 \end{haskell}
-The inverse mapping is:
+反向映射是：
 \begin{haskell}
-fromNatural :: (forall z. (z -> x) -> (z -> y)) -> (x -> y)
-fromNatural alpha = alpha id
+    fromNatural :: (forall z. (z -> x) -> (z -> y)) -> (x -> y)
+    fromNatural alpha = alpha id
 \end{haskell}
-(Notice the use of the Yoneda trick again.)
+（再次注意使用了Yoneda技巧。）
 
-This isomorphism maps identity to identity and composition to composition. That's because it's implemented as post-composition, and post-composition preserves both identity and composition. We've shown this fact before, in the chapter on isomorphisms:
-\[ ((f \circ g) \circ -) = (f \circ -) \circ (g \circ -) \]
+这个同构将恒等映射为恒等，并将组合映射为组合。因为它是通过后合成实现的，而后合成保持了恒等和组合。我们在同构一章中已经展示过这个事实：
+$$((f \circ g) \circ -) = (f \circ -) \circ (g \circ -)$$
 
-Because it preserves composition and identity, this isomorphism also preserves \emph{isomorphisms}. So if $x$ is isomorphic to $y$ then the presheaves $ \mathcal{C}(-, x)$ and $ \mathcal{C}(-, y)$ are isomorphic, and vice versa. 
+因为它保持了组合和恒等，这个同构也保持了\emph{同构}（isomorphisms）。所以，如果$x$和$y$是同构的，那么预层$\mathcal{C}(-, x)$和$\mathcal{C}(-, y)$也是同构的，反之亦然。
 
-This is exactly the result that we've been using all along to prove numerous isomorphisms in previous chapters. If the hom-sets are naturally isomorphic, then the objects are isomorphic. 
+我们在之前各章中一直使用这个结果来证明许多同构。如果同态集自然同构，那么对象也是同构的。
 
-The Yoneda embedding builds on the idea that there is nothing more to an object than its relationships with other objects. The presheaf $\cat C (-, a)$, like a hologram, encodes the totality of views of $a$ from the perspective of the whole category $\cat C$. The Yoneda embedding tells us that, when we combine all these individual holograms, we get a perfect hologram of the whole category.
+Yoneda 嵌入建立在这样一种思想之上，即一个对象与其他对象的关系决定了这个对象的一切。预层$\cat C (-, a)$，就像一个全息图，编码了从整个范畴$\cat C$的角度看$a$的所有视图。Yoneda
 
-\section{Representable Functors}
+嵌入告诉我们，当我们将这些单独的全息图结合起来时，我们得到了整个范畴的完美全息图。
 
-Objects in a  co-presheaf category are functors that assign sets to objects in $\mathcal{C}$. Some of these functors work by picking a reference object $a$ and assigning,  to all objects $x$, their hom-sets  $\mathcal{C}(a, x)$:
-\[ F x = \cat C(a, x) \]
-Such functors, and all the functors isomorphic to those, are called \emph{representable}. The whole functor is ``represented'' by a single object $a$. 
+\section{Representable Functors（可表函子）}
 
-In a closed category, the functor which assigns  to every object $x$ the set of elements of the exponential object $x^a$ is represented by $a$. This is because the set of elements of $x^a$ is isomorphic to $\mathcal{C}(a, x)$:
-\[\mathcal{C}(1, x^a) \cong \mathcal{C}(1 \times a, x) \cong \mathcal{C} (a, x)\]
+对预层范畴中的对象是将集合分配给$\mathcal{C}$中的对象的函子（functors）。其中一些函子通过选择一个参考对象$a$来工作，并将所有对象$x$映射为它们的同态集$\mathcal{C}(a, x)$：
+$$F x = \cat C(a, x)$$
+这样的函子以及所有与之同构的函子称为\emph{representable（可表函子）}。整个函子由单个对象$a$来“表示”。
 
-Seen this way, the representing object $a$ is like a logarithm of a functor. 
+在封闭范畴中，将每个对象$x$映射为指数对象$x^a$的元素集合的函子由$a$表示。这是因为$x^a$的元素集合同构于$\mathcal{C}(a, x)$：
+$$\mathcal{C}(1, x^a) \cong \mathcal{C}(1 \times a, x) \cong \mathcal{C} (a, x)$$
 
-The analogy goes deeper: just like a logarithm of a product is a sum of logarithms, a representing object for a product data type is a sum. For instance, the functor that squares its argument using a product, $F x = x \times x$, is represented by $2$, which is the sum $1 + 1$. Indeed, we've seen before that $x \times x \cong x^2$.
+从这个角度看，表示对象$a$就像是一个函子的对数。
 
-Representable functors play a very special role in the category of $ \mathbf{Set}$-valued functors. Notice that the Yoneda embedding maps all objects of $\mathcal{C}$ to representable presheaves. It maps an object $x$ to a presheaf represented by $x$: 
+这个类比更深入：正如乘积的对数是对数之和一样，乘积数据类型的表示对象是一个和。例如，使用乘积平方其参数的函子$F x = x \times x$由$2$表示，这是和$1 + 1$。实际上，我们之前已经看到$x \times x \cong x^2$。
 
-\[  \mathcal{Y} \colon x \mapsto \mathcal{C}(-, x) \]
+可表函子在$\mathbf{Set}$值函子的范畴中扮演着非常特殊的角色。注意到Yoneda 嵌入将$\mathcal{C}$的所有对象映射为可表预层。它将一个对象$x$映射为由$x$表示的预层：
+$$\mathcal{Y} \colon x \mapsto \mathcal{C}(-, x)$$
 
-We can find the entire category  $\mathcal{C}$, objects and morphisms, embedded inside the presheaf category as representable functors. The question is, what else is there in the presheaf category ``in between'' representable functors?
+我们可以在预层范畴中找到整个范畴$\mathcal{C}$，对象和态射都嵌入为可表函子。问题是，在可表函子之间，预层范畴中还有什么“在它们之间”呢？
 
-Just like rational numbers are dense among real numbers, so representables are ``dense'' among (co-) presheaves. Every real number may be approximated by rational numbers. Every presheaf is a colimit of representables (and every co-presheaf, a limit). We'll come back to this topic when we talk about (co-) ends.
+就像有理数在实数中是稠密的，可表函子在（对）预层中也是“稠密的”。每个实数可以通过有理数逼近。每个预层都是可表函子的上极限（colimit）（而每个对预层则是下极限（limit））。我们将在讨论（对）端点（ends）时回到这个话题。
 
 \begin{exercise}
-Describe limits and colimits as representing objects. What are the functors they represent?
+    描述作为表示对象的极限和上极限。它们表示什么样的函子？
 \end{exercise}
 \begin{exercise}
-Consider a \emph{singleton functor} $F \colon \cat C \to \Set$ that assigns to each object $c$ a singleton set $\{c\}$ that contains just that object (that is, a different singleton for every object). Define the action of $F$ on arrows. Show that $F$ being representable is equivalent to $\cat C$ having an initial object.
+    考虑一个\emph{singleton functor（单例函子）}$F \colon \cat C \to \Set$，它将每个对象$c$映射为仅包含该对象的单例集合$\{c\}$（即，每个对象有不同的单例集合）。定义$F$对箭头的作用。证明$F$是可表的等价于$\cat C$有一个初始对象（initial object）。
 \end{exercise}
 
-\subsection{The guessing game}
+\subsection{The guessing game（猜谜游戏）}
 
-The idea that objects can be described by the way they interact with other objects is sometimes illustrated by playing an imaginary guessing game. One category theorist picks a secret object in a category, and the other has to guess which object it is (up to isomorphism, of course). 
+通过一个假想的猜谜游戏，有时可以说明对象如何通过与其他对象的相互作用来描述。一个范畴理论家在一个范畴中选择一个秘密对象，而另一个人则必须猜出它是什么（当然，是同构的）。
 
-The guesser is allowed to point at objects, and use them as ``probes'' into the secret object. The opponent is supposed to respond each time with a set: the set of arrows from the probing object $a$ to the secret object $x$. This, of course, is the hom-set $\mathcal{C}(a, x)$. 
+猜测者可以指向对象，并使用它们作为探测秘密对象的“探针”。对手每次都应以一个集合作为回应：从探测对象$a$到秘密对象$x$的箭头集合。这当然就是同态集$\mathcal{C}(a, x)$。
 
-The totality of these answers, as long as the opponent is not cheating, will define a presheaf $F \colon \mathcal{C}^{op} \to \mathbf{Set}$, and the object they are hiding is its representing object. 
+这些答案的总和，只要对手没有作弊，将定义一个预层$F \colon \mathcal{C}^{op} \to \mathbf{Set}$，他们隐藏的对象就是它的表示对象。
 
-But how do we know that the second category theorist in not cheating? To test that, we ask questions about arrows. For every arrow we select, they should give us a function between two sets---the sets they gave us for its endpoints. We can then check if all identity arrows are mapped to identity functions, and whether compositions of arrows map to compositions of functions. In other words, we'll be able to verify that $F$ is indeed a functor. 
+但我们怎么知道第二个范畴理论家没有作弊呢？为了验证这一点，我们询问关于箭头的问题。对于我们选择的每个箭头，他们应该给我们两个集合之间的一个函数——他们为其端点给出的集合。我们可以检查所有恒等箭头是否被映射为恒等函数，组合的箭头是否映射为函数的组合。换句话说，我们将能够验证$F$确实是一个函子。
 
-However, a clever enough opponent may still fool us. The presheaf they are revealing to us may describe a fantastic object---a figment of their imagination---and we won't be able to tell. It turns out that such fantastic beasts are often as interesting as the real ones. 
+然而，一个足够聪明的对手可能仍然会欺骗我们。他们揭示给我们的预层可能描述了一个幻想的对象——他们的想象的产物——而我们却无法辨别。事实证明，这样的幻想物体往往与真实物体一样有趣。
 
-\subsection{Representable functors in programming}
+\subsection{Representable functors in programming（编程中的可表函子）}
 
-In Haskell, we define a class of representable functors using two functions that witness the isomorphism: 
-\[ F x = \cat C(a, x) \]
-The first one, \hask{tabulate}, turns a function into a lookup table; and the second, \hask{index}, uses the representing type \hask{Key} to index into it.
+在Haskell中，我们使用两个函数定义了一个可表函子类，它们见证了这个同构：
+$$F x = \cat C(a, x)$$
+第一个函数，\hask{tabulate}，将一个函数转换为查找表；第二个函数，\hask{index}，使用表示类型\hask{Key}来索引它。
 
 \begin{haskell}
-class Representable f where
-  type Key f :: Type
-  tabulate :: (Key f -> x) -> f x
-  index    :: f x -> (Key f -> x)
+    class Representable f where
+    type Key f :: Type
+    tabulate :: (Key f -> x) -> f x
+    index    :: f x -> (Key f -> x)
 \end{haskell}
 
-Algebraic data types that use sums are not representable (there is no formula for taking a logarithm of a sum). For instance, the list type is defined as a sum, so it's not representable. However, an infinite stream is. 
+使用和（sum）的代数数据类型不可表示（没有公式可以取和的对数）。例如，列表类型被定义为一个和，因此它不可表示。然而，无限流是可表示的。
 
-Conceptually, a stream is like an infinite tuple, which is technically a product. Such a stream is represented by the type of natural numbers. In other words, an infinite stream is equivalent to a mapping out of natural numbers. 
+从概念上讲，流就像一个无限元组，技术上来说是一个积。这种流由自然数类型表示。换句话说，一个无限流等价于自然数的映射。
 \begin{haskell}
-data Stream a = Stm a (Stream a)
+    data Stream a = Stm a (Stream a)
 \end{haskell}
-Here's the instance definition:
+下面是实例定义：
 \begin{haskell}
-instance Representable Stream where
-  type Key Stream = Nat
-  tabulate g = tab Z
+    instance Representable Stream where
+    type Key Stream = Nat
+    tabulate g = tab Z
     where
-      tab n = Stm (g n) (tab (S n))
-  index stm = \n -> ind n stm
+    tab n = Stm (g n) (tab (S n))
+    index stm = \n -> ind n stm
     where
-      ind Z (Stm a _) = a
-      ind (S n) (Stm _ as) = ind n as
+    ind Z (Stm a _) = a
+    ind (S n) (Stm _ as) = ind n as
 \end{haskell}
-Representable types are useful for implementing \index{memoization} memoization of functions.
+可表类型对于实现\emph{memoization（记忆化）}函数非常有用。
 
 \begin{exercise}
-Implement the \hask{Representable} instance for \hask{Pair}:
-\begin{haskell}
-data Pair x = Pair x x
-\end{haskell}
+    为\hask{Pair}实现\hask{Representable}实例：
+    \begin{haskell}
+        data Pair x = Pair x x
+    \end{haskell}
 \end{exercise}
 
 \begin{exercise}
-Is the constant functor that maps everything to the terminal object representable? Hint: what's the logarithm of 1?
+    将所有内容映射为终端对象的常量函子是可表的么？提示：1的对数是什么？
 
-In Haskell, such a functor could be implemented as:
-\begin{haskell}
-data Unit a = U
-\end{haskell}
-Implement the instance of \hask{Representable} for it.
+    在Haskell中，这样的函子可以实现为：
+    \begin{haskell}
+        data Unit a = U
+    \end{haskell}
+    为其实现\hask{Representable}实例。
 \end{exercise}
 
 \begin{exercise}
-The list functor is not representable. But can it be considered a sum or representables?
+    列表函子不可表示。但它可以被认为是可表的和吗？
 \end{exercise}
 
-\section{2-category  $\mathbf{Cat}$ }
+\section{2-category  $\mathbf{Cat}$ （2-范畴 $\mathbf{Cat}$）}
 
-In the category of categories, $\mathbf{Cat}$, the hom-sets are not ``just'' sets. Each of them can be promoted to a functor category, with natural transformations playing the role of arrows. This kind of structure is called a 2-category. 
+在范畴的范畴$\mathbf{Cat}$中，同态集不仅仅是集合。每个同态集都可以提升为一个函子范畴，其中自然变换（natural transformations）扮演箭头的角色。这种结构被称为2-范畴（2-category）。
 
-In the language of 2-categories, objects are called \index{0-cells}0-cells, arrows between them are called \index{1-cells}1-cells, and arrows between arrows are called \index{2-cells}2-cells. 
+在2-范畴的语言中，对象称为\emph{0-cells}（0-胞元），它们之间的箭头称为\emph{1-cells}（1-胞元），而箭头之间的箭头称为\emph{2-cells}（2-胞元）。
 
-The obvious generalization of that picture would be to have 3-cells that go between 2-cells and so on. An \index{$n$-category}$n$-category has cells going up to the $n$-th level. 
+这一图景的明显推广是，在2-胞元之间有3-胞元，依此类推。一个\emph{$n$-category}（$n$-范畴）有一直到第$n$层的胞元。
 
-But why not have arrows going all the way? Enter \index{infinity categories}infinity categories. Far from being a curiosity, $\infty$-categories have practical applications. For instance they are used in algebraic topology to describe points, paths between points, surfaces swiped by paths, volumes swiped by surfaces, and so on, ad infinitum. 
+但为什么不让箭头一直延伸呢？这就引出了\emph{infinity categories（$\infty$-范畴）}。远非一种好奇心，$\infty$-范畴在实际应用中有其用途。例如，它们在代数拓扑中用于描述点、点之间的路径、路径扫过的曲面、曲面扫过的体积，依此类推，直到无穷。
 
-\section{Useful Formulas}
+\section{Useful Formulas（实用公式）}
 \begin{itemize}
-\item Yoneda lemma for covariant functors:
-\[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
-\item Yoneda lemma for contravariant functors:
-\[ [\mathcal{C}^{op}, \mathbf{Set}]( \mathcal{C}(-, a), F) \cong F a \]
-\item Corollaries to the Yoneda lemma:
-\begin{align*}
- [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(x, -), \mathcal{C}(y, -)) &\cong \mathcal{C}(y, x) \\
- [\mathcal{C}^{op}, \mathbf{Set}]( \mathcal{C}(-, x), \mathcal{C}(-, y)) &\cong \mathcal{C}(x, y)
-\end{align*}
+    \item 对协变函子的Yoneda 引理：
+    $$[\mathcal{C}, \mathbf{Set}](\mathcal{C}(a, -), F) \cong F a$$
+    \item 对逆变函子的Yoneda 引理：
+    $$[\mathcal{C}^{
 
+        op}, \mathbf{Set}](\mathcal{C}(-, a), F) \cong F a$$
+    \item Yoneda 引理的推论：
+    \begin{align*}
+    [\mathcal{C}, \mathbf{Set}](\mathcal{C}(x, -), \mathcal{C}(y, -)) &\cong \mathcal{C}(y, x) \\
+    [\mathcal{C}^{op}, \mathbf{Set}](\mathcal{C}(-, x), \mathcal{C}(-, y)) &\cong \mathcal{C}(x, y)
+    \end{align*}
 \end{itemize}
 
 \end{document}
