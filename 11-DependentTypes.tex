@@ -599,675 +599,676 @@
 
  \end{exercise}
 
-\section{Dependent Sum}
 
-In type theory, the dependent sum, or the sigma type $\Sigma_{x : B} T(x)$, is defined as a type of pairs in which the \emph{type} of the second component depends on the \emph{value} of the first component. 
+  \section{依赖和 (Dependent Sum)}
 
-Conceptually, the sum type is defined using its mapping-out property. The mapping out of a sum is a pair of mappings, as illustrated in this adjunction:
-\[ \mathcal{C}(F_1 + F_2, F) \cong (\mathcal{C} \times \mathcal{C}) (\langle F_1, F_2 \rangle, \Delta F) \]
-Here, we have a pair of arrows $(F_1 \to F, F_2 \to F)$ that define the mapping out of the sum $S = F_1 + F_2$. In $\Set$, the sum is a tagged union. A dependent sum is a sum that is tagged by elements of another set.
+  在类型理论中，依赖和，或 sigma 类型 $\Sigma_{x : B} T(x)$，定义为一对元素的类型，其中第二个元素的\emph{类型}依赖于第一个元素的\emph{值}。
 
-Our counted vector type can be thought of as a dependent sum tagged by natural numbers. An element of this type is a natural number \hask{n}  (a value) paired with an element of the n-tuple type \hask{(a, a, ... a)}. Here are some counted vectors of integers written in this representation:
-\begin{haskell}
-(0, ())
-(1, 42)
-(2, (64, 7))
-(5, (8, 21, 14, -1, 0))
-\end{haskell}
+  从概念上讲，和类型通过其映射出性质（mapping-out property）定义。和的映射出是一个对映，如下的伴随关系所示：
+  \[ \mathcal{C}(F_1 + F_2, F) \cong (\mathcal{C} \times \mathcal{C}) (\langle F_1, F_2 \rangle, \Delta F) \]
+  在这里，我们有一对箭头 $(F_1 \to F, F_2 \to F)$，它们定义了和 $S = F_1 + F_2$ 的映射出。在 $\Set$ 中，和是带标签的并集。依赖和是由另一个集合的元素标记的和。
 
-More generally, the introduction rule for the dependent sum assumes that there is a family of types $T(x)$ indexed by elements of the base type $B$. Then an element of $\Sigma_{x : B} T(x)$ is constructed from a pair of elements $x \colon B$ and $y \colon T(x)$. 
+  我们的计数向量类型可以被认为是由自然数标记的依赖和。这种类型的元素是一个自然数 \hask{n}（一个值）与一个 n 元组类型 \hask{(a, a, ... a)} 的元素配对。以下是一些用这种表示法编写的整数计数向量：
+  \begin{haskell}
+   (0, ())
+   (1, 42)
+   (2, (64, 7))
+   (5, (8, 21, 14, -1, 0))
+  \end{haskell}
 
-Categorically, dependent sum is modeled as the left adjoint of the base-change functor. 
+  更一般地说，依赖和的引入规则假设存在一个由基类型 $B$ 的元素索引的类型族 $T(x)$。然后 $\Sigma_{x : B} T(x)$ 的元素由一对元素 $x \colon B$ 和 $y \colon T(x)$ 构成。
 
-To see this, let's first revisit the definition of a pair, which is an element of a product. We've noticed before that a product can be written as a pullback from the singleton set---the terminal object. Here's the universal construction for the product/pullback (the notation anticipates the target of this construction):
-\[
- \begin{tikzcd}
- S
- \arrow[dr, blue, dashed, "\phi^T"]
- \arrow[drr, blue, bend left, "\phi"]
- \arrow[ddr, bend right, "q"]
- \\
- &B \times F
-\arrow[dr, phantom,  , very near start, "\lrcorner"]
- \arrow[r, "\pi_2"]
- \arrow[d, "\pi_1"']
- &F
- \arrow[d, "!"]
- \\
- &B
- \arrow[r, "!"]
- &1
-  \end{tikzcd}
-\]
+  从范畴论的角度看，依赖和被建模为基变换函子的左伴随。
 
-We have also seen that the product can be defined using an adjunction. We can spot this adjunction in our diagram: for every pair of arrows $\langle \phi, q \rangle$ there is a unique arrow $\phi^T$ that makes the triangles commute. 
+  为了理解这一点，我们首先回顾一下积的定义，它是积的元素。我们之前已经注意到，积可以表示为从单元素集合（终对象）拉回的积。以下是积/拉回的通用构造（符号表示了该构造的目标）：
+  \[
+   \begin{tikzcd}
+    S
+    \arrow[dr, blue, dashed, "\phi^T"]
+    \arrow[drr, blue, bend left, "\phi"]
+    \arrow[ddr, bend right, "q"]
+    \\
+    &B \times F
+    \arrow[dr, phantom,  , very near start, "\lrcorner"]
+    \arrow[r, "\pi_2"]
+    \arrow[d, "\pi_1"']
+    &F
+    \arrow[d, "!"]
+    \\
+    &B
+    \arrow[r, "!"]
+    &1
+   \end{tikzcd}
+  \]
 
-Notice that, if we keep $q$ fixed, we get a one-to-one correspondence between the arrows $\phi$ and $\phi^T$. This will be the adjunction we're interested in.
+  我们还看到积可以通过伴随关系来定义。我们可以在图中发现这种伴随关系：对于每一对箭头 $\langle \phi, q \rangle$，都有一个唯一的箭头 $\phi^T$ 使得三角形是可交换的。
 
-We can now put our fibrational glasses on and notice that $\langle S, q\rangle$ and $\langle B \times F, \pi_1 \rangle$ are two fibrations over the same base $B$. The commuting triangle makes $\phi^T$ a morphism in the slice category $\mathcal{C}/B$, or a fiber-wise mapping. In other words $\phi^T$ is a member of the hom-set:
- \[ (\mathcal{C}/B) \left(\left \langle {S \atop q} \right \rangle, \left \langle {B \times F \atop \pi_1} \right \rangle \right)  \]
- 
- Since $\phi$ is a member of the hom-set $ \mathcal{C}(S, F)$, we can rewrite the one-to-one correspondence between $\phi^T$ and  $\phi$ as an isomorphism of hom-sets:
-\[  (\mathcal{C}/B)\left(\left \langle {S \atop q} \right \rangle, \left \langle {B \times F \atop \pi_1} \right \rangle \right) \cong \mathcal{C}(S, F) \]
-In fact, it's an adjunction in which we have the forgetful functor $U \colon \mathcal{C}/B \to \mathcal{C}$ mapping $\langle S, q \rangle$ to $S$, thus forgetting the fibration.
+  请注意，如果我们固定 $q$，我们会在箭头 $\phi$ 和 $\phi^T$ 之间得到一一对应的关系。这就是我们感兴趣的伴随关系。
 
-If you squint at this adjunction hard enough, you can see the outlines of the definition of $S$ as a categorical sum (coproduct). 
+  现在，我们可以戴上纤维化的眼镜，注意到 $\langle S, q\rangle$ 和 $\langle B \times F, \pi_1 \rangle$ 是在相同基 $B$ 上的两个纤维化。交换三角形使 $\phi^T$ 成为商范畴 $\mathcal{C}/B$ 中的一个态射，或者说是纤维间的映射。换句话说，$\phi^T$ 是同态集的一个成员：
+  \[ (\mathcal{C}/B) \left(\left \langle {S \atop q} \right \rangle, \left \langle {B \times F \atop \pi_1} \right \rangle \right)  \]
 
-Firstly, on the right you have a mapping out of $S$. Think of $S$ as the sum of fibers that are defined by the fibration $\langle S, q \rangle$. 
+  由于 $\phi$ 是同态集 $ \mathcal{C}(S, F)$ 的一个成员，我们可以将 $\phi^T$ 和 $\phi$ 之间的一一对应关系重写为同态集的同构：
+  \[  (\mathcal{C}/B)\left(\left \langle {S \atop q} \right \rangle, \left \langle {B \times F \atop \pi_1} \right \rangle \right) \cong \mathcal{C}(S, F) \]
+  实际上，这是一个伴随关系，其中我们有一个遗忘函子 $U \colon \mathcal{C}/B \to \mathcal{C}$，它将 $\langle S, q \rangle$ 映射到 $S$，从而遗忘了纤维化。
 
-Secondly, recall that the fibration $\langle B \times F, \pi_1 \rangle$ can be though of as producing many copies of $F$ planted over points in $B$. This is a generalization of the diagonal functor $\Delta$ that duplicates $F$---here, we make ``$B$ copies'' of $F$. The left hand side of the adjunction is just a bunch of arrows, each mapping a different fiber of $S$ to the target fiber $F$. 
+  如果你仔细看这个伴随关系，你可以看到将 $S$ 定义为范畴和（即余积）的轮廓。
 
-\[
-\begin{tikzpicture}
-\def\xmin{1.4};
-\def\dx{0.4};
-\def\xl{-1.4};
+  首先，在右边你有一个 $S$ 的映射出。将 $S$ 视为由纤维化 $\langle S, q \rangle$ 定义的纤维的和。
 
-\def\dy{0.2};
-\def\yb{0.2};
-\def\yt{10 * \dy}; 
+  其次，回想一下纤维化 $\langle B \times F, \pi_1 \rangle$ 可以被视为在 $B$ 的点上植入许多 $F$ 的副本。这是对对角函子 $\Delta$ 的推广，它复制 $F$，在这里，我们制作了“$B$ 副本”的 $F$。伴随关系的左侧只是一些箭头，每个箭头将 $S$ 的不同纤维映射到目标纤维 $F$。
 
-\def\ybb{-2};
-\def\ytt{\ybb + 6 * \dy};
+  \[
+   \begin{tikzpicture}
+    \def\xmin{1.4};
+    \def\dx{0.4};
+    \def\xl{-1.4};
 
-\def\ybase{-2.5}
+    \def\dy{0.2};
+    \def\yb{0.2};
+    \def\yt{10 * \dy};
+
+    \def\ybb{-2};
+    \def\ytt{\ybb + 6 * \dy};
+
+    \def\ybase{-2.5}
 
 % bars above
 
-\def\yya{\yt - 3 * \dy}
-\def\yyb{\yt - 1 * \dy}
-\def\yyc{\yt - 6 * \dy}
-\def\yyd{\yt - 7 * \dy}
+    \def\yya{\yt - 3 * \dy}
+    \def\yyb{\yt - 1 * \dy}
+    \def\yyc{\yt - 6 * \dy}
+    \def\yyd{\yt - 7 * \dy}
 
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 0*\dx, \yb) rectangle (\xl + 1 * \dx, \yya);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 1*\dx, \yb) rectangle (\xl + 2 * \dx, \yyb);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 2*\dx, \yb) rectangle (\xl + 3 * \dx, \yyc);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 3*\dx, \yb) rectangle (\xl + 4 * \dx, \yyd);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 4*\dx, \yb) rectangle (\xl + 5 * \dx, \yya);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 0*\dx, \yb) rectangle (\xl + 1 * \dx, \yya);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 1*\dx, \yb) rectangle (\xl + 2 * \dx, \yyb);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 2*\dx, \yb) rectangle (\xl + 3 * \dx, \yyc);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 3*\dx, \yb) rectangle (\xl + 4 * \dx, \yyd);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 4*\dx, \yb) rectangle (\xl + 5 * \dx, \yya);
 
-\draw (\xl + 0 * \dx, \yb) -- (\xl + 0 * \dx, \yya);
-\draw (\xl + 1 * \dx, \yb) -- (\xl + 1 * \dx, \yyb);
-\draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yyb);
-\draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yyc);
-\draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yya);
-\draw (\xl + 5 * \dx, \yb) -- (\xl + 5 * \dx, \yya);
+    \draw (\xl + 0 * \dx, \yb) -- (\xl + 0 * \dx, \yya);
+    \draw (\xl + 1 * \dx, \yb) -- (\xl + 1 * \dx, \yyb);
+    \draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yyb);
+    \draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yyc);
+    \draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yya);
+    \draw (\xl + 5 * \dx, \yb) -- (\xl + 5 * \dx, \yya);
 
 
 % bars below
 
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \ybb) rectangle (\xl + 5 * \dx, \ytt);
-\draw (\xl + 0 * \dx, \ybb) -- (\xl + 0 * \dx, \ytt);
-\draw (\xl + 1 * \dx, \ybb) -- (\xl + 1 * \dx, \ytt);
-\draw (\xl + 2 * \dx, \ybb) -- (\xl + 2 * \dx, \ytt);
-\draw (\xl + 3 * \dx, \ybb) -- (\xl + 3 * \dx, \ytt);
-\draw (\xl + 4 * \dx, \ybb) -- (\xl + 4 * \dx, \ytt);
-\draw (\xl + 5 * \dx, \ybb) -- (\xl + 5 * \dx, \ytt);
+    \filldraw[fill=blue!50!green!20, draw=white] (\xl, \ybb) rectangle (\xl + 5 * \dx, \ytt);
+    \draw (\xl + 0 * \dx, \ybb) -- (\xl + 0 * \dx, \ytt);
+    \draw (\xl + 1 * \dx, \ybb) -- (\xl + 1 * \dx, \ytt);
+    \draw (\xl + 2 * \dx, \ybb) -- (\xl + 2 * \dx, \ytt);
+    \draw (\xl + 3 * \dx, \ybb) -- (\xl + 3 * \dx, \ytt);
+    \draw (\xl + 4 * \dx, \ybb) -- (\xl + 4 * \dx, \ytt);
+    \draw (\xl + 5 * \dx, \ybb) -- (\xl + 5 * \dx, \ytt);
 
-\node[left] at (\xl, \ybb + 3 * \dy) {$B \times F$};
-\node[left] at (\xl, 3 * \dy) {$S$};
-\draw[thick, blue] (\xl + 6 * \dx, \ybb) -- (\xl + 6 * \dx, \ytt) node[midway, right] {$F$};
-\draw[] (\xl, \ybase) -- (\xl + 5 * \dx, \ybase) node [midway, below] {$B$};
+    \node[left] at (\xl, \ybb + 3 * \dy) {$B \times F$};
+    \node[left] at (\xl, 3 * \dy) {$S$};
+    \draw[thick, blue] (\xl + 6 * \dx, \ybb) -- (\xl + 6 * \dx, \ytt) node[midway, right] {$F$};
+    \draw[] (\xl, \ybase) -- (\xl + 5 * \dx, \ybase) node [midway, below] {$B$};
 
-\draw[->, dashed] (\xl + 2.5 * \dx, \yb - 0.1) -- (\xl + 2.5 * \dx, \ytt + 0.1) node[midway, right] {$\phi^T$};
+    \draw[->, dashed] (\xl + 2.5 * \dx, \yb - 0.1) -- (\xl + 2.5 * \dx, \ytt + 0.1) node[midway, right] {$\phi^T$};
 
-\end{tikzpicture}
-\]
+   \end{tikzpicture}
+  \]
 
-Applying this idea to our counted-vector example, $\phi^T$ stands for infinitely many functions, one per every natural number. In practice, we define these functions using recursion. For instance, here's a mapping out of a vector of integers:
-\begin{haskell}
-sumV :: Vec n Int -> Int
-sumV VNil = 0
-sumV (VCons n v) = n + sumV v
-\end{haskell}
+  将这一思想应用到我们的计数向量示例中，$\phi^T$ 代表无限多个函数，每个自然数一个。在实践中，我们使用递归来定义这些函数。例如，这里有一个整数向量的映射：
+  \begin{haskell}
+   sumV :: Vec n Int -> Int
+   sumV VNil = 0
+   sumV (VCons n v) = n + sumV v
+  \end{haskell}
 
-\subsection{Adding the atlas}
+  \subsection{添加图集 (Adding the atlas)}
 
-We can generalize our diagram by replacing the terminal object with an arbitrary base $A$ (an atlas). Instead of a single fiber, we now have a fibration $\langle F, p \rangle$, and we use the pullback square that defines the base-change functor $f^*$:
-\[
- \begin{tikzcd}
- S
- \arrow[dr, blue, dashed, "\phi^T"]
- \arrow[drr, blue, bend left, "\phi"]
- \arrow[ddr, bend right, "q"]
- \\
- &f^* F
-\arrow[dr, phantom,  , very near start, "\lrcorner"]
- \arrow[r, "g"]
- \arrow[d, "f^* p"']
- &F
- \arrow[d, "p"]
- \\
- &B
- \arrow[r, "f"]
- &A
-  \end{tikzcd}
-\]
+  我们可以通过用任意基 $A$（图集）替换终对象来推广我们的图表。现在，我们有了一个纤维化 $\langle F, p \rangle$，并且我们使用定义基变换函子 $f^*$ 的拉回方形：
+  \[
+   \begin{tikzcd}
+    S
+    \arrow[dr, blue, dashed, "\phi^T"]
+    \arrow[drr, blue, bend left, "\phi"]
+    \arrow[ddr, bend right, "q"]
+    \\
+    &f^* F
+    \arrow[dr, phantom,  , very near start, "\lrcorner"]
+    \arrow[r, "g"]
+    \arrow[d, "f^* p"']
+    &F
+    \arrow[d, "p"]
+    \\
+    &B
+    \arrow[r, "f"]
+    &A
+   \end{tikzcd}
+  \]
 
-We can imagine that the fibration over $B$ is finer grain, since $f$ may map multiple points to one. Think, for instance, of a function \hask{even :: Nat -> Bool} that creates two bunches of even and odd numbers. In this picture, $f$ defines a coarser ``resampling'' of the original $S$.
+  我们可以想象在 $B$ 上的纤维化更细粒度，因为 $f$ 可能将多个点映射到一个点。例如，考虑一个函数 \hask{even :: Nat -> Bool}，它创建了偶数和奇数的两个集合。在此图中，$f$ 定义了对原始 $S$ 的粗略“重采样”。
 
-The universality of the pullback results in the following isomorphism of hom-sets:
+  拉回的通用性导致了以下同态集的同构：
 
-\[  (\mathcal{C}/B) \left( \left \langle {S \atop q} \right \rangle , f^* \left \langle {F \atop p} \right \rangle \right) \cong (\mathcal{C}/A) \left( \left \langle {S \atop f \circ q } \right \rangle , \left \langle {F \atop p} \right \rangle \right)  \]
-Here, $\phi^T$ is an element of the left-hand side, and $\phi$ is the corresponding element of the right-hand side. 
+  \[  (\mathcal{C}/B) \left( \left \langle {S \atop q} \right \rangle , f^* \left \langle {F \atop p} \right \rangle \right) \cong (\mathcal{C}/A) \left( \left \langle {S \atop f \circ q } \right \rangle , \left \langle {F \atop p} \right \rangle \right)  \]
+  在这里，$\phi^T$ 是左侧的一个元素，而 $\phi$ 是对应的右侧元素。
 
-We interpret this isomorphism as the adjunction between the base change functor $f^*$ on the left and the dependent sum functor on the right. 
-\[  (\mathcal{C}/B) \left( \left \langle {S \atop q} \right \rangle , f^* \left \langle {F \atop p} \right \rangle \right) \cong (\mathcal{C}/A) \left( \Sigma_f \left \langle {S \atop q} \right \rangle , \left \langle {F \atop p} \right \rangle \right)  \]
-The dependent sum is thus given by this formula:
-\[ \Sigma_f \left \langle {S \atop q} \right \rangle =  \left \langle {S \atop f \circ q} \right \rangle \]
-This says that, if $S$ is fibered over $B$ using $q$, and there is a mapping $f$ from $B$ to $A$, then $S$ is automatically (more coarsely) fibered over $A$, the projection being the composition $f \circ q$. 
+  我们将这个同构解释为基变换函子 $f^*$ 和依赖和函子之间的伴随关系。
+  \[  (\mathcal{C}/B) \left( \left \langle {S \atop q} \right \rangle , f^* \left \langle {F \atop p} \right \rangle \right) \cong (\mathcal{C}/A) \left( \Sigma_f \left \langle {S \atop q} \right \rangle , \left \langle {F \atop p} \right \rangle \right)  \]
+  依赖和因此由以下公式给出：
+  \[ \Sigma_f \left \langle {S \atop q} \right \rangle =  \left \langle {S \atop f \circ q} \right \rangle \]
+  这意味着，如果 $S$ 是通过 $q$ 在 $B$ 上纤维化的，并且存在从 $B$ 到 $A$ 的映射 $f$，那么 $S$ 就会自动（更粗略地）在 $A$ 上纤维化，投影为组合 $f \circ q$。
 
-We've seen before that, in $\mathbf{Set}$, $f$ defines patches within $B$. Fibers of $F$ are replanted in these patches to form $f^*F$.  Locally---that is within each patch---$f^*F$ looks like a cartesian product. 
+  我们之前已经看到，在 $\mathbf{Set}$ 中，$f$ 定义了 $B$ 内的补丁。$F$ 的纤维被重新植入这些补丁中，形成 $f^*F$。局部而言，即在每个补丁内，$f^*F$ 看起来像是一个笛卡尔积。
 
-\[
-\begin{tikzpicture}
-\def\xmin{1.4};
-\def\dx{0.4};
-\def\xl{-1.4};
+  \[
+   \begin{tikzpicture}
+    \def\xmin{1.4};
+    \def\dx{0.4};
+    \def\xl{-1.4};
 
-\def\dy{0.2};
-\def\yb{0};
-\def\yt{10 * \dy}; 
+    \def\dy{0.2};
+    \def\yb{0};
+    \def\yt{10 * \dy};
 
 % bars over A
-\filldraw[fill=blue!50!green!20, draw=white] (\xmin, \yb) rectangle (\xmin + \dx, \yt - 2*\dy);
-\filldraw[fill=red!50!green!20, draw=white] (\xmin + \dx, \yb) rectangle (\xmin + 2 * \dx, \yt);
+    \filldraw[fill=blue!50!green!20, draw=white] (\xmin, \yb) rectangle (\xmin + \dx, \yt - 2*\dy);
+    \filldraw[fill=red!50!green!20, draw=white] (\xmin + \dx, \yb) rectangle (\xmin + 2 * \dx, \yt);
 
-\draw (\xmin, \yb) -- (\xmin, \yt - 2*\dy);
-\draw (\xmin + \dx, \yb) -- (\xmin+ \dx, \yt);
-\draw (\xmin + 2 * \dx, \yb) -- (\xmin + 2 * \dx, \yt);
+    \draw (\xmin, \yb) -- (\xmin, \yt - 2*\dy);
+    \draw (\xmin + \dx, \yb) -- (\xmin+ \dx, \yt);
+    \draw (\xmin + 2 * \dx, \yb) -- (\xmin + 2 * \dx, \yt);
 
-\node[below] (BB) at (\xmin + \dx, \yb) {$A$};
-\node[above] at (\xmin + \dx, 10 * \dy) {$F$};
+    \node[below] (BB) at (\xmin + \dx, \yb) {$A$};
+    \node[above] at (\xmin + \dx, 10 * \dy) {$F$};
 
 % bars over B
 
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 5 * \dx, \yt - 2*\dy);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 2*\dx, \yb) rectangle (\xl + 5 * \dx, \yt);
-\draw (\xl, \yb) -- (\xl, \yt - 2*\dy);
-\draw (\xl + \dx, \yb) -- (\xl + \dx, \yt - 2 * \dy);
-\draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
-\draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
-\draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
-\draw (\xl + 5 * \dx, \yb) -- (\xl + 5 * \dx, \yt);
+    \filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 5 * \dx, \yt - 2*\dy);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 2*\dx, \yb) rectangle (\xl + 5 * \dx, \yt);
+    \draw (\xl, \yb) -- (\xl, \yt - 2*\dy);
+    \draw (\xl + \dx, \yb) -- (\xl + \dx, \yt - 2 * \dy);
+    \draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
+    \draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
+    \draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
+    \draw (\xl + 5 * \dx, \yb) -- (\xl + 5 * \dx, \yt);
 
-\node[below] (B) at (\xl + 2 * \dx, \yb) {$B$};
-\node[above] at (\xl + \dx, 10 * \dy) {$f^* F$};
+    \node[below] (B) at (\xl + 2 * \dx, \yb) {$B$};
+    \node[above] at (\xl + \dx, 10 * \dy) {$f^* F$};
 
-\draw[->]  (B) -- (BB) node [midway, below] {$f$};
+    \draw[->]  (B) -- (BB) node [midway, below] {$f$};
 
 
-\end{tikzpicture}
-\]
-$S$ itself is fibered in two ways: coarsely chopped over $A$ using $f \circ q$ and finely julienned over $B$ using $q$. 
+   \end{tikzpicture}
+  \]
+  $S$ 本身以两种方式纤维化：使用 $f \circ q$ 在 $A$ 上粗略地分割，并使用 $q$ 在 $B$ 上精细地切片。
 
-In category theory, the dependent sum, which is the left adjoint to the base change functor $f^*$, is denoted by $f_!$. For a given $f \colon b \to a$, it's a functor:
-\[ f_! \colon \cat C/b \to \cat C/a \]
-Its action on an object $(s, q \colon s \to b)$ is given by post-composition by $f$:
-\[ f_! (s, q)= (s, f \circ q) \]
+  在范畴论中，依赖和是基变换函子 $f^*$ 的左伴随，记作 $f_!$。对于给定的 $f \colon b \to a$，这是一个函子：
+  \[ f_! \colon \cat C/b \to \cat C/a \]
+  它对对象 $(s, q \colon s \to b)$ 的作用由后组合 $f$ 给出：
+  \[ f_! (s, q)= (s, f \circ q) \]
 
-\subsection{Existential quantification}
+  \subsection{存在量化 (Existential quantification)}
 
-In the \emph{propositions as types} interpretation, type families correspond to families of propositions. The dependent sum type $\Sigma_{x : B} \, T(x)$ corresponds to the proposition: There exists an $x$ for which $T(x)$ is true:
-\[ \exists_{x : B} \, T (x)\]
+  在“命题即类型”的解释中，类型族对应于命题族。依赖和类型 $\Sigma_{x : B} \, T(x)$ 对应于命题：存在一个 $x$ 使得 $T(x)$ 为真：
+  \[ \exists_{x : B} \, T (x)\]
 
-Indeed, a term of the type $\Sigma_{x : B} \, T(x)$ is a pair of an element $x \colon B$ and an element $y \colon T(x)$---which shows that $T(x)$ is inhabited for some $x$.
+  确实，类型 $\Sigma_{x : B} \, T(x)$ 的一个术语是一个元素对，一个是 $x \colon B$，另一个是 $y \colon T(x)$——这表明 $T(x)$ 对于某个 $x$ 是可居住的。
 
-\section{Dependent Product}
+  \section{依赖积 (Dependent Product)}
 
-In type theory, the dependent product, or dependent function, or pi-type $\Pi_{x:B} T(x)$, is defined as a function whose return \emph{type} depends on the \emph{value} of its argument. 
+  在类型理论中，依赖积，或依赖函数，或 $\Pi$-类型 $\Pi_{x:B} T(x)$，定义为返回\emph{类型}取决于其参数的\emph{值}的函数。
 
-It's called a function, because you can evaluate it. Given a dependent function  $f \colon \Pi_{x:B} T(x)$, you may apply it to an argument $x\colon B$ to get a value $f(x) \colon T(x)$.
+  它被称为函数，因为你可以对其进行求值。给定一个依赖函数 $f \colon \Pi_{x:B} T(x)$，你可以将其应用于参数 $x\colon B$ 以获得 $f(x) \colon T(x)$ 的值。
 
-\subsection{Dependent product in Haskell}
-A simple example of a dependent product is a function that constructs a vector of a given size and fills it with copies of a given value:
-\begin{haskell}
-replicateV :: a -> SNat n -> Vec n a
-replicateV _ SZ  = VNil
-replicateV x (SS n) = VCons x (replicateV x n)
-\end{haskell}
-
-At the time of this writing, Haskell's support for dependent types is limited, so the implementation of dependent functions requires the use of singleton types. In this case, the number that is the argument to \hask{replicateV} is passed as a singleton natural:
-\begin{haskell}
-data SNat n where
-  SZ :: SNat Z
-  SS :: SNat n -> SNat (S n)
-\end{haskell}
-(Note that \hask{replicateV} is a function of two arguments, so it can be either considered a dependent function of a pair, or a regular function returning a dependent function.)
-\subsection{Dependent product of sets}
-Before we describe the categorical model of dependent functions, it's instructive to consider how they work on sets. A dependent function selects one element from each set $T(x)$. 
-
-You may visualize the totality of this selection as a giant tuple---an element of a cartesian product. For instance, in the trivial case of $B$ a two-element set $\{1, 2\}$, a dependent function type is just a cartesian product $T(1) \times T(2)$. In general, you get one tuple component per every value of $x$. It's a giant tuple indexed by elements of $B$. This is the meaning of the product notation, $\Pi_{x:B} T(x)$. 
+  \subsection{Haskell 中的依赖积}
+  一个简单的依赖积示例是一个构造具有给定大小的向量并用给定值填充它的函数：
+  \begin{haskell}
+   replicateV :: a -> SNat n -> Vec n a
+   replicateV _ SZ  = VNil
+   replicateV x (SS n) = VCons x (replicateV x n)
+  \end{haskell}
+
+  在撰写本文时，Haskell 对依赖类型的支持有限，因此依赖函数的实现需要使用单例类型。在这种情况下，作为 \hask{replicateV} 参数的数字作为单例自然数传递：
+  \begin{haskell}
+   data SNat n where
+   SZ :: SNat Z
+   SS :: SNat n -> SNat (S n)
+  \end{haskell}
+  （请注意，\hask{replicateV} 是一个双参函数，因此它可以被视为一个对的依赖函数，或者一个返回依赖函数的常规函数。）
+  \subsection{集合的依赖积}
+  在描述依赖函数的范畴模型之前，研究它们在集合上的工作方式是很有帮助的。依赖函数从每个集合 $T(x)$ 中选择一个元素。
+
+  你可以将这个选择的整体想象为一个巨大的元组——笛卡尔积的一个元素。例如，在 $B$ 是一个两元素集合 $\{1, 2\}$ 的简单情况下，依赖函数类型只是一个笛卡尔积 $T(1) \times T(2)$。通常，你会得到一个以 $B$ 的元素为索引的元组组件。这就是积符号 $\Pi_{x:B} T(x)$ 的意义。
 
-In our example, \hask{replicateV} picks a particular counted vector for each value of \hask{n}. Counted vectors are equivalent to tuples so, for \hask{n} equal zero, \hask{replicateV} returns an empty tuple \hask{()}; for \hask{n = 1} it returns a single value \hask{x}; for \hask{n} equal two, it duplicates \hask{x} returning \hask{(x, x)}; etc. 
-
-The function \hask{replicateV}, evaluated at some \hask{x :: a},  is equivalent to an infinite tuple of tuples:
-\[ ((), x, (x, x), (x, x, x), ...) \]
-which is a specific element of the type:
-\[ ((), a, (a, a), (a, a, a), ...) \]
-
-\subsection{Dependent product categorically}
-In order to build a categorical model of dependent functions, we need to change our perspective from a family of types to a fibration. We start with a bundle $E/B$ fibered by the projection $p\colon E \to B$. A dependent function is called a \emph{section} of this bundle. 
-
-If you visualize the bundle as a bunch of fibers sticking out from the base $B$, a section is like a haircut: it cuts through each fiber to produce a corresponding value. In physics, such sections are called fields---with spacetime as the base. 
-
-Just like we talked about a function object representing a set of functions, we can talk about an object $S(E)$ that represents a set of sections of a given bundle $E$. 
-
-Just like we defined function application as a mapping out of the product:
-\[\varepsilon_{B C} \colon C^B \times B \to C\]
-we can define the dependent function application as a mapping:
-\[\varepsilon \colon S(E) \times B \to E\]
-We can visualize it as picking a section $s$ in $S(E)$ and an element $x$ of the base $B$ and producing a value in the bundle $E$. (In physics, this would correspond to measuring a field at a particular point in spacetime.)
-
-But this time we have to insist that this value be in the correct fiber. If we project the result of applying $\varepsilon$ to $(s, x)$, it should fall back to the $x$. 
-
-\[
-\begin{tikzpicture}
-
-\def\dy{0.2};
-\def\yb{-0.6}; % base
-\def\yfb{0}; % fiber bottom
-\def\yfs{0.5}; % s
-\def\yfss{1.0}; % s'
-\def\yft{2}; % fiber top
-
-\def\dx{0.9};
-
-\def\xbl{0};
-\def\xbmr{\xbl + 2*\dx};
-\def\xbr{\xbl + 4*\dx};
-
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
-
-\draw (\xbl, \yfb+0.5) .. controls (\xbl + \dx, \yfb + 2.2) and (\xbl + 3* \dx, \yfb) .. (\xbr, \yfb + 1);
-\filldraw[black] (\xbmr, \yfb + 1) circle (1 pt);
-\node[ above] at (\xbmr + 0.7, \yfb + 1) {$\varepsilon(s, x)$};
-\node[left] at  (\xbl, \yfb+0.5) {$s$};
-\draw (\xbl, \yb) -- (\xbr, \yb);
-
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
-
-
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$x$};
+  在我们的例子中，\hask{replicateV} 为 \hask{n} 的每个值选择一个特定的计数向量。计数向量等同于元组，因此，对于 \hask{n} 等于零，\hask{replicateV} 返回一个空元组 \hask{()}; 对于 \hask{n = 1}，它返回一个单值 \hask{x}; 对于 \hask{n} 等于二，它复制 \hask{x} 返回 \hask{(x, x)}；以此类推。
+
+  函数 \hask{replicateV} 在某个 \hask{x :: a} 上求值时，等效于一个由元组组成的无限元组：
+  \[ ((), x, (x, x), (x, x, x), ...) \]
+  这是类型的一个特定元素：
+  \[ ((), a, (a, a), (a, a, a), ...) \]
+
+  \subsection{范畴上的依赖积 (Dependent product categorically)}
+  为了构建依赖函数的范畴模型，我们需要从类型族的角度转换为纤维化的角度。我们从一个纤维化 $E/B$ 开始，该纤维化由投影 $p\colon E \to B$ 进行。依赖函数被称为这个纤维化的\emph{截面}。
+
+  如果你将这个纤维化视为从基 $B$ 伸出的许多纤维，截面就像是一个理发：它切断了每个纤维以生成相应的值。在物理学中，这样的截面被称为场——以时空为基。
+
+  正如我们谈论函数对象代表函数集一样，我们可以谈论一个对象 $S(E)$，它表示给定纤维化的截面集。
+
+  正如我们将函数应用定义为从积中映射出来：
+  \[\varepsilon_{B C} \colon C^B \times B \to C\]
+  我们可以定义依赖函数的应用为一个映射：
+  \[\varepsilon \colon S(E) \times B \to E\]
+  我们可以将其形象化为从 $S(E)$ 中选择一个截面 $s$ 和基 $B$ 的一个元素 $x$，并在纤维化 $E$ 中生成一个值。（在物理学中，这对应于在特定时空点测量一个场。）
+
+  但这次我们必须坚持这个值在正确的纤维中。如果我们投影 $\varepsilon$ 在 $(s, x)$ 上的结果，它应该回到 $x$。
+
+  \[
+   \begin{tikzpicture}
+
+    \def\dy{0.2};
+    \def\yb{-0.6}; % base
+    \def\yfb{0}; % fiber bottom
+    \def\yfs{0.5}; % s
+    \def\yfss{1.0}; % s'
+    \def\yft{2}; % fiber top
+
+    \def\dx{0.9};
+
+    \def\xbl{0};
+    \def\xbmr{\xbl + 2*\dx};
+    \def\xbr{\xbl + 4*\dx};
+
+    \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
+
+    \draw (\xbl, \yfb+0.5) .. controls (\xbl + \dx, \yfb + 2.2) and (\xbl + 3* \dx, \yfb) .. (\xbr, \yfb + 1);
+    \filldraw[black] (\xbmr, \yfb + 1) circle (1 pt);
+    \node[ above] at (\xbmr + 0.7, \yfb + 1) {$\varepsilon(s, x)$};
+    \node[left] at  (\xbl, \yfb+0.5) {$s$};
+    \draw (\xbl, \yb) -- (\xbr, \yb);
+
+    \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+
+
+    \filldraw[black] (\xbmr, \yb) circle (1 pt);
+    \node[below] at (\xbmr, \yb) {$x$};
 
-\node[above] at (\xbmr, \yft) {$p^{-1} x$};
+    \node[above] at (\xbmr, \yft) {$p^{-1} x$};
 
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+    \node[right] at (\xbr, \yb) {$B$};
+    \node[right] at (\xbr, \yft) {$E$};
 
-\end{tikzpicture}
-\]
-In other words, this diagram must commute:
-\[
- \begin{tikzcd}
- S(E) \times B 
- \arrow[rr, "\varepsilon"]
- \arrow[dr, "\pi_2"']
- && E
- \arrow[dl, "p"]
- \\
- &B
-  \end{tikzcd}
-\]
-This makes $\varepsilon$ a morphism in the slice category $\mathcal{C}/B$.
+   \end{tikzpicture}
+  \]
+  换句话说，该图必须交换：
+  \[
+   \begin{tikzcd}
+    S(E) \times B
+    \arrow[rr, "\varepsilon"]
+    \arrow[dr, "\pi_2"']
+    && E
+    \arrow[dl, "p"]
+    \\
+    &B
+   \end{tikzcd}
+  \]
+  这使得 $\varepsilon$ 成为商范畴 $\mathcal{C}/B$ 中的一个态射。
 
-And just like the exponential object was universal, so is the object of sections. The universality condition has the same form: For any other object $G$ with an arrow $\phi \colon G \times B \to E$ there is a unique arrow $\phi^T \colon G \to S(E)$ that makes the following diagram commute:
-\[
- \begin{tikzcd}
- G \times B
- \arrow[d, dashed, "\phi^T \times B"']
- \arrow[dr, "\phi"]
- \\
- S(E) \times B
- \arrow[r, "\varepsilon"]
- &E
-  \end{tikzcd}
-\]
-The difference is that both $\varepsilon$ and $\phi$ are now morphisms in the slice category $\mathcal{C}/B$. 
-
-The one-to-one correspondence between $\phi$ and $\phi^T$ forms the adjunction:
-\[(\mathcal{C}/B) \left( \left \langle {G\times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \cong \mathcal{C} \left(G, S(E)\right) \]
-which we can use as the definition of the object of sections $S(E)$. The counit of this adjunction is  the dependent-function application. We get it by replacing $G$ with $S(E)$ and selecting the identity morphism on the right. The counit is thus a member of the hom-set:
-\[(\mathcal{C}/B) \left( \left \langle {S(E) \times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \]
-
-
-Compare the above adjunction with the currying adjunction that defines the function object $E^B$:
-\[  \cat C (G \times B, E) \cong \cat C (G, E^B) \]
-
-Now recall that, in $\mathbf{Set}$, we interpret the product $G \times B$ as planting copies of $G$ as identical fibers over each element of $B$.  So a single element of the left-hand side of our adjunction is a family of functions, one per fiber. Any given $y \in G$ cuts a horizontal slice through $G \times B$. These are the pairs $(y, b)$ for all $b \in B$. Our family of functions maps this slice to the corresponding fibers of $E$ thus creating a section of $E$.
-
-\[
-\begin{tikzpicture}
-\def\dy{0.2};
-\def\yb{0};
-\def\yt{10 * \dy}; 
-
-\def\dx{0.4};
-\def\xl{-2};
-\def\xr{1};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 4 * \dx, \yt);
-\draw (\xl, \yb) -- (\xl, \yt);
-\draw (\xl + \dx, \yb) -- (\xl + \dx, \yt);
-\draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
-\draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
-\draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
-\node[below] at (\xl + 2 * \dx, \yb) {$B$};
-\node[left] at (\xl + 5 * \dx,  4 * \dy) {$y$};
-\node[left] at (\xl,  6 * \dy) {$G$};
-\node[above] at (\xl + 2*\dx, 10 * \dy) {$G \times B$};
-
-\def\a{2* \dy}
-\def\b{6* \dy}
-\def\c{4* \dy}
-\def\d{12* \dy}
-\def\e{10* \dy}
-
-
-\draw[fill=orange!30, draw=white] (\xr, \yb) -- (\xr, \a) -- (\xr + 1 * \dx, \b) -- (\xr + 2 * \dx, \c) -- (\xr + 3 * \dx, \d) -- (\xr + 4 * \dx, \e) -- (\xr + 4 * \dx, \yb) -- cycle;
-
-
-\draw (\xr, \yb) -- (\xr, \a);
-\draw (\xr + \dx, \yb) -- (\xr + \dx, \b);
-\draw (\xr + 2 * \dx, \yb) -- (\xr + 2 * \dx, \c);
-\draw (\xr + 3 * \dx, \yb) -- (\xr + 3 * \dx, \d);
-\draw (\xr + 4 * \dx, \yb) -- (\xr + 4 * \dx, \e);
-
-\node[below] at (\xr + 2 * \dx, \yb) {$B$};
-\node[above] at (\xr + 2 * \dx, 9 * \dy) {$E$};
-
-\draw[dashed] (\xr, \a -\dy ) -- (\xr + 1 * \dx, \b - 5 * \dy) -- (\xr + 2 * \dx, \c - \dy) -- (\xr + 3 * \dx, \d - 4*\dy) -- (\xr + 4 * \dx, \e - 3*\dy);
-
-
-\filldraw[black] (\xl + 3 * \dx, \yb + 4* \dy) circle (1 pt);
-\filldraw[black] (\xr + 3 * \dx, \yb + 8* \dy) circle (1 pt);
-
-\draw[blue] ((\xl + 3 * \dx, \yb + 4* \dy) edge[->, bend left] (\xr + 3 * \dx, \yb + 8* \dy);
-
-\draw[dashed] (\xl, \yb + 4* \dy) -- (\xl + 4* \dx, \yb + 4* \dy);
-
-\end{tikzpicture}
-\]
-
-The adjunction tells us that this family of mappings uniquely determines a function from $G$ to $S(E)$. Every $y \in G$ is thus mapped to a different element $s$ of $S(E)$. Therefore elements of $S(E)$ are in one-to-one correspondence with sections of $E$ .
-
-These are all set-theoretical intuitions. We can generalize them by first noticing that the right hand side of the adjunction can be easily expressed as a hom-set in the slice category $\mathcal{C}/1$ over the terminal object. 
-
-Indeed, there is one-to-one correspondence between objects $X$ in $\mathcal{C}$ and objects $\langle X, ! \rangle$ in  $\mathcal{C}/1$ (here $!$ is the unique arrow to the terminal object). Arrows in $\mathcal{C}/1$ are arrows of $\mathcal{C}$ with no additional constraints. We therefore have:
-\[(\mathcal{C}/B) \left( \left \langle {G\times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \cong (\mathcal{C}/1)  \left( \left \langle {G \atop !} \right \rangle , \left \langle {S(E) \atop ! } \right \rangle \right)  \]
-
-\subsection{Adding the atlas}
-
-The next step is to ``blur the focus'' by replacing the terminal object with a more general base $A$, serving as the atlas.
-
-The right-hand side of the adjunction becomes a hom-set in the slice category $\mathcal{C}/A$. $G$ itself gets coarsely fibrated by some $q \colon G \to A$. 
-
-Remember that $G \times B$ can be understood as a pullback along the mapping $! \colon B \to 1$, or a change of base from $1$ to $B$. If we want to replace $1$ with $A$, we should replace the product $G \times B$ with a more general pullback of $q$. Such a change of base is parameterized by a new morphism $f \colon B \to A$.
-
-\[
- \begin{tikzcd}
- G \times B
- \arrow[dr, phantom,  , very near start, "\lrcorner"]
-\arrow[d, "\pi_2"]
- \arrow[r, "\pi_1"]
- & G
- \arrow[d, "!"]
- \\
- B
- \arrow[r, "!"]
- &
- 1
- \end{tikzcd}
- \hspace{20pt}
-\begin{tikzpicture}
-\draw[->] (0, 0) -- (1, 0);
-\end{tikzpicture}
- \hspace{20pt}
- \begin{tikzcd}
- f^* G
-\arrow[dr, phantom,  , very near start, "\lrcorner"]
- \arrow[d, "f^*q"']
- \arrow[r, "g"]
- & G
- \arrow[d, "q"]
- \\
- B
- \arrow[r, "f"]
- &A
-\end{tikzcd}
-\]
-
-The result is that, instead of a bunch of $G$ fibers over $B$, we get a pullback $f^* G$ that is populated by groups of fibers from the fibration $q \colon G \to A$. This way $A$ serves as an atlas that enumerates all the patches populated by uniform fibers. 
-
-Imagine, for instance, that $A$ is a two-element set. The fibration $q$ will split $G$ into two fibers. They will serve as our generic fibers. These fibers are now replanted over the two patches in $B$ to form $f^* G$. The replanting is guided by $f^{-1}$. 
-
-\[
-\begin{tikzpicture}
-\def\xmin{-4};
-
-\def\dy{0.2};
-\def\yb{0};
-\def\yt{10 * \dy}; 
-
-\def\dx{0.4};
-\def\xl{-2};
-\def\xr{1};
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xmin, \yb) rectangle (\xmin + \dx, \yt - 2*\dy);
-\filldraw[fill=red!50!green!20, draw=white] (\xmin + \dx, \yb) rectangle (\xmin + 2 * \dx, \yt);
-\draw (\xmin, \yb) -- (\xmin, \yt - 2*\dy);
-\draw (\xmin + \dx, \yb) -- (\xmin+ \dx, \yt);
-\draw (\xmin + 2 * \dx, \yb) -- (\xmin + 2 * \dx, \yt);
-\node[below] (BB) at (\xmin + \dx, \yb) {$A$};
-\node[above] at (\xmin + \dx, 10 * \dy) {$G$};
-
-
-
-\filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 4 * \dx, \yt - 2*\dy);
-\filldraw[fill=red!50!green!20, draw=white] (\xl + 2 * \dx, \yb) rectangle (\xl + 4 * \dx, \yt);
-\draw (\xl + 0 * \dx, \yb) -- (\xl + 0 * \dx, \yt - 2 * \dy);
-\draw (\xl + 1 * \dx, \yb) -- (\xl + 1 * \dx, \yt - 2 * \dy);
-\draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
-\draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
-\draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
-\node[below] (B) at (\xl + 2 * \dx, \yb) {$B$};
-\node[above] at (\xl + \dx, 10 * \dy) {$f^* G$};
-
-\draw[->]  (B) -- (BB) node [midway, below] {$f$};
-
-\def\a{2* \dy}
-\def\b{6* \dy}
-\def\c{4* \dy}
-\def\d{12* \dy}
-\def\e{10* \dy}
-
-
-\draw[fill=orange!30, draw=white] (\xr, \yb) -- (\xr, \a) -- (\xr + 1 * \dx, \b) -- (\xr + 2 * \dx, \c) -- (\xr + 3 * \dx, \d) -- (\xr + 4 * \dx, \e) -- (\xr + 4 * \dx, \yb) -- cycle;
-
-
-\draw (\xr, \yb) -- (\xr, \a);
-\draw (\xr + \dx, \yb) -- (\xr + \dx, \b);
-\draw (\xr + 2 * \dx, \yb) -- (\xr + 2 * \dx, \c);
-\draw (\xr + 3 * \dx, \yb) -- (\xr + 3 * \dx, \d);
-\draw (\xr + 4 * \dx, \yb) -- (\xr + 4 * \dx, \e);
-
-\node[below] at (\xr + 2 * \dx, \yb) {$B$};
-\node[above] at (\xr + 2 * \dx, 10 * \dy) {$E$};
+  正如我们定义了函数对象的普遍性一样，截面对象也是普遍的。普遍性条件具有相同的形式：对于任何其他具有箭头 $\phi \colon G \times B \to E$ 的对象 $G$，存在一个唯一的箭头 $\phi^T \colon G \to S(E)$ 使得以下图表交换：
+  \[
+   \begin{tikzcd}
+    G \times B
+    \arrow[d, dashed, "\phi^T \times B"']
+    \arrow[dr, "\phi"]
+    \\
+    S(E) \times B
+    \arrow[r, "\varepsilon"]
+    &E
+   \end{tikzcd}
+  \]
+  不同之处在于 $\varepsilon$ 和 $\phi$ 现在都是商范畴 $\mathcal{C}/B$ 中的态射。
+
+  $\phi$ 和 $\phi^T$ 之间的一一对应关系形成了伴随关系：
+  \[(\mathcal{C}/B) \left( \left \langle {G\times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \cong \mathcal{C} \left(G, S(E)\right) \]
+  我们可以用它作为截面对象 $S(E)$ 的定义。这个伴随关系的余单元是依赖函数的应用。我们通过用 $S(E)$ 替换 $G$ 并在右侧选择恒等态射来获得它。余单元因此成为同态集的一个成员：
+  \[(\mathcal{C}/B) \left( \left \langle {S(E) \times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \]
+
+
+  将上面的伴随关系与定义函数对象 $E^B$ 的柯里化伴随关系进行比较：
+  \[  \cat C (G \times B, E) \cong \cat C (G, E^B) \]
+
+  现在回想一下，在 $\mathbf{Set}$ 中，我们将积 $G \times B$ 解释为在 $B$ 的每个元素上植入 $G$ 的副本。因此，我们的伴随关系的左侧的单个元素是一个函数族，每个纤维一个函数。给定 $G$ 中的任意一个 $y$，它在 $G \times B$ 中切出一个水平切片。这些是所有 $b \in B$ 的对 $(y, b)$。我们的函数族将这个切片映射到 $E$ 的对应纤维中，从而创建一个 $E$ 的截面。
+
+  \[
+   \begin{tikzpicture}
+    \def\dy{0.2};
+    \def\yb{0};
+    \def\yt{10 * \dy};
+
+    \def\dx{0.4};
+    \def\xl{-2};
+    \def\xr{1};
+
+    \filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 4 * \dx, \yt);
+    \draw (\xl, \yb) -- (\xl, \yt);
+    \draw (\xl + \dx, \yb) -- (\xl + \dx, \yt);
+    \draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
+    \draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
+    \draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
+    \node[below] at (\xl + 2 * \dx, \yb) {$B$};
+    \node[left] at (\xl + 5 * \dx,  4 * \dy) {$y$};
+    \node[left] at (\xl,  6 * \dy) {$G$};
+    \node[above] at (\xl + 2*\dx, 10 * \dy) {$G \times B$};
+
+    \def\a{2* \dy}
+    \def\b{6* \dy}
+    \def\c{4* \dy}
+    \def\d{12* \dy}
+    \def\e{10* \dy}
+
+
+    \draw[fill=orange!30, draw=white] (\xr, \yb) -- (\xr, \a) -- (\xr + 1 * \dx, \b) -- (\xr + 2 * \dx, \c) -- (\xr + 3 * \dx, \d) -- (\xr + 4 * \dx, \e) -- (\xr + 4 * \dx, \yb) -- cycle;
+
+
+    \draw (\xr, \yb) -- (\xr, \a);
+    \draw (\xr + \dx, \yb) -- (\xr + \dx, \b);
+    \draw (\xr + 2 * \dx, \yb) -- (\xr + 2 * \dx, \c);
+    \draw (\xr + 3 * \dx, \yb) -- (\xr + 3 * \dx, \d);
+    \draw (\xr + 4 * \dx, \yb) -- (\xr + 4 * \dx, \e);
+
+    \node[below] at (\xr + 2 * \dx, \yb) {$B$};
+    \node[above] at (\xr + \dx, 10 * \dy) {$E$};
+
+    \draw[dashed] (\xr, \a -\dy ) -- (\xr + 1 * \dx, \b - 5 * \dy) -- (\xr + 2 * \dx, \c - \dy) -- (\xr + 3 * \dx, \d - 4*\dy) -- (\xr + 4 * \dx, \e - 3*\dy);
+
+
+    \filldraw[black] (\xl + 3 * \dx, \yb + 4* \dy) circle (1 pt);
+    \filldraw[black] (\xr + 3 * \dx, \yb + 8* \dy) circle (1 pt);
+
+    \draw[blue] ((\xl + 3 * \dx, \yb + 4* \dy) edge[->, bend left] (\xr + 3 * \dx, \yb + 8* \dy);
+
+    \draw[dashed] (\xl, \yb + 4* \dy) -- (\xl + 4* \dx, \yb + 4* \dy);
+
+   \end{tikzpicture}
+  \]
+
+  伴随关系告诉我们，这些映射族唯一地确定了从 $G$ 到 $S(E)$ 的函数。因此，$S(E)$ 的元素与 $E$ 的截面一一对应。
+
+  这些都是集合论的直觉。我们可以通过首先注意到伴随关系的右侧可以很容易地表达为终对象上商范畴 $\mathcal{C}/1$ 中的同态集来推广它们。
+
+  确实，$\mathcal{C}$ 中的对象 $X$ 和 $\mathcal{C}/1$ 中的对象 $\langle X, ! \rangle$ 之间存在一一对应关系（这里 $!$ 是指向终对象的唯一箭头）。$\mathcal{C}/1$ 中的箭头是 $\mathcal{C}$ 中的箭头，没有额外的约束。因此，我们有：
+  \[(\mathcal{C}/B) \left( \left \langle {G\times B \atop \pi_2} \right \rangle , \left \langle {E \atop p } \right \rangle \right) \cong (\mathcal{C}/1)  \left( \left \langle {G \atop !} \right \rangle , \left \langle {S(E) \atop ! } \right \rangle \right)  \]
+
+  \subsection{添加图集 (Adding the atlas)}
+
+  下一步是通过用更一般的基 $A$ 代替终对象 $1$ 来“模糊焦点”，$A$ 作为图集。
+
+  伴随关系的右侧变为商范畴 $\mathcal{C}/A$ 中的同态集。$G$ 本身通过某种 $q \colon G \to A$ 进行粗略纤维化。
+
+  请记住，$G \times B$ 可以理解为沿映射 $! \colon B \to 1$ 的拉回，或从 $1$ 到 $B$ 的基变换。如果我们想用 $A$ 替换 $1$，我们应该用更一般的 $q$ 的拉回代替积 $G \times B$。这种基变换由一个新的态射 $f \colon B \to A$ 参数化。
+
+  \[
+   \begin{tikzcd}
+    G \times B
+    \arrow[dr, phantom,  , very near start, "\lrcorner"]
+    \arrow[d, "\pi_2"]
+    \arrow[r, "\pi_1"]
+    & G
+    \arrow[d, "!"]
+    \\
+    B
+    \arrow[r, "!"]
+    &
+    1
+   \end{tikzcd}
+   \hspace{20pt}
+   \begin{tikzpicture}
+    \draw[->] (0, 0) -- (1, 0);
+   \end{tikzpicture}
+   \hspace{20pt}
+   \begin{tikzcd}
+    f^* G
+    \arrow[dr, phantom,  , very near start, "\lrcorner"]
+    \arrow[d, "f^*q"']
+    \arrow[r, "g"]
+    & G
+    \arrow[d, "q"]
+    \\
+    B
+    \arrow[r, "f"]
+    &A
+   \end{tikzcd}
+  \]
+
+  结果是，我们得到的不再是 $B$ 上的 $G$ 纤维，而是一个通过 $f^{-1}$ 重新植入 $A$ 中的 $G$ 纤维的拉回 $f^* G$。这样 $A$ 就成了一个图集，它枚举了所有由均匀纤维填充的补丁。
+
+  例如，假设 $A$ 是一个两元素集合。纤维化 $q$ 将 $G$ 分为两个纤维。它们将作为我们的通用纤维。这些纤维现在根据 $f^{-1}$ 的引导重新植入 $B$ 中的两个补丁中，形成 $f^* G$。
+
+  \[
+   \begin{tikzpicture}
+    \def\xmin{-4};
+
+    \def\dy{0.2};
+    \def\yb{0};
+    \def\yt{10 * \dy};
+
+    \def\dx{0.4};
+    \def\xl{-2};
+    \def\xr{1};
+
+    \filldraw[fill=blue!50!green!20, draw=white] (\xmin, \yb) rectangle (\xmin + \dx, \yt - 2*\dy);
+    \filldraw[fill=red!50!green!20, draw=white] (\xmin + \dx, \yb) rectangle (\xmin + 2 * \dx, \yt);
+    \draw (\xmin, \yb) -- (\xmin, \yt - 2*\dy);
+    \draw (\xmin + \dx, \yb) -- (\xmin+ \dx, \yt);
+    \draw (\xmin + 2 * \dx, \yb) -- (\xmin + 2 * \dx, \yt);
+    \node[below] (BB) at (\xmin + \dx, \yb) {$A$};
+    \node[above] at (\xmin + \dx, 10 * \dy) {$G$};
+
+
+
+    \filldraw[fill=blue!50!green!20, draw=white] (\xl, \yb) rectangle (\xl + 4 * \dx, \yt - 2*\dy);
+    \filldraw[fill=red!50!green!20, draw=white] (\xl + 2 * \dx, \yb) rectangle (\xl + 4 * \dx, \yt);
+    \draw (\xl + 0 * \dx, \yb) -- (\xl + 0 * \dx, \yt - 2 * \dy);
+    \draw (\xl + 1 * \dx, \yb) -- (\xl + 1 * \dx, \yt - 2 * \dy);
+    \draw (\xl + 2 * \dx, \yb) -- (\xl + 2 * \dx, \yt);
+    \draw (\xl + 3 * \dx, \yb) -- (\xl + 3 * \dx, \yt);
+    \draw (\xl + 4 * \dx, \yb) -- (\xl + 4 * \dx, \yt);
+    \node[below] (B) at (\xl + 2 * \dx, \yb) {$B$};
+    \node[above] at (\xl + \dx, 10 * \dy) {$f^* G$};
+
+    \draw[->]  (B) -- (BB) node [midway, below] {$f$};
+
+    \def\a{2* \dy}
+    \def\b{6* \dy}
+    \def\c{4* \dy}
+    \def\d{12* \dy}
+    \def\e{10* \dy}
+
+
+    \draw[fill=orange!30, draw=white] (\xr, \yb) -- (\xr, \a) -- (\xr + 1 * \dx, \b) -- (\xr + 2 * \dx, \c) -- (\xr + 3 * \dx, \d) -- (\xr + 4 * \dx, \e) -- (\xr + 4 * \dx, \yb) -- cycle;
+
+
+    \draw (\xr, \yb) -- (\xr, \a);
+    \draw (\xr + \dx, \yb) -- (\xr + \dx, \b);
+    \draw (\xr + 2 * \dx, \yb) -- (\xr + 2 * \dx, \c);
+    \draw (\xr + 3 * \dx, \yb) -- (\xr + 3 * \dx, \d);
+    \draw (\xr + 4 * \dx, \yb) -- (\xr + 4 * \dx, \e);
+
+    \node[below] at (\xr + 2 * \dx, \yb) {$B$};
+    \node[above] at (\xr + 2 * \dx, 10 * \dy) {$E$};
 
 % dashed zigzag in E
-\draw[dashed] (\xr, \a -\dy ) -- (\xr + 1 * \dx, \b - 5 * \dy) -- (\xr + 2 * \dx, \c - 2* \dy)  -- (\xr + 2 * \dx, \c - \dy) -- (\xr + 3 * \dx, \d - 4*\dy) -- (\xr + 4 * \dx, \e - 3*\dy);
+    \draw[dashed] (\xr, \a -\dy ) -- (\xr + 1 * \dx, \b - 5 * \dy) -- (\xr + 2 * \dx, \c - 2* \dy)  -- (\xr + 2 * \dx, \c - \dy) -- (\xr + 3 * \dx, \d - 4*\dy) -- (\xr + 4 * \dx, \e - 3*\dy);
 
-\filldraw[black] (\xl + 3 * \dx, \yb + 5* \dy) circle (1 pt);
-\filldraw[black] (\xr + 3 * \dx, \yb + 8* \dy) circle (1 pt);
+    \filldraw[black] (\xl + 3 * \dx, \yb + 5* \dy) circle (1 pt);
+    \filldraw[black] (\xr + 3 * \dx, \yb + 8* \dy) circle (1 pt);
 
 % arrow from f*G to E
-\draw[blue] ((\xl + 3 * \dx, \yb + 5* \dy) edge[->, bend left] (\xr + 3 * \dx, \yb + 8* \dy);
+    \draw[blue] ((\xl + 3 * \dx, \yb + 5* \dy) edge[->, bend left] (\xr + 3 * \dx, \yb + 8* \dy);
 
 % dashed slices through f*G
-\draw[dashed] (\xl, \yb + 3* \dy) -- (\xl + 2 * \dx, \yb + 3* \dy);
-\draw[dashed] (\xl + 2 * \dx, \yb + 5* \dy) -- (\xl + 4* \dx, \yb + 5* \dy);
+    \draw[dashed] (\xl, \yb + 3* \dy) -- (\xl + 2 * \dx, \yb + 3* \dy);
+    \draw[dashed] (\xl + 2 * \dx, \yb + 5* \dy) -- (\xl + 4* \dx, \yb + 5* \dy);
 
 % slices through G
-\draw[dashed] (\xmin, \yb + 3* \dy) -- (\xmin + \dx, \yb + 3* \dy);
-\draw[dashed] (\xmin + \dx, \yb + 5* \dy) -- (\xmin + 2 * \dx, \yb + 5* \dy);
+    \draw[dashed] (\xmin, \yb + 3* \dy) -- (\xmin + \dx, \yb + 3* \dy);
+    \draw[dashed] (\xmin + \dx, \yb + 5* \dy) -- (\xmin + 2 * \dx, \yb + 5* \dy);
 
-\end{tikzpicture}
-\]
+   \end{tikzpicture}
+  \]
 
-The adjunction that defines the dependent function type is therefore:
-\[ (\mathcal{C}/B) \left( f^* \left \langle {G \atop q} \right \rangle, \left \langle {E \atop p} \right \rangle \right) \cong  (\mathcal{C}/A)\left( \left \langle {G \atop q} \right \rangle, \Pi_f \left \langle {E \atop p } \right \rangle \right) \]
-This is a generalization of an adjunction that we used to define the object of sections $S(E)$. This one defines a new object $\Pi_f E$ that is a rearrangement of the object of sections. 
+  定义依赖函数类型的伴随关系为：
+  \[ (\mathcal{C}/B) \left( f^* \left \langle {G \atop q} \right \rangle, \left \langle {E \atop p} \right \rangle \right) \cong  (\mathcal{C}/A)\left( \left \langle {G \atop q} \right \rangle, \Pi_f \left \langle {E \atop p } \right \rangle \right) \]
+  这是我们用来定义截面对象 $S(E)$ 的伴随关系的推广。这个定义了一个新对象 $\Pi_f E$，它是截面对象的重新排列。
 
-The adjunction is a mapping between morphisms in their respective slice categories:
+  伴随关系是在它们各自的商范畴中的映射之间的映射：
 
-\[
- \begin{tikzcd}
- f^* G
- \arrow[rr, "\phi"]
- \arrow[rd, "f^* q"']
- &&E
- \arrow[dl, "p"]
- \\
- &B
- \end{tikzcd}
- \hspace{20pt}
-\begin{tikzcd}
- G
- \arrow[rr, "\phi^T"]
- \arrow[rd, "q"']
- && \Pi_f E
- \arrow[ld, "\Pi_f \, p"]
- \\
- & A
-  \end{tikzcd}
-\]
+  \[
+   \begin{tikzcd}
+    f^* G
+    \arrow[rr, "\phi"]
+    \arrow[rd, "f^* q"']
+    &&E
+    \arrow[dl, "p"]
+    \\
+    &B
+   \end{tikzcd}
+   \hspace{20pt}
+   \begin{tikzcd}
+    G
+    \arrow[rr, "\phi^T"]
+    \arrow[rd, "q"']
+    && \Pi_f E
+    \arrow[ld, "\Pi_f \, p"]
+    \\
+    & A
+   \end{tikzcd}
+  \]
 
-To gain some intuition into this adjunction, let's consider how it works on sets. 
+  为了更好地理解这个伴随关系，让我们考虑它在集合上是如何工作的。
 
-\begin{itemize}
-\item The right hand side operates in a coarsely grained fibration over the atlas $A$. It is a family of functions, one function per patch. For every patch we get a function from the ``thick fiber'' of $G$ (drawn in blue below) to the ``thick fiber'' of $\Pi_f E$ (not shown).
+  \begin{itemize}
+   \item 右侧在以图集 $A$ 为基的粗粒纤维化中操作。它是一个函数族，每个补丁一个函数。对于每个补丁，我们从 $G$ 的“厚纤维”（下图中为蓝色）到 $\Pi_f E$ 的“厚纤维”（未显示）得到一个函数。
 
-\item The left hand side operates in a more finely grained fibration over $B$. These fibers are grouped into small bundles over patches. Once we pick a patch (drawn in red below), we get a family of functions from that patch to the corresponding patch in $E$ (drawn in green)---a section of a small bundle in $E$. So, patch-by-patch, we get small sections of $E$. 
-\end{itemize}
-The adjunction tells us that the elements of the ``thick fiber'' of $\Pi_f E$ correspond to small sections of $E$ over the same patch.
+   \item 左侧在以 $B$ 为基的更精细的纤维化中操作。这些纤维分组成小束并覆盖补丁。一旦我们选择一个补丁（下图中为红色），我们就从该补丁到 $E$ 中相应补丁（绿色表示）得到一个函数族——$E$ 中小束的截面。因此，逐个补丁，我们得到 $E$ 的小截面。
+  \end{itemize}
+  伴随关系告诉我们，$\Pi_f E$ 的“厚纤维”的元素与相同补丁上的 $E$ 的小截面相对应。
 
-\[
-\begin{tikzpicture}
-\def\xl{-3};
-\def\xr{0};
-\def\yb{0};
-\def\yt{2};
+  \[
+   \begin{tikzpicture}
+    \def\xl{-3};
+    \def\xr{0};
+    \def\yb{0};
+    \def\yt{2};
 
-\def\dy{0.4};
-\def\dx{0.5};
+    \def\dy{0.4};
+    \def\dx{0.5};
 
-\def\a{(\xl, \yb)};
-\def\b{(\xr, \yb)};
-\def\c{(\xl, \yt)};
-\def\d {(\xr, \yt)};
+    \def\a{(\xl, \yb)};
+    \def\b{(\xr, \yb)};
+    \def\c{(\xl, \yt)};
+    \def\d {(\xr, \yt)};
 
 % _a second plane
-\def\aa{(\xl + \dx, \yb + \dy)};
-\def\ba{(\xr + \dx, \yb + \dy)};
-\def\ca{(\xl + \dx, \yt + \dy)};
-\def\da{(\xr + \dx, \yt + \dy)};
+    \def\aa{(\xl + \dx, \yb + \dy)};
+    \def\ba{(\xr + \dx, \yb + \dy)};
+    \def\ca{(\xl + \dx, \yt + \dy)};
+    \def\da{(\xr + \dx, \yt + \dy)};
 
 % _b third plane
-\def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
-\def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
-\def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
-\def\db{(\xr + 2*\dx, \yt + 2*\dy)};
+    \def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
+    \def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
+    \def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
+    \def\db{(\xr + 2*\dx, \yt + 2*\dy)};
 
 % shifted walls
-\def\yshift{-1.5};
-\def\xshift{1.5};
+    \def\yshift{-1.5};
+    \def\xshift{1.5};
 
 
 % E
-\draw \a rectangle \d;
-\draw[draw=black!40!green] \aa rectangle \da;
-\draw \ab rectangle \db;
+    \draw \a rectangle \d;
+    \draw[draw=black!40!green] \aa rectangle \da;
+    \draw \ab rectangle \db;
 
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
+    \draw \a -- \ab;
+    \draw \b -- \bb;
+    \draw \d -- \db;
+    \draw \c -- \cb;
 
-\node[above] at \cb {$E$};
+    \node[above] at \cb {$E$};
 
 % B
 % rebase yb (bottom)
-\def\yb{\yshift}
+    \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{0};
+    \def\xr{0};
 
-\draw \a -- \b;
-\draw \ab -- \bb;
-\draw[red] \aa -- \ba;
+    \draw \a -- \b;
+    \draw \ab -- \bb;
+    \draw[red] \aa -- \ba;
 % diagonal
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
-\node[above] at \ab {$B$};
+    \draw \a -- \ab;
+    \draw \b -- \bb;
+    \draw \d -- \db;
+    \draw \c -- \cb;
+    \node[above] at \ab {$B$};
 
 % G
 % rebase yb (bottom)
-\def\yb{0};
+    \def\yb{0};
 % rebase xr (right wall)
-\def\xr{\xshift};
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \b -- \d;
-\draw \bb -- \db;
-\draw[blue] \ba -- \da;
-\node[above] at \db {$G$};
+    \def\xr{\xshift};
+    \draw \b -- \bb;
+    \draw \d -- \db;
+    \draw \b -- \d;
+    \draw \bb -- \db;
+    \draw[blue] \ba -- \da;
+    \node[above] at \db {$G$};
 
 % A
 % rebase yb (bottom)
-\def\yb{\yshift}
+    \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{\xshift};
+    \def\xr{\xshift};
 
-\draw \b -- \bb;
-\node[right] at \bb {$A$};
-\filldraw[black] \ba circle (1 pt);
+    \draw \b -- \bb;
+    \node[right] at \bb {$A$};
+    \filldraw[black] \ba circle (1 pt);
 
 %projections
-\draw[blue, shorten <=0.2cm, shorten >=0.2cm, ->] (\xshift + \dx, 0 + \dy) -- node[right]{$q$} (\xshift +\dx, \yshift + \dy);
+    \draw[blue, shorten <=0.2cm, shorten >=0.2cm, ->] (\xshift + \dx, 0 + \dy) -- node[right]{$q$} (\xshift +\dx, \yshift + \dy);
 
-\draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$f$} (\xshift +\dx, \yshift + \dy);
+    \draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$f$} (\xshift +\dx, \yshift + \dy);
 
-\draw[draw=black!40!green, shorten <=0.2cm, shorten >=0.2cm, ->] (0 - \dx, 0 + \dy) -- node[right]{$p$} (0 - \dx, \yshift + \dy);
+    \draw[draw=black!40!green, shorten <=0.2cm, shorten >=0.2cm, ->] (0 - \dx, 0 + \dy) -- node[right]{$p$} (0 - \dx, \yshift + \dy);
 
-\end{tikzpicture}
-\]
+   \end{tikzpicture}
+  \]
 
-In category theory, the dependent product, which is the right adjoint to the base change functor $f^*$, is denoted by $f_*$. For a given $f \colon b \to a$, it's a functor:
-\[ f_* \colon \cat C/b \to \cat C/a \]
+  在范畴论中，依赖积是基变换函子 $f^*$ 的右伴随，记作 $f_*$。对于给定的 $f \colon b \to a$，它是一个函子：
+  \[ f_* \colon \cat C/b \to \cat C/a \]
 
-The following exercises shed some light on the role played by $f$. It can be seen as localizing the sections of $E$ by restricting them to ``neighborhoods'' defined by $f^{-1}$.
+  以下练习揭示了 $f$ 所起的作用。它可以被视为通过限制它们在由 $f^{-1}$ 定义的“邻域”上的截面来定位 $E$ 的截面。
 
-\begin{exercise}
-Consider what happens when $A$ is a two-element set $\{0, 1\}$ and $f$ maps the whole of $B$ to one element, say $1$. How would you define the function on the right-hand side of the adjunction? What should it do to the fiber over $0$?
-\end{exercise}
+  \begin{exercise}
+   考虑当 $A$ 是一个两元素集合 $\{0, 1\}$ 并且 $f$ 将整个 $B$ 映射到一个元素（比如 $1$）时会发生什么。你将如何定义伴随关系右侧的函数？它应该对 $0$ 上的纤维做些什么？
+  \end{exercise}
 
-\begin{exercise}
-Let's pick $G$ to be a singleton set $1$, and let $x \colon 1 \to A$ be a fibration that selects an element in $A$. Using the adjunction, show that:
-\begin{itemize}
-\item $f^* 1$ has two types of fibers: singletons over the elements of $f^{-1} (x)$ and empty sets otherwise. 
-\item A mapping $\phi \colon f^* 1 \to E$ is equivalent to a selection of elements, one from each fiber of $E$ over the elements of $f^{-1}(x)$. In other words, it's a partial section of $E$ over the subset $f^{-1}(x)$ of $B$.
-\item A fiber of $\Pi_f E$ over a given $x$ is such a partial section. 
-\item What happens when $A$ is also a singleton set?
-\end{itemize}
-\end{exercise}
+  \begin{exercise}
+   我们选择 $G$ 为单元素集合 $1$，并让 $x \colon 1 \to A$ 作为一个选择 $A$ 中元素的纤维化。使用伴随关系，证明以下结论：
+   \begin{itemize}
+    \item $f^* 1$ 有两种类型的纤维：$f^{-1} (x)$ 的元素上的单元集和空集。
+    \item 一个映射 $\phi \colon f^* 1 \to E$ 等同于从 $E$ 的每个 $f^{-1}(x)$ 的纤维中选择一个元素。换句话说，它是 $E$ 在 $B$ 的子集 $f^{-1}(x)$ 上的部分截面。
+    \item $\Pi_f E$ 的一个纤维是这样的部分截面。
+    \item 当 $A$ 也是一个单元素集合时会发生什么？
+   \end{itemize}
+  \end{exercise}
 
 
 
-\subsection{Universal quantification}
+  \subsection{全称量化 (Universal quantification)}
 
-The logical interpretation of the dependent product $\Pi_{x : B} \, T(x)$ is a universally quantified proposition. An element of $\Pi_{x : B} \, T(x)$ is a section---the proof that it's possible to select an element from each member of the family $T(x)$. It means that none of them is empty. In other words, it's a proof of the proposition:
-\[ \forall_{x : B}\, T(x) \]
+  依赖积 $\Pi_{x : B} \, T(x)$ 的逻辑解释是一个全称命题。类型 $\Pi_{x : B} \, T(x)$ 的一个元素是一个截面——它证明了可以从 $T(x)$ 的每个成员中选择一个元素。这意味着它们都不是空的。换句话说，它是命题的证明：
+  \[ \forall_{x : B}\, T(x) \]
 
 \section{Equality}
 
