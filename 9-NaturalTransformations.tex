@@ -661,351 +661,353 @@
 \end{document}
 
 
-\section{Universal Constructions Revisited}
+\section{重访泛在构造 (Universal Constructions Revisited)}
 
-Lao Tzu says, the simplest pattern is the clearest.
+老子说，最简单的模式是最清晰的。
 
-We've seen definitions of sums, products, exponentials, natural numbers, and lists.
+我们已经看到了和、积、指数、自然数和列表的定义。
 
-The old-school approach to defining such data types is to explore their internals. It's the set-theory way: we look at how the elements of new sets are constructed from the elements of old sets. An element of a sum is either an element of the first set, or the second set. An element of a product is a pair of elements. And so on. We are looking at objects from the engineering point of view.
+传统的定义这些数据类型的方法是探索它们的内部。这是集合论的方式：我们考察新集合的元素如何从旧集合的元素构造出来。一个和的元素要么是第一个集合的元素，要么是第二个集合的元素。一个积的元素是一对元素，依此类推。从工程的角度来看，我们是在观察对象。
 
-In category theory we take the opposite approach. We are not interested in what's inside the object or how it's implemented. We are interested in the purpose of the object, how it can be used, and how it interacts with other objects. We are looking at objects from the utilitarian point of view.
+在范畴论中，我们采取相反的方法。我们不关心对象的内部或它是如何实现的。我们关心的是对象的目的，它如何被使用，以及它如何与其他对象交互。我们从实用主义的角度看待对象。
 
-Both approaches have their advantages. The categorical approach came later, because you need to study a lot of examples before clear patterns emerge. But once you see the patterns, you discover unexpected connections between things, like the duality between sums and products.
+这两种方法各有其优点。范畴论的方法出现较晚，因为你需要研究大量的实例才能看清楚模式。但一旦你看到了这些模式，你就会发现事物之间意想不到的联系，比如和与积之间的对偶性。
 
-Defining particular objects through their connections requires looking at possibly infinite numbers of objects with which they interact.
+通过它们之间的联系来定义特定的对象需要考察它们可能与之交互的无限多个对象。
 
-``Tell me your relation to the Universe, and I'll tell you who you are.''
+“告诉我你与宇宙的关系，我就会告诉你是谁。”
 
-Defining an object by its mappings-out or mappings-in with respect to all objects in the category is called a \emph{universal construction}.
+通过关于范畴中所有对象的映射来定义对象的过程被称为“泛在构造 (universal construction)”。
 
-Why are natural transformations so important? It's because most categorical constructions involve commuting diagrams. If we can re-cast these diagrams as naturality squares, we move one level up the abstraction ladder and gain new valuable insights.
+为什么自然变换 (natural transformations) 如此重要？这是因为大多数范畴构造涉及交换图 (commuting diagrams)。如果我们可以将这些图重构为自然性方块 (naturality squares)，我们就能在抽象的阶梯上更进一步，并获得新的有价值的见解。
 
-Being able to compress a lot of facts into small elegant formulas helps us see new patterns. We'll see, for instance, that natural isomorphisms between hom-sets pop up all over category theory and eventually lead to the idea of an adjunction.
+能够将大量的事实压缩成简洁优雅的公式，有助于我们发现新的模式。例如，我们会看到同态集之间的自然同构在范畴论中随处可见，最终引出了伴随 (adjunction) 的概念。
 
-But first we'll study several examples in greater detail to get some understanding of the terse language of category theory. We'll try, for instance, to decode the statement that the sum, or the coproduct of two objects, is defined by the following natural isomorphism:
-
-\[ [\mathbf{2}, \mathcal{C}](D, \Delta_x)  \cong \mathcal{C}(a + b, x) \]
-
-
-
-\subsection{Picking objects}
-
-Even such a simple task as pointing at an object has a special interpretation in category theory. We have already seen that pointing at an element of a set is equivalent to selecting a function from the singleton set to it. Similarly, picking an object in a category is equivalent to selecting a functor from the single-object category. Alternatively, it can be done using a constant functor from another category.
-
-Quite often we want to pick a pair of objects. That, too, can be accomplished by selecting a functor from a two-object stick-figure category. Similarly, picking an arrow is equivalent to selecting a functor from the ``walking arrow'' category, and so on.
-
-By judiciously selecting our functors and natural transformations between them, we can reformulate all the universal constructions we've seen so far.
-
-\subsection{Cospans as natural transformations}
-
-The definition of a sum requires the selection of two objects to be summed; and a third one to serve as the target of the mapping out.
+但首先，我们将详细研究几个例子，以了解范畴论简洁语言的含义。例如，我们将尝试解码这样的陈述：两个对象的和（或称余积）由以下自然同构定义：
 
 \[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& c
- \end{tikzcd}
-\]
-This diagram can be further decomposed into two simpler shapes called \emph{cospans}:
-\[
- \begin{tikzcd}
- a
- \arrow[dr, ""']
- && b
- \arrow[dl, ""]
- \\
- & x
- \end{tikzcd}
+    [\mathbf{2}, \mathcal{C}](D, \Delta_x) \cong \mathcal{C}(a + b, x)
 \]
 
-To construct a cospan we first have to pick a pair of objects. To do that we'll start with a two-object category $\mathbf{2}$. We'll call its objects $1$ and $2$.
-We'll use a functor
-\[ D \colon \mathbf{2} \to \mathcal{C}\]
-to select the objects $a$ and $b$:
+\subsection{选择对象 (Picking objects)}
+
+即使是指向一个对象这样简单的任务，在范畴论中也有特殊的解释。我们已经看到，指向一个集合的元素等同于从单元素集合中选择一个函数。同样，在范畴中选择一个对象等同于从单对象范畴中选择一个函子。或者，可以通过从另一个范畴中的常值函子 (constant functor) 来完成。
+
+我们经常想要选择一对对象。这也可以通过从一个双对象的简图范畴中选择一个函子来完成。同样，选择一个箭头等同于从“行走箭头 (walking arrow)”范畴中选择一个函子，等等。
+
+通过明智地选择我们的函子和它们之间的自然变换，我们可以重新表述到目前为止我们看到的所有泛在构造。
+
+\subsection{作为自然变换的余脚 (Cospans as natural transformations)}
+
+和的定义要求选择两个需要求和的对象；以及一个第三对象作为映射出去的目标。
+
+\[
+    \begin{tikzcd}
+        a
+        \arrow[dr, bend left, "\text{Left}"']
+        \arrow[ddr, bend right, "f"']
+        && b
+        \arrow[dl, bend right, "\text{Right}"]
+        \arrow[ddl, bend left, "g"]
+        \\
+        &a + b
+        \arrow[d, dashed, "h"]
+        \\
+        & c
+    \end{tikzcd}
+\]
+
+这个图可以进一步分解为两个更简单的形状，称为“余脚 (cospans)”：
+
+\[
+    \begin{tikzcd}
+        a
+        \arrow[dr, ""']
+        && b
+        \arrow[dl, ""]
+        \\
+        & x
+    \end{tikzcd}
+\]
+
+要构造一个余脚，我们首先要选择一对对象。为此，我们从一个双对象范畴 $\mathbf{2}$ 开始。我们将其对象称为 $1$ 和 $2$。我们使用一个函子
+\[ D \colon \mathbf{2} \to \mathcal{C} \]
+来选择对象 $a$ 和 $b$：
 \begin{align*}
-D\, 1 &= a \\
-D\, 2 &= b
+    D\, 1 &= a \\
+    D\, 2 &= b
 \end{align*}
-($D$ stands for ``diagram'', since the two objects form a very simple diagram consisting of two dots in $\mathcal{C}$.)
+（$D$ 代表“图 (diagram)”，因为这两个对象在 $\mathcal{C}$ 中形成了一个非常简单的由两个点组成的图。）
 
-We'll use the constant functor
+我们使用常值函子 (constant functor)
 \[ \Delta_x \colon \mathbf{2} \to \mathcal{C} \]
-to select the object $x$. This functor maps both $1$ and $2$ to $x$ (and the two identity arrows to $id_x$).
+来选择对象 $x$。这个函子将 $1$ 和 $2$ 都映射到 $x$（并将两个恒等箭头映射到 $id_x$）。
 
-Since both functors go from $\mathbf{2}$ to $\mathcal{C}$, we can define a natural transformation $\alpha$ between them. In this case, it's just a pair of arrows:
+由于这两个函子都从 $\mathbf{2}$ 到 $\mathcal{C}$，我们可以在它们之间定义一个自然变换 $\alpha$。在这种情况下，它只是两个箭头的组合：
 \begin{align*}
-\alpha_1 \colon D \, 1 \to \Delta_x 1 \\
-\alpha_2 \colon D \, 2 \to \Delta_x 2
+    \alpha_1 \colon D \, 1 \to \Delta_x 1 \\
+    \alpha_2 \colon D \, 2 \to \Delta_x 2
 \end{align*}
-These are exactly the two arrows in the cospan.
+这些正是余脚中的两个箭头。
 
-Naturality condition for $\alpha$ is trivial, since there are no arrows (other than identities) in $\mathbf{2}$.
+由于 $\mathbf{2}$ 中没有箭头（除了恒等箭头），所以 $\alpha$ 的自然性条件是显而易见的。
 
-There may be many cospans sharing the same three objects---meaning: there may be many natural transformations between the two functors $D$ and  $\Delta_x$. These natural transformations form a hom-set in the functor category $[\mathbf{2}, \mathcal{C}]$, namely:
+可能有许多余脚共享相同的三个对象——这意味着：在两个函子 $D$ 和 $\Delta_x$ 之间可能有许多自然变换。这些自然变换在函子范畴 $[\mathbf{2}, \mathcal{C}]$ 中形成了一个同态集，即：
 \[ [\mathbf{2}, \mathcal{C}](D, \Delta_x) \]
 
-\subsection{Functoriality of cospans}
+\subsection{余脚的函子性 (Functoriality of cospans)}
 
-Let's consider what happens when we start varying the object $x$ in a cospan. We have a mapping $F$ that takes $x$ to the set of cospans over $x$:
+让我们考虑当我们开始在余脚中改变对象 $x$ 时会发生什么。我们有一个映射 $F$，它将 $x$ 映射到 $x$ 上的余脚集合：
 \[ F x = [\mathbf{2}, \mathcal{C}](D, \Delta_x) \]
-This mapping turns out to be functorial in $x$.
+这个映射在 $x$ 上表现为函子性。
 
-To see that, consider an arrow $m \colon x \to y$. The lifting of this arrow is a mapping between two sets of natural transformations:
+要看到这一点，请考虑一个箭头 $m \colon x \to y$。这个箭头的提升是两个自然变换集合之间的映射：
 \[ [\mathbf{2}, \mathcal{C}](D, \Delta_x) \to [\mathbf{2}, \mathcal{C}](D, \Delta_{y}) \]
 
-This might look very abstract until you remember that natural transformations have components, and these components are just regular arrows. An element of the left-hand side is a natural transformation:
+这看起来可能非常抽象，直到你记住自然变换有分量，这些分量只是普通的箭头。左侧集合的一个元素是一个自然变换：
 \[ \mu \colon D \to \Delta_x \]
-It has two components corresponding to the two objects in $\mathbf{2}$. For instance, we have
+它有两个对应于 $\mathbf{2}$ 中两个对象的分量。例如，我们有：
 \[ \mu_1 \colon D \, 1 \to \Delta_x 1 \]
-or, using the definitions of $D$ and $\Delta$:
+或者，使用 $D$ 和 $\Delta$ 的定义：
 \[ \mu_1 \colon a \to x \]
-This is just the left leg of our cospan.
+这只是我们余脚的左腿。
 
-Similarly, the element of the right-hand side is a natural transformation:
+同样，右侧集合的元素是一个自然变换：
 \[ \nu \colon D \to \Delta_{y} \]
-Its component at $1$ is an arrow
+它在 $1$ 处的分量是一个箭头：
 \[ \nu_1 \colon a \to y \]
-We can get from $\mu_1$ to $\nu_1$ simply by post-composing it with $m \colon x \to y$. So the lifting of $m$ is a component-by-component post-compositon $(m \circ -)$:
+我们可以通过将其与 $m \colon x \to y$ 后组合来从 $\mu_1$ 到 $\nu_1$。因此，$m$ 的提升是一个逐分量后组合 $(m \circ -)$：
 \begin{align*}
-\nu_1 = m \circ \mu_1 \\
-\nu_2 = m \circ \mu_2 \\
+    \nu_1 = m \circ \mu_1 \\
+\end{align*}
+\begin{align*}
+    \nu_2 = m \circ \mu_2
 \end{align*}
 
-\subsection{Sum as a universal cospan}
+\subsection{和作为泛在余脚 (Sum as a universal cospan)}
 
-Of all the cospans that you can build on the pair $a$ and $b$, the one with the arrows we called $\text{Left}$ and $\text{Right}$ converging on $a + b$  is very special. There is a unique mapping out of it to any other cospan---a mapping that makes two triangles commute.
+在你可以在对 $a$ 和 $b$ 进行构造的所有余脚中，我们称为 $\text{Left}$ 和 $\text{Right}$ 的箭头在 $a + b$ 上汇聚的那个是非常特殊的。有一个唯一的映射从它映射到任何其他余脚——一个使两个三角形交换的映射。
 \[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& x
- \end{tikzcd}
+    \begin{tikzcd}
+        a
+        \arrow[dr, bend left, "\text{Left}"']
+        \arrow[ddr, bend right, "f"']
+        && b
+        \arrow[dl, bend right, "\text{Right}"]
+        \arrow[ddl, bend left, "g"]
+        \\
+        &a + b
+        \arrow[d, dashed, "h"]
+        \\
+        & x
+    \end{tikzcd}
 \]
 
-We are now in the position to translate this condition to a statement about natural transformations and hom-sets. The arrow $h$ is an element of the hom-set
-\[ \mathcal{C}(a + b, x)\]
-A cospan over $x$ is a natural transformation, that is an element of the hom-set in the functor category:
+我们现在能够将这种条件转换为关于自然变换和同态集的陈述。箭头 $h$ 是同态集 $\mathcal{C}(a + b, x)$ 的元素。
+
+$x$ 上的余脚是一个自然变换，即函子范畴中的同态集的元素：
 \[ [\mathbf{2}, \mathcal{C}](D, \Delta_x) \]
 
-Both are hom-sets in their respective categories. And both are just sets, that is objects in the category $\mathbf{Set}$. This category forms a bridge between the functor category $[\mathbf{2}, \mathcal{C}]$ and a ``regular'' category $\mathcal{C}$, even though, conceptually, they seem to be at very different levels of abstraction.
+这两个同态集都在各自的范畴中。而且它们都是集合，即 $\mathbf{Set}$ 范畴中的对象。这个范畴形成了函子范畴 $[\mathbf{2}, \mathcal{C}]$ 和“常规”范畴 $\mathcal{C}$ 之间的桥梁，尽管从概念上讲，它们似乎处于非常不同的抽象层次。
 
-Paraphrasing Sigmund Freud, ``Sometimes a set is just a set.''
+借用西格蒙德·弗洛伊德的话：“有时一个集合只是一个集合。”
 
-Our universal construction is the bijection or the isomorphism of sets:
+我们的泛在构造是集合之间的双射或同构：
 \[ [\mathbf{2}, \mathcal{C}](D, \Delta_x)  \cong \mathcal{C}(a + b, x) \]
 
-Moreover, if we vary the object $x$, the two sides behave like functors from  $\mathcal{C}$ to $\mathbf{Set}$. Therefore it makes sense to ask if this mapping of functors is a natural isomorphism.
+此外，如果我们改变对象 $x$，这两边表现得像是从 $\mathcal{C}$ 到 $\mathbf{Set}$ 的函子。因此，问这个函子映射是否是自然同构是有意义的。
 
-Indeed, it can be shown that the naturality condition for this isomorphism translates into commuting conditions for the triangles in the definition of the sum. So the definition of the sum can be replaced by a single equation.
+实际上，可以证明这个同构的自然性条件转化为和定义中的三角形的交换条件。因此，可以用一个方程来替代和的定义。
 
-\subsection{Product as a universal span}
+\subsection{积作为泛在跨度 (Product as a universal span)}
 
-An analogous argument can be made about the universal construction for the product. Again, we start with the stick-figure category $\mathbf{2}$ and the functor $D$. But this time we use a natural transformation going in the opposite direction
+关于积的泛在构造，也可以做类似的论证。同样，我们从简图范畴 $\mathbf{2}$ 和函子 $D$ 开始。但这次我们使用一个相反方向的自然变换
 \[ \alpha \colon \Delta_x \to D \]
-Such a natural transformation is a pair of arrows that form a \emph{span}:
+这样的自然变换是一对箭头，形成一个“跨度 (span)”：
 \[
- \begin{tikzcd}
- &x
- \arrow[dl, "f"']
- \arrow[dr, "g"]
- \\
- a
- && b
-  \end{tikzcd}
+    \begin{tikzcd}
+        &x
+        \arrow[dl, "f"']
+        \arrow[dr, "g"]
+        \\
+        a
+        && b
+    \end{tikzcd}
 \]
-Collectively, these natural transformations form a hom-set in the functor category :
+这些自然变换集合形成了函子范畴中的一个同态集：
 \[[\mathbf{2}, \mathcal{C}](\Delta_x, D) \]
 
-Every element of this hom-set is in one-to-one correspondence with a unique mapping $h$ into the product $a \times b$. Such a mapping is a member of the hom-set $\mathcal{C}(x, a \times b)$. This correspondence is expressed as the isomorphism:
+这个同态集的每个元素都与映射到积 $a \times b$ 的唯一映射 $h$ 一一对应。这样的映射是同态集 $\mathcal{C}(x, a \times b)$ 的成员。这种对应关系表示为同构：
 \[ [\mathbf{2}, \mathcal{C}](\Delta_x, D)  \cong \mathcal{C}(x, a \times b) \]
-It can be shown that the naturality of this isomorphism guarantees that the triangles in this diagram commute:
+可以证明，这个同构的自然性保证了此图中的三角形交换：
 \[
- \begin{tikzcd}
- & x
-\arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "f = \alpha_1"']
- \arrow[ddr, bend left, "g = \alpha_2"]
-\\
-&a \times b
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
-\\
-a = D\, 1 && b = D \, 2
- \end{tikzcd}
+    \begin{tikzcd}
+        & x
+        \arrow[d, dashed, "h"]
+        \arrow[ddl, bend right, "f = \alpha_1"']
+        \arrow[ddr, bend left, "g = \alpha_2"]
+        \\
+        &a \times b
+        \arrow[dl, "\text{fst}"]
+        \arrow[dr, "\text{snd}"']
+        \\
+        a = D\, 1 && b = D \, 2
+    \end{tikzcd}
 \]
 
-\subsection{Exponentials}
+\subsection{指数 (Exponentials)}
 
-The exponentials, or function objects, are defined by this commuting diagram:
+指数或函数对象由以下交换图定义：
 \[
- \begin{tikzcd}
- x \times a
- \arrow[d, dashed, "h \times id_a"']
- \arrow[rd, "f"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon_{a b}"']
-& b
- \end{tikzcd}
+    \begin{tikzcd}
+        x \times a
+        \arrow[d, dashed, "h \times id_a"']
+        \arrow[rd, "f"]
+        \\
+        b^a \times a
+        \arrow[r, "\varepsilon_{a b}"']
+        & b
+    \end{tikzcd}
 \]
-Here, $f$ is an element of the hom-set $\mathcal{C}(x \times a, b)$ and $h$ is an element of $\mathcal{C}(x, b^a)$.
+这里，$f$ 是同态集 $\mathcal{C}(x \times a, b)$ 的一个元素，而 $h$ 是 $\mathcal{C}(x, b^a)$ 的一个元素。
 
-The isomorphism between these sets, natural in $x$, defines the exponential object.
+这些集合之间的自然同构定义了指数对象。
 \[\mathcal{C}(x \times a, b) \cong \mathcal{C}(x, b^a)\]
 
-The $f$ in the diagram above is an element of the left-hand side, and $h$ is the corresponding element of the right-hand side. The transformation $\alpha_x$ (which also depends on $a$ and $b$) maps $f$ to $h$.
+上述图中的 $f$ 是左侧的一个元素，而 $h$ 是右侧的相应元素。自然变换 $\alpha_x$（它还取决于 $a$ 和 $b$）将 $f$ 映射为 $h$。
 \[ \alpha_x \colon \mathcal{C}(x \times a, b) \to \mathcal{C}(x, b^a) \]
-In Haskell, we call it \hask{curry}. Its inverse, $\alpha^{-1}$ is known as \hask{uncurry}.
+在 Haskell 中，我们称其为 \hask{curry}。它的逆变换 $\alpha^{-1}$ 被称为 \hask{uncurry}。
 
-Unlike in the previous examples, here both hom-sets are in the same category, and it's easy to analyze the isomorphism in more detail. In particular, we'd like to see how the commuting condition:
+与前面的例子不同，这里两个同态集都在同一个范畴中，因此很容易更详细地分析这个同构。特别是，我们希望看看交换条件：
 \[  f = \varepsilon_{a b} \circ (h \times id_a) \]
-arises from naturality.
+如何从自然性中得出。
 
-The standard Yoneda trick is to make a substitution for $x$ that would reduce one of the hom-sets to an endo-hom-set, that is a hom-set whose source is the same the target. This will allow us to pick a canonical element of that hom-set, that is the identity arrow.
+标准的 Yoneda 技巧是为 $x$ 进行替换，将其中一个同态集简化为一个自同态集，即源与目标相同的同态集。这将使我们能够选择该同态集的规范元素，即恒等箭头。
 
-In our case, substituting $b^a$ for $x$ will allow us to pick $h = id_{(b^a)}$.
+在我们的例子中，将 $b^a$ 替换为 $x$ 将允许我们选择 $h = id_{(b^a)}$。
 \[
- \begin{tikzcd}
- b^a \times a
- \arrow[d, dashed, "id_{(b^a)} \times id_a"']
- \arrow[rd, "f"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon_{a b}"']
-& b
- \end{tikzcd}
+    \begin{tikzcd}
+        b^a \times a
+        \arrow[d, dashed, "id_{(b^a)} \times id_a"']
+        \arrow[rd, "f"]
+        \\
+        b^a \times a
+        \arrow[r, "\varepsilon_{a b}"']
+        & b
+    \end{tikzcd}
 \]
-The commuting condition in this case tells us that $f = \varepsilon_{a b}$. In other words, we get the formula for $\varepsilon_{a b}$ in terms of $\alpha$:
+这种情况下的交换条件告诉我们 $f = \varepsilon_{a b}$。换句话说，我们得到了关于 $\alpha$ 的 $\varepsilon_{a b}$ 的公式：
 \[ \varepsilon_{a b} = \alpha_{x}^{-1} (id_{x}) \]
-where $x$ is equal to $b^a$.
+其中，$x$ 等于 $b^a$。
 
-Since we recognize $\alpha^{-1}$ as \hask{uncurry}, and $\varepsilon$ as function application, we can write it in Haskell as:
+由于我们识别 $\alpha^{-1}$ 为 \hask{uncurry}，识别 $\varepsilon$ 为函数应用，因此我们可以在 Haskell 中将其写为：
 \begin{haskell}
-apply :: (a -> b, a) -> b
-apply = uncurry id
+    apply :: (a -> b, a) -> b
+    apply = uncurry id
 \end{haskell}
-This my be surprising at first, until you realize that the currying of \hask{(a->b,a)->b} leads to \hask{(a->b)->(a->b)}.
+这最初可能令人惊讶，直到你意识到 \hask{(a->b,a)->b} 的柯里化导致 \hask{(a->b)->(a->b)}。
 
-We can also encode the two sides of the main isomorphism as Haskell functors:
+我们还可以将主同构的两边编码为 Haskell 函子：
 \begin{haskell}
-data LeftFunctor  a b x = LF ((x, a) -> b)
+    data LeftFunctor  a b x = LF ((x, a) -> b)
 \end{haskell}
 \begin{haskell}
-data RightFunctor a b x = RF (x -> (a -> b))
+    data RightFunctor a b x = RF (x -> (a -> b))
 \end{haskell}
-They are both contravariant functors in the type variable \hask{x}.
+它们都是在类型变量 \hask{x} 中的逆变函子。
 \begin{haskell}
-instance Contravariant (LeftFunctor a b) where
-  contramap g (LF f) = LF (f . bimap g id)
+    instance Contravariant (LeftFunctor a b) where
+    contramap g (LF f) = LF (f . bimap g id)
 \end{haskell}
-This says that the lifting of $g \colon x \to y$ is given by the following pre-composition:
+这表示 $g \colon x \to y$ 的提升由以下后组合给出：
 \[ \mathcal{C}(y \times a, b) \xrightarrow{(- \circ (g \times id_a)) }  \mathcal{C}(x \times a, b)\]
 
-Similarly:
+类似地：
 \begin{haskell}
-instance Contravariant (RightFunctor a b) where
-  contramap g (RF h) = RF (h . g)
+    instance Contravariant (RightFunctor a b) where
+    contramap g (RF h) = RF (h . g)
 \end{haskell}
-translates to:
+翻译为：
 \[  \mathcal{C}(y, b^a) \xrightarrow{ (- \circ g) } \mathcal{C}(x, b^a) \]
 
-The natural transformation $\alpha$ is just a thin encapsulation of \hask{curry}; and its inverse is \hask{uncurry}:
+自然变换 $\alpha$ 只是 \hask{curry} 的一个薄封装；它的逆变换是 \hask{uncurry}：
 
 \begin{haskell}
-alpha :: forall a b x. LeftFunctor a b x -> RightFunctor a b x
-alpha (LF f) = RF (curry f)
+    alpha :: forall a b x. LeftFunctor a b x -> RightFunctor a b x
+    alpha (LF f) = RF (curry f)
 \end{haskell}
 
 \begin{haskell}
-alpha_1 :: forall a b x. RightFunctor a b x -> LeftFunctor a b x
-alpha_1 (RF h) = LF (uncurry h)
+    alpha_1 :: forall a b x. RightFunctor a b x -> LeftFunctor a b x
+    alpha_1 (RF h) = LF (uncurry h)
 \end{haskell}
 
-Using the two formulas for the lifting of $g \colon x \to y$, here's the naturality square:
+使用 $g \colon x \to y$ 的两种提升公式，以下是自然性方块：
 
 \[
- \begin{tikzcd}
- \mathcal{C}(y \times a, b)
- \arrow[rr, "(- \circ (g \times id_a))"]
- \arrow[d,  "\alpha_y"]
-& &
-\mathcal{C}(x \times a, b)
-  \arrow[d, "\alpha_x"]
- \\
- \mathcal{C}(y, b^a)
- \arrow[rr, "(- \circ g)"]
-& &
-\mathcal{C}(x, b^a)
- \end{tikzcd}
+    \begin{tikzcd}
+        \mathcal{C}(y \times a, b)
+        \arrow[rr, "(- \circ (g \times id_a))"]
+        \arrow[d, "\alpha_y"]
+        & &
+        \mathcal{C}(x \times a, b)
+        \arrow[d, "\alpha_x"]
+        \\
+        \mathcal{C}(y, b^a)
+        \arrow[rr, "(- \circ g)"]
+        & &
+        \mathcal{C}(x, b^a)
+    \end{tikzcd}
 \]
 
-Let's now apply the Yoneda trick to it and replace $y$ with $b^a$. This also allows us to substitute $g$---which now goes for $x$ to $b^a$---with $h$.
+现在让我们将 Yoneda 技巧应用于它，并将 $y$ 替换为 $b^a$。这也使我们能够将 $g$（现在它从 $x$ 到 $b^a$）替换为 $h$。
 
 \[
- \begin{tikzcd}
- \mathcal{C}(b^a \times a, b)
- \arrow[rr, "(- \circ (h \times id_a))"]
- \arrow[d,  "\alpha_{(b^a)}"]
-& &
-\mathcal{C}(x \times a, b)
-  \arrow[d,  "\alpha_x"]
- \\
- \mathcal{C}(b^a, b^a)
- \arrow[rr, "(- \circ h)"]
-& &
-\mathcal{C}(x, b^a)
- \end{tikzcd}
+    \begin{tikzcd}
+        \mathcal{C}(b^a \times a, b)
+        \arrow[rr, "(- \circ (h \times id_a))"]
+        \arrow[d, "\alpha_{(b^a)}"]
+        & &
+        \mathcal{C}(x \times a, b)
+        \arrow[d, "\alpha_x"]
+        \\
+        \mathcal{C}(b^a, b^a)
+        \arrow[rr, "(- \circ h)"]
+        & &
+        \mathcal{C}(x, b^a)
+    \end{tikzcd}
 \]
 
-We know that the hom-set $\mathcal{C}(b^a, b^a)$ contains at least the identity arrow, so we can pick the element $id_{(b^a)}$ in the lower left corner.
+我们知道同态集 $\mathcal{C}(b^a, b^a)$ 至少包含恒等箭头，因此我们可以选择左下角的元素 $id_{(b^a)}$。
 
-Reversing the arrow on the left, we know that $\alpha^{-1}$ acting on identity produces $\varepsilon_{a b}$ in the upper left corner (that's the \hask{uncurry id} trick).
+反转左侧的箭头，我们知道 $\alpha^{-1}$ 作用于恒等箭头会在左上角产生 $\varepsilon_{a b}$（这是 \hask{uncurry id} 技巧）。
 
-Pre-composition with $h$ acting on identity produces $h$ in the lower right corner.
+$h$ 作用于恒等箭头的前置组合会在右下角产生 $h$。
 
-$\alpha^{-1}$ acting on $h$ produces $f$ in the upper right corner.
+$\alpha^{-1}$ 作用于 $h$ 会在右上角产生 $f$。
 
 \[
- \begin{tikzcd}[
-  every arrow/.style={draw,mapsto}
-]
- \varepsilon_{a b}
- \arrow[rr, "(- \circ (h \times id_a))"]
-& &
-f
- \\
- id_{(b^a)}
- \arrow[u, "\alpha^{-1}"]
- \arrow[rr, "(- \circ h)"]
-& &
-h
-\arrow[u, "\alpha^{-1}"']
- \end{tikzcd}
+    \begin{tikzcd}[
+        every arrow/.style={draw,mapsto}
+    ]
+        \varepsilon_{a b}
+        \arrow[rr, "(- \circ (h \times id_a))"]
+        & &
+        f
+        \\
+        id_{(b^a)}
+        \arrow[u, "\alpha^{-1}"]
+        \arrow[rr, "(- \circ h)"]
+        & &
+        h
+        \arrow[u, "\alpha^{-1}"']
+    \end{tikzcd}
 \]
-(The $\mapsto$ arrows denote the action of functions on elements of sets.)
+（$\mapsto$ 箭头表示函数作用于集合元素的操作。）
 
-
-So the selection of $id_{(b^a)}$ in the lower left corner fixes the other three corners. In particular, we can see that the upper arrow applied to $\varepsilon_{a b}$ produces $f$, which is exactly the commuting condition:
+因此，选择左下角的 $id_{(b^a)}$ 固定了其他三个角。特别是，我们可以看到，应用于 $\varepsilon_{a b}$ 的上箭头产生 $f$，这正是我们设定要推导的交换条件：
 \[ \varepsilon_{a b} \circ (h \times id_a) = f \]
-the one that we set out to derive.
+
 
 \section{Limits and Colimits}
 
