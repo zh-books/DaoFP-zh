@@ -1009,513 +1009,509 @@ $\alpha^{-1}$ 作用于 $h$ 会在右上角产生 $f$。
 \[ \varepsilon_{a b} \circ (h \times id_a) = f \]
 
 
-\section{Limits and Colimits}
+\section{Limits and Colimits 极限与余极限}
 
-In the previous section we defined the sum and the product using natural transformations. These were transformations between diagrams defined as functors from a very simple stick-figure category $\mathbf{2}$, one of the functors being the constant functor. 
+在前一节中，我们使用自然变换定义了和（sum）与积（product）。这些自然变换是在非常简单的图形范畴 $\mathbf{2}$ 中定义的，从该范畴到常值函子的一些函数。
 
-Nothing prevents us from replacing the category $\mathbf{2}$ with something more complex. For instance, we could try categories that have non-trivial arrows between objects, or categories with infinitely many objects. 
+没有什么能阻止我们用更复杂的范畴来替换 $\mathbf{2}$。例如，我们可以尝试使用在对象之间有非平凡箭头的范畴，或者具有无限多个对象的范畴。
 
-There is a whole vocabulary built around such constructions. 
+围绕这些构造，形成了整套的专用术语。
 
-We used objects in the category $\mathbf{2}$ for indexing objects in the category $\mathcal{C}$. We can replace $\mathbf{2}$ with an arbitrary indexing category $\cat J$. A diagram in $\mathcal{C}$ is still defined as a functor $D \colon \cat J \to \mathcal{C}$. It picks objects in $\mathcal{C}$, but it also picks arrows between them.
+我们使用范畴 $\mathbf{2}$ 中的对象来索引范畴 $\mathcal{C}$ 中的对象。我们可以用任意索引范畴 $\cat J$ 来替代 $\mathbf{2}$。$\mathcal{C}$ 中的一个图形仍然被定义为一个函子 $D \colon \cat J \to \mathcal{C}$。它选择 $\mathcal{C}$ 中的对象，同时也选择它们之间的箭头。
 
-As the second functor we'll still use the constant functor $\Delta_x \colon \cat J \to \mathcal{C}$.
+作为第二个函子，我们仍然使用常值函子 $\Delta_x \colon \cat J \to \mathcal{C}$。
 
-A  natural transformation, that is an element of the hom-set
-\[ [\cat J, \mathcal{C}](\Delta_x, D)  \]
-is now called a \emph{cone}. Its dual, an element of
-\[ [\cat J, \mathcal{C}](D, \Delta_x)  \]
-is called a \emph{cocone}. They generalize the span and the cospan, respectively.
+一个自然变换，即同态集
+\[ [\cat J, \mathcal{C}](\Delta_x, D) \]
+中的一个元素，现在被称为\emph{锥（cone）}。它的对偶，即
+\[ [\cat J, \mathcal{C}](D, \Delta_x) \]
+中的一个元素，被称为\emph{余锥（cocone）}。它们分别推广了跨度（span）和余跨度（cospan）。
 
-Diagramatically, cones and cocones look like this:
+在图形上，锥和余锥看起来是这样的：
 \[
- \begin{tikzcd}
-  & x
-\arrow[ddr, "g"]
- \arrow[ddl, "f"']
- \arrow[ddd, "h"]
- \\
-\\
-D 1 
-\arrow[rr, red]
-\arrow[rd, red]
-&& D 2
-\arrow[dl, red]
-\\
-& D 3
- \end{tikzcd}
- \qquad
-\begin{tikzcd}
- D 1
- \arrow[rr, red]
- \arrow[dr, red]
- \arrow[dddr, "f"']
- && D 2
-\arrow[dl, red]
- \arrow[dddl, "g"]
- \\
- & D 3
- \arrow[dd, "h"]
- \\
- \\
- & x
- \end{tikzcd}
- \]
+    \begin{tikzcd}
+        & x
+        \arrow[ddr, "g"]
+        \arrow[ddl, "f"']
+        \arrow[ddd, "h"]
+        \\
+        \\
+        D 1
+        \arrow[rr, red]
+        \arrow[rd, red]
+        && D 2
+        \arrow[dl, red]
+        \\
+        & D 3
+    \end{tikzcd}
+    \qquad
+    \begin{tikzcd}
+        D 1
+        \arrow[rr, red]
+        \arrow[dr, red]
+        \arrow[dddr, "f"']
+        && D 2
+        \arrow[dl, red]
+        \arrow[dddl, "g"]
+        \\
+        & D 3
+        \arrow[dd, "h"]
+        \\
+        \\
+        & x
+    \end{tikzcd}
+\]
 
-Since the indexing category may now contain arrows, the naturality conditions for these diagrams are no longer trivial. The constant functor $\Delta_x$ shrinks all vertices to one, so naturality squares shrink to triangles. Naturality means that all triangles with $x$ in their apex must now commute. 
+由于索引范畴现在可能包含箭头，这些图的自然性条件不再是平凡的。常值函子 $\Delta_x$ 将所有顶点收缩到一个点，因此自然性方块缩小为三角形。自然性意味着所有以 $x$ 为顶点的三角形现在必须交换。
 
-The universal cone, if it exists, is called the \emph{limit} of the diagram $D$, and is written as $\text{Lim}D$. Universality means that it satisfies the following isomorphism, natural in $x$:
-\[ [\cat J, \mathcal{C}](\Delta_x, D)  \cong \mathcal{C}(x, \text{Lim}D) \]
-For each cone with the apex $x$ there is a unique mapping from $x$ into the limit $ \text{Lim}D$.
+如果存在的话，通用锥被称为图 $D$ 的\emph{极限（limit）}，记为 $\text{Lim}D$。通用性意味着它满足以下自然同构：
+\[ [\cat J, \mathcal{C}](\Delta_x, D) \cong \mathcal{C}(x, \text{Lim}D) \]
+对于每个以 $x$ 为顶点的锥，存在从 $x$ 到极限 $\text{Lim}D$ 的唯一映射。
 
-A limit of a $\Set$-valued functor has a particularly simple characterization. It's a set of cones with the singleton set at the apex. Indeed, elements of the limit, that is functions from the singleton set to it, are in one-to-one correspondence with such cones:
-\[ [\cat J, \mathcal{C}](\Delta_1, D)  \cong \mathcal{C}(1, \text{Lim}D) \]
+一个 $\Set$ 值函子的极限有一个特别简单的特征。它是以单集为顶点的锥的集合。事实上，极限的元素，即从单集到它的函数，与这样的锥一一对应：
+\[ [\cat J, \mathcal{C}](\Delta_1, D) \cong \mathcal{C}(1, \text{Lim}D) \]
 
+对偶地，通用余锥被称为\emph{余极限（colimit）}，并通过以下自然同构描述：
+\[ [\cat J, \mathcal{C}](D, \Delta_x) \cong \mathcal{C}( \text{Colim}D, x) \]
 
-Dually, the universal cocone is called a \emph{colimit}, and is described by the following natural isomorphism:
-\[ [\cat J, \mathcal{C}](D, \Delta_x)  \cong \mathcal{C}( \text{Colim}D, x) \]
+我们现在可以说，积是来自索引范畴 $\mathbf{2}$ 的图的极限（和是余极限）。
 
+极限和余极限提炼了模式的本质。
 
-We can now say that a product is a limit (and a sum, a colimit) of a diagram from the indexing category $\mathbf{2}$.
+一个极限，像积一样，通过其映射入特性定义。一个余极限，像和一样，通过其映射出特性定义。
 
-Limits and colimits distill the essence of a pattern. 
-
-A limit, like a product, is defined by its mapping-in property. A colimit, like a sum, is defined by its mapping-out property.
-
-There are many interesting limits and colimits, and we'll see some when we discuss algebras and coalgebras.
+有许多有趣的极限和余极限，我们将在讨论代数（algebras）和余代数（coalgebras）时看到一些例子。
 
 \begin{exercise}
-Show that the limit of a \index{walking arrow, limit}``walking arrow'' category, that is a two-object category with an arrow connecting the two objects, has the same elements as the first object in the diagram (``elements'' are the arrows from the terminal object).
+    证明``行走箭头''范畴的极限，即一个连接两个对象的箭头的两对象范畴，具有与图中的第一个对象相同的元素（``元素''是从终端对象的箭头）。
 \end{exercise}
 
-\subsection{Equalizers}
+\subsection{Equalizers 等值子}
 
-A lot of high-school math involves learning how to solve equations or systems of equations. An equation equates the outcomes of two different ways of producing something. If we are allowed to subtract things, we usually shove everything to one side and simplify the problem to the one of calculating the zeros of some expression. In geometry, the same idea is expressed as the intersection of two geometric objects.
+许多高中数学涉及学习如何求解方程或方程组。方程等价于产生某物的两种不同方式的结果。如果我们可以减去某物，我们通常将所有内容移到一边并简化问题为计算某些表达式的零点。在几何中，同样的思想表示为两个几何对象的交集。
 
-In category theory all these patterns are embodied in a single construction called an equalizer. An equalizer is a limit of a diagram whose pattern is given by a stick-figure category with two parallel arrows:
+在范畴论中，所有这些模式都体现在一种称为等值子（equalizer）的单一构造中。等值子是图的极限，其模式由具有两条平行箭头的简图范畴给出：
 \[
-\begin{tikzcd}
-i \arrow[r, shift left=0.75ex]
-  \arrow[r, shift right=0.75ex]
-&
-j
-\end{tikzcd}
+    \begin{tikzcd}
+        i \arrow[r, shift left=0.75ex]
+        \arrow[r, shift right=0.75ex]
+        &
+        j
+    \end{tikzcd}
 \]
-The two arrows represent two ways of producing something. 
+这两条箭头表示两种产生某物的方式。
 
-A functor from this category picks a pair of objects and a pair of morphisms in the target category. The limit of this diagram embodies an intersection of the two outcomes. It is an object $e$ with two arrows $p \colon e \to a$ and $p' \colon e \to b$.
+从这个范畴的函子选择目标范畴中的一对对象和一对态射。这个图的极限体现了两种结果的交集。它是一个对象 $e$，有两条箭头 $p \colon e \to a$ 和 $p' \colon e \to b$。
 \[
-\begin{tikzcd}
-& e
-\arrow[dl, "p"']
-\arrow[dr, gray, "p'"]
-\\
-a 
-\arrow[rr, red, shift left=.75ex, "f"]
-\arrow[rr, red, shift right=.75ex, "g"']
-&&
-b
-\end{tikzcd}
+    \begin{tikzcd}
+        & e
+        \arrow[dl, "p"']
+        \arrow[dr, gray, "p'"]
+        \\
+        a
+        \arrow[rr, red, shift left=.75ex, "f"]
+        \arrow[rr, red, shift right=.75ex, "g"']
+        &&
+        b
+    \end{tikzcd}
 \]
-We have two commuting conditions:
+我们有两个交换条件：
 \begin{align*}
-p' &= f \circ h \\
-p' &= g \circ h
+    p' &= f \circ h \\
+    p' &= g \circ h
 \end{align*}
-It means that $p'$ is fully determined by one of the equations, while the other turns into the constraints:
+这意味着 $p'$ 完全由其中一个方程决定，而另一个方程则变成了约束：
 \[ f \circ p = g \circ p \]
-Since the equalizer is the limit, it is the universal such pair, as illustrated in this diagram:
+由于等值子是极限，它是通用的这种对，如下图所示：
 \[
-\begin{tikzcd}
-x
-\arrow[d, dashed, "h"']
-\arrow[dr, ""]
-\\
-e
-\arrow[r, "p"']
-&
-a \arrow[r, red, shift left=0.75ex, "f"]
-  \arrow[r, red, shift right=0.75ex, "g"']
-&
-b
-\end{tikzcd}
+    \begin{tikzcd}
+        x
+        \arrow[d, dashed, "h"']
+        \arrow[dr, ""]
+        \\
+        e
+        \arrow[r, "p"']
+        &
+        a \arrow[r, red, shift left=0.75ex, "f"]
+        \arrow[r, red, shift right=0.75ex, "g"']
+        &
+        b
+    \end{tikzcd}
 \]
 
-To develop the intuition for equalizers it's instructive to consider how it works for sets. As usual, the trick is to replace $x$ with the singleton set $1$:
+为了培养对等值子的直觉，研究它如何在集合中工作是有益的。与往常一样，诀窍是将 $x$ 替换为单集 $1$：
 \[
-\begin{tikzcd}
-1
-\arrow[d, dashed, "e"']
-\arrow[dr, "a"]
-\\
-E
-\arrow[r, "p"']
-&
-A \arrow[r, red, shift left=0.75ex, "f"]
-  \arrow[r, red, shift right=0.75ex, "g"']
-&
-B
-\end{tikzcd}
+    \begin{tikzcd}
+        1
+        \arrow[d, dashed, "e"']
+        \arrow[dr, "a"]
+        \\
+        E
+        \arrow[r, "p"']
+        &
+        A \arrow[r, red, shift left=0.75ex, "f"]
+        \arrow[r, red, shift right=0.75ex, "g"']
+        &
+        B
+    \end{tikzcd}
 \]
-In this case $a$ is an element of $A$ such that $f a = g a$. That's just a way of saying that $a$ is the solution of a pair of equations. Universality means that there is a unique element $e$ of $E$ such that $p \circ e = a$. In other words, elements of $E$ are in one-to-one correspondence with the solutions of the system of equations. 
+在这种情况下，$a$ 是 $A$ 的一个元素，使得 $f a = g a$。这只是说 $a$ 是一对方程的解。通用性意味着存在 $E$ 的唯一元素 $e$ 使得 $p \circ e = a$。换句话说，$E$ 的元素与方程组的解一一对应。
 
-\subsection{Coequalizers}
+\subsection{Coequalizers 余等值子}
 
-What's dual to the idea of equating or intersecting? It's the process of discovering commonalities and organizing things into buckets. For instance, we can distribute integers into even and odd buckets. In category theory, this process of bucketizing is described by coequalizers.
+与等价或交集的想法对偶的是什么？是发现共性并将事物组织成桶的过程。例如，我们可以将整数分配到偶数和奇数的桶中。在范畴论中，这个分桶的过程由余等值子描述。
 
-A coequalizer is the colimit of the same diagram that we used to define the equalizer:
+余等值子是我们用来定义等值子的相同图的余极限：
 \[
-\begin{tikzcd}
-a 
-\arrow[rr, red, shift left=.75ex, "f"]
-\arrow[rr, red, shift right=.75ex, "g"']
-\arrow[rd, gray, "q'"']
-&&
-b
-\arrow[ld, "q"]
-\\
-& c
-\end{tikzcd}
+    \begin{tikzcd}
+        a
+        \arrow[rr, red, shift left=.75ex, "f"]
+        \arrow[rr, red, shift right=.75ex, "g"']
+        \arrow[rd, gray, "q'"']
+        &&
+        b
+        \arrow[ld, "q"]
+        \\
+        & c
+    \end{tikzcd}
 \]
-This time, the arrow $q'$ is fully determined by $q$; and $q$ must satisfy the equation:
+这次，箭头 $q'$ 完全由 $q$ 决定；而 $q$ 必须满足以下方程：
 \[ q \circ f = q \circ g \]
 
-Again, we can gain some intuition by considering a coequalizer of two functions acting on sets. 
+同样，我们可以通过考虑在集合上作用的两个函数的余等值子来获得一些直觉。
 \[
-\begin{tikzcd}
-A
-\arrow[r, red, shift left=.75ex, "f"]
-\arrow[r, red, shift right=.75ex, "g"']
-&
-B
-\arrow[r, "q"]
-& C
-\end{tikzcd}
+    \begin{tikzcd}
+        A
+        \arrow[r, red, shift left=.75ex, "f"]
+        \arrow[r, red, shift right=.75ex, "g"']
+        &
+        B
+        \arrow[r, "q"]
+        & C
+    \end{tikzcd}
 \]
-An $x \in A$ is mapped to two elements $f x$ and $g x$ in $B$, but then $q$ maps them back to a single element of $C$. This element represents the bucket. Universality means that $C$ is a copy of $B$ in which the elements that were produced from the same $x$ have been identified.
+集合 $A$ 中的 $x$ 被映射到 $B$ 中的两个元素 $f x$ 和 $g x$，然后 $q$ 将它们映射回 $C$ 的单个元素。这个元素代表桶。通用性意味着 $C$ 是 $B$ 的副本，其中由相同 $x$ 产生的元素已被识别为相同。
 
-Consider an example where $A$ is a set of pairs of integers \hask{(m, n)}, such that either both are even or both are odd.  We want to coequalize two functions that are the two projections \hask{(fst, snd)}. The equalizer set $C$ will have two elements corresponding to two buckets. We'll represent it as \hask{Bool}. The equalizing function \hask{q} selects the bucket:
+考虑一个例子，其中 $A$ 是整数对 \hask{(m, n)} 的集合，其中或两者都是偶数，或两者都是奇数。我们想要余等值化两个函数，即两个投影 \hask{(fst, snd)}。等值集合 $C$ 将有两个元素，分别对应两个桶。我们将其表示为 \hask{Bool}。等值函数 \hask{q} 选择桶：
 \begin{haskell}
-q :: Int -> Bool
-q n = n `mod` 2 == 0 
+    q :: Int -> Bool
+    q n = n `mod` 2 == 0
 \end{haskell}
-Any function \hask{q'} that cannot distinguish between the components of our pairs can be uniquely factorized through the function \hask{h}:
+任何不能区分我们对的分量的函数 \hask{q'} 可以通过函数 \hask{h} 唯一分解：
 \begin{haskell}
-h :: (Int -> a) -> Bool -> a
-h q' True  = g' 0
-h q' False = g' 1
+    h :: (Int -> a) -> Bool -> a
+    h q' True  = g' 0
+    h q' False = g' 1
 \end{haskell}
 
 \begin{exercise}
-Run a few tests that show that, in the example above, the factorization \hask{(h g') . q} gives the same result as \hask{g'} given by the following definition:
-\begin{haskell}
-import Data.Bits
+    运行几个测试，显示在上面的例子中，分解 \hask{(h g') . q} 的结果与由以下定义给出的 \hask{g'} 相同：
+    \begin{haskell}
+        import Data.Bits
 
-q' :: Int -> Bool
-q' x = testBit x 0
-\end{haskell}
+        q' :: Int -> Bool
+        q' x = testBit x 0
+    \end{haskell}
 
 \end{exercise}
 \begin{exercise}
-What is the coequalizer of the pair \hask{(id, reverse)}, both of the type \hask{String->String}? Test its universality by factorizing the following function:
-\begin{haskell}
-q' :: String -> Maybe Char
-q' s = if even len
-       then Nothing
-       else Just (s !! (len `div` 2))
-  where len = length s
-\end{haskell}
+    什么是 \hask{(id, reverse)} 对的余等值子，这两个函数的类型都是 \hask{String->String}？通过分解以下函数测试其通用性：
+    \begin{haskell}
+        q' :: String -> Maybe Char
+        q' s = if even len
+        then Nothing
+        else Just (s !! (len `div` 2))
+        where len = length s
+    \end{haskell}
 \end{exercise}
 
-\subsection{The existence of the terminal object}
+\subsection{The existence of the terminal object 终端对象的存在性}
 
-Lao Tzu says: great acts are made up of small deeds.
+老子说：大事由小事构成。
 
-So far we've been studying limits of tiny diagrams, that is functors from simple stick-figure categories. Nothing, however, prevents us from defining limits and colimits where the patterns are taken to be infinite categories. But there is a gradation of infinities. When the objects in a category form a proper set, we call such a category  \index{small category}\emph{small}. Unfortunately, the very basic example, the category $\Set$ of sets, is not small. We know that there is no set of all sets. $\Set$ is a \index{large category}\emph{large} category. But at least all the hom-sets in $\Set$ are sets. We say that $\Set$ is \index{locally small category}\emph{locally small}. In what follows we'll be always working with locally small categories.
+到目前为止，我们已经研究了小图的极限，即从简单的简图范畴到某个范畴的函子。但是，没有什么可以阻止我们定义极限和余极限，模式取自无限范畴。但是，无穷存在着层次。 当一个范畴中的对象形成一个适当的集合时，我们称这样一个范畴为\emph{小范畴（small category）}。不幸的是，最基本的例子——集合范畴 $\Set$ 并不是小范畴。我们知道不存在所有集合的集合。$\Set$ 是\emph{大范畴（large category）}。但至少 $\Set$ 中的所有同态集都是集合。我们说 $\Set$ 是\emph{局部小（locally small）}的。 在接下来的内容中，我们将始终处理局部小范畴。
 
-A small limit is a limit of a small diagram, that is a functor from a category whose objects and morphisms form sets. A category in which all small limits exist is called small complete, or just \emph{complete}. In particular, in such a category, a product of an arbitrary \emph{set} of objects exists. You can also equalize an arbitrary set of arrows between two objects. If such category is locally small, that means all equalizers exist.
+小极限是一个小图的极限，即来自对象和态射形成集合的范畴的函子。一个范畴中所有小极限都存在的范畴称为小完备（small complete），或简称为\emph{完备（complete）}。特别是，在这样的范畴中，一个任意\emph{集合}的对象的积存在。你还可以等值化两物件之间任意箭头的集合。如果这样的范畴是局部小的，这意味着所有等值子都存在。
 
-Conversely, a (small) cocomplete category has all small colimits. In particular, such a category has all small coproducts and coequalizers.
+相反，一个（小）余完备范畴有所有小余极限。特别是，这样的范畴有所有小余积和余等值子。
 
-The category $\Set$ is both complete and cocomplete. 
+集合范畴 $\Set$ 既是完备的也是余完备的。
 
+在一个余完备局部小范畴中，存在终端对象的简单标准是：足够存在一个弱终端集合。
 
-In a cocomplete locally small category there is a simple criterion for the existence of the terminal object: It's enough that a weakly terminal set exists. 
+一个\emph{弱终端对象（weakly terminal object）}，就像终端对象一样，有来自任何对象的箭头；但这种箭头不一定是唯一的。
 
-A \index{weakly terminal object}\emph{weakly terminal} object, just like the terminal object, has an arrow coming from any object; except that such an arrow is not necessarily unique. 
-
-A \index{weakly terminal set}\emph{weakly terminal set} is a family of objects $t_i$ indexed by a set $I$ such that, for any object $c$ in $\cat C$ there exists an $i$ and an arrow $c \to t_i$. Such a set is also called a \index{solution set}\emph{solution set}.
+一个\emph{弱终端集合（weakly terminal set）}是一个由集合 $I$ 索引的对象 $t_i$ 的家族，使得，对于范畴 $\cat C$ 中的任何对象 $c$，存在一个 $i$ 和一个箭头 $c \to t_i$。这样的集合也称为\emph{解集（solution set）}。
 
 \[
-\begin{tikzpicture}
+    \begin{tikzpicture}
         \filldraw (0, 1.5) circle (1pt);
         \node at (0, 1.8) {$c$};
-        
-\filldraw[fill=gray!50, draw=white] (0, -0.2) ellipse (1.3 and 0.8);
+
+        \filldraw[fill=gray!50, draw=white] (0, -0.2) ellipse (1.3 and 0.8);
         \filldraw (-0.7, 0) circle (1pt);
         \node at (-0.7, -0.3) {$t_1$};
         \filldraw (0.7, 0) circle (1pt);
         \node at (0.7, -0.3) {$t_2$};
         \filldraw (0, -0.2) circle (1pt);
         \node at (0, -0.5) {$t_3$};
-        
-    	\draw[->] (0, 1.5) -- (0, 0);
-\end{tikzpicture}
+
+        \draw[->] (0, 1.5) -- (0, 0);
+    \end{tikzpicture}
 \]
 
-In a cocomplete category we can always construct a coproduct $\coprod_{i \in I} t_i$. This coproduct is a weakly terminal object, because there is an arrow to it from every $c$. This arrow is the composite of the arrow to some $t_i$ followed by the injection $\iota_i \colon t_i \to \coprod_{j \in I} t_j$.
+在余完备范畴中，我们总能构造一个余积 $\coprod_{i \in I} t_i$。这个余积是一个弱终端对象，因为有一条从每个 $c$ 到它的箭头。这个箭头是到某个 $t_i$ 的箭头与注入 $\iota_i \colon t_i \to \coprod_{j \in I} t_j$ 的复合。
 
-Given a weakly terminal object, we can construct the (strongly) terminal object. We first define a subcategory $\cat T$ of $\cat C$ whose objects are $t_i$. Morphisms in $\cat T$ are all the morphisms in $\cat C$ that go between the objects of $\cat T$. This is called a \index{full subcategory}\emph{full} subcategory of $\cat C$. By our construction, $\cat T$ is small.
+给定一个弱终端对象，我们可以构造（强）终端对象。我们首先定义 $\cat C$ 的子范畴 $\cat T$，其对象是 $t_i$。$\cat T$ 中的态射是 $\cat C$ 中所有在 $\cat T$ 的对象之间的态射。这称为 $\cat C$ 的\emph{满子范畴（full subcategory）}。通过我们的构造，$\cat T$ 是小范畴。
 
-There is an obvious inclusion functor $F$ that embeds $\cat T$ in $\cat C$. This functor defines a small diagram in $\cat C$. It turns out that the colimit of this diagram is the terminal object in $\cat C$.
+有一个显然的包含函子 $F$ 将 $\cat T$ 嵌入 $\cat C$。这个函子在 $\cat C$ 中定义了一个小图。事实证明，这个图的余极限是 $\cat C$ 中的终端对象。
 
-Dually, a similar construction can be used to define an initial object as a limit of a weakly initial set.
+对偶地，类似的构造可以用来定义一个弱初对象的极限作为初对象。
 
-This property of solution sets will come handy in the proof of the Freyd's adjoint functor theorem.
+这个解集的属性在弗雷德的伴随函子定理的证明中将很有用。
 
-\section{The Yoneda Lemma}
+\section{The Yoneda Lemma 延达引理}
 
-A functor from some category $\mathcal{C}$ to the category of sets can be thought of as a model of this category in $\mathbf{Set}$. Modeling, in general, is a lossy process: it discards some information. A constant $\Set$-valued functor is an extreme example: it maps the whole category to a single set and its identity function. 
+从某个范畴 $\mathcal{C}$ 到集合范畴的函子可以被视为该范畴在 $\mathbf{Set}$ 中的模型。建模通常是一个有损过程：它丢弃了一些信息。常值 $\Set$ 函子是一个极端的例子：它将整个范畴映射到单个集合及其恒等函数。
 
-A hom-functor produces a model of the category as viewed from a certain vantage point. The functor $\mathcal{C}(a, -)$, for instance, offers the panorama of $\mathcal{C}$ from the vantage point of $a$. It organizes all the arrows emanating from $a$ into neat packages that are connected by images of arrows that go between them, all in accordance with the original structure of the source category. 
+同态函子产生了从某个视角看范畴的模型。函子 $\mathcal{C}(a, -)$，例如，提供了从 $a$ 的视角看 $\mathcal{C}$ 的全景，非常详细。它将所有从 $a$ 发出的箭头组织成整齐的包，连接它们的箭头是按照源范畴的原始结构进行的。
 
 \[
-\begin{tikzpicture}
-\def\ax{0}
-\def\ay{0.5}
-\def\xx{-0.5}
-\def\xy{2.7}
-\def\yx{2}
-\def\yy{2.5}
-\def\zx{2}
-\def\zy{0.5}
-\def\vx{-1.5}
-\def\vy{1.7}
-\filldraw[black] (\ax, \ay) circle (1 pt);
-\node (a) at (\ax, \ay) {};
-\node[left] at (\ax, \ay) {$a$};
-\filldraw[blue] (\xx, \xy) circle (1 pt);
-\node[above] at (\xx, \xy) {$x$};
-\filldraw[red] (\yx, \yy) circle (1 pt);
-\node[above] at (\yx, \yy) {$y$};
-\filldraw[brown] (\zx, \zy) circle (1 pt);
-\node[right] at (\zx, \zy) {$z$};
-\filldraw[black] (\vx, \vy) circle (1 pt);
-\node[below] at (\vx, \vy) {$v$};
+    \begin{tikzpicture}
+        \def\ax{0}
+        \def\ay{0.5}
+        \def\xx{-0.5}
+        \def\xy{2.7}
+        \def\yx{2}
+        \def\yy{2.5}
+        \def\zx{2}
+        \def\zy{0.5}
+        \def\vx{-1.5}
+        \def\vy{1.7}
+        \filldraw[black] (\ax, \ay) circle (1 pt);
+        \node (a) at (\ax, \ay) {};
+        \node[left] at (\ax, \ay) {$a$};
+        \filldraw[blue] (\xx, \xy) circle (1 pt);
+        \node[above] at (\xx, \xy) {$x$};
+        \filldraw[red] (\yx, \yy) circle (1 pt);
+        \node[above] at (\yx, \yy) {$y$};
+        \filldraw[brown] (\zx, \zy) circle (1 pt);
+        \node[right] at (\zx, \zy) {$z$};
+        \filldraw[black] (\vx, \vy) circle (1 pt);
+        \node[below] at (\vx, \vy) {$v$};
 
-\draw [->] (a) edge[out=225, in=315, loop] (a);
+        \draw [->] (a) edge[out=225, in=315, loop] (a);
 
-\draw[dashed] (\xx, \xy) edge[->, bend left, shorten > = 4 pt] (\yx, \yy);
-\draw[dashed] (\zx, \zy) edge[->, bend right, shorten > = 4 pt] (\yx, \yy);
+        \draw[dashed] (\xx, \xy) edge[->, bend left, shorten > = 4 pt] (\yx, \yy);
+        \draw[dashed] (\zx, \zy) edge[->, bend right, shorten > = 4 pt] (\yx, \yy);
 
-\draw[blue] (\ax, \ay) edge[->, bend left, shorten > = 4 pt] (\xx, \xy);
-\draw[blue] (\ax, \ay) edge[->, bend right, shorten > = 4 pt] (\xx, \xy);
+        \draw[blue] (\ax, \ay) edge[->, bend left, shorten > = 4 pt] (\xx, \xy);
+        \draw[blue] (\ax, \ay) edge[->, bend right, shorten > = 4 pt] (\xx, \xy);
 
-\draw[red] (\ax, \ay) edge[->, bend left, shorten > = 4 pt] (\yx, \yy);
-\draw[red] (\ax, \ay) edge[->, bend right, shorten > = 4 pt] (\yx, \yy);
-\draw[red] (\ax, \ay) edge[->, shorten > = 4 pt] (\yx, \yy);
+        \draw[red] (\ax, \ay) edge[->, bend left, shorten > = 4 pt] (\yx, \yy);
+        \draw[red] (\ax, \ay) edge[->, bend right, shorten > = 4 pt] (\yx, \yy);
+        \draw[red] (\ax, \ay) edge[->, shorten > = 4 pt] (\yx, \yy);
 
-\draw[brown] (\ax, \ay) edge[->, shorten > = 4 pt] (\zx, \zy);
-\end{tikzpicture}
-\hspace{80pt}
-\begin{tikzpicture}
-\def\ax{0}
-\def\ay{0.5}
-\def\xx{-0.5}
-\def\xy{2.7}
-\def\yx{2}
-\def\yy{2.5}
-\def\zx{2}
-\def\zy{0.5}
-\def\vx{-1.5}
-\def\vy{1.7}
-\def\sx{0.7}
-\def\sy{1.6}
+        \draw[brown] (\ax, \ay) edge[->, shorten > = 4 pt] (\zx, \zy);
+    \end{tikzpicture}
+    \hspace{80pt}
+    \begin{tikzpicture}
+        \def\ax{0}
+        \def\ay{0.5}
+        \def\xx{-0.5}
+        \def\xy{2.7}
+        \def\yx{2}
+        \def\yy{2.5}
+        \def\zx{2}
+        \def\zy{0.5}
+        \def\vx{-1.5}
+        \def\vy{1.7}
+        \def\sx{0.7}
+        \def\sy{1.6}
 
-\node at (\sx, \sy) {$\Set$};
+        \node at (\sx, \sy) {$\Set$};
 
-\draw[black] (\vx, \vy) circle (0.2);
-\node[below] at (\vx, \vy - 0.2) {$v$};
+        \draw[black] (\vx, \vy) circle (0.2);
+        \node[below] at (\vx, \vy - 0.2) {$v$};
 
-\draw[black] (\ax, \ay) circle (0.2);
-\filldraw[black] (\ax, \ay) circle (1 pt);
-\node[below] at (\ax, \ay-0.2) {$a$};
+        \draw[black] (\ax, \ay) circle (0.2);
+        \filldraw[black] (\ax, \ay) circle (1 pt);
+        \node[below] at (\ax, \ay-0.2) {$a$};
 
-\draw[blue] (\xx, \xy) circle (0.35);
-\filldraw[blue] (\xx - 0.1, \xy) circle (1 pt);
-\filldraw[blue] (\xx + 0.1, \xy) circle (1 pt);
-\node[above] at (\xx, \xy - 0.8) {$x$};
+        \draw[blue] (\xx, \xy) circle (0.35);
+        \filldraw[blue] (\xx - 0.1, \xy) circle (1 pt);
+        \filldraw[blue] (\xx + 0.1, \xy) circle (1 pt);
+        \node[above] at (\xx, \xy - 0.8) {$x$};
 
-\draw[red] (\yx, \yy) circle (0.4);
-\filldraw[red] (\yx-0.15, \yy+0.1) circle (1 pt);
-\filldraw[red] (\yx+0.15, \yy+0.1) circle (1 pt);
-\filldraw[red] (\yx, \yy-0.2) circle (1 pt);
-\node[below] at (\yx, \yy - 0.4) {$y$};
+        \draw[red] (\yx, \yy) circle (0.4);
+        \filldraw[red] (\yx-0.15, \yy+0.1) circle (1 pt);
+        \filldraw[red] (\yx+0.15, \yy+0.1) circle (1 pt);
+        \filldraw[red] (\yx, \yy-0.2) circle (1 pt);
+        \node[below] at (\yx, \yy - 0.4) {$y$};
 
-\draw[brown] (\zx, \zy) circle (0.2);
-\filldraw[brown] (\zx, \zy) circle (1 pt);
-\node[below] at (\zx, \zy - 0.2) {$z$};
+        \draw[brown] (\zx, \zy) circle (0.2);
+        \filldraw[brown] (\zx, \zy) circle (1 pt);
+        \node[below] at (\zx, \zy - 0.2) {$z$};
 
-\draw[dashed] (\xx, \xy) edge[->, bend left, shorten > = 15, shorten < = 15] (\yx, \yy);
-\draw[dashed] (\zx, \zy) edge[->, bend right, shorten > = 15, shorten < = 10] (\yx, \yy);
+        \draw[dashed] (\xx, \xy) edge[->, bend left, shorten > = 15, shorten < = 15] (\yx, \yy);
+        \draw[dashed] (\zx, \zy) edge[->, bend right, shorten > = 15, shorten < = 10] (\yx, \yy);
 
-\end{tikzpicture}
+    \end{tikzpicture}
 \]
 
+一些视角比其他视角更好。例如，从初始对象的视角看，景色相当稀疏。每个对象 $x$ 都被映射到单集合 $\cat C(0, x)$，对应于唯一的映射 $0 \to x$。
 
-Some vantage points are better than others. For instance, the view from the initial object is quite sparse. Every object $x$ is mapped to a singleton set $\cat C(0, x)$ corresponding to the unique mapping $0 \to x$. 
+从终端对象的视角看，则更有趣：它将所有对象映射到其全局元素集合 $\cat C(1, x)$。
 
-The view from the terminal object is more interesting: it maps all objects to their sets of (global) elements $\cat C(1, x)$. 
+延达引理可以被视为范畴论中最深刻的陈述之一，也可以被视为最平凡的陈述之一。让我们从深刻的版本开始。
 
-The Yoneda lemma may be considered one of the most profound statements, or one of the most trivial statements in category theory. Let's start with the profound version. 
+考虑两个 $\mathcal{C}$ 在 $\mathbf{Set}$ 中的模型。第一个模型由同态函子 $\mathcal{C}(a, -)$ 给出。这是从 $a$ 的视角看到的 $\mathcal{C}$ 的全景、非常详细的视角。第二个模型由某个任意函子 $F \colon \mathcal{C} \to \mathbf{Set}$ 给出。任何这两个模型之间的自然变换都嵌入了一个模型到另一个模型中。事实证明，所有这些自然变换的集合完全由集合 $F a$ 决定。
 
-Consider two models of $\mathcal{C}$ in $\mathbf{Set}$. The first one is given by the hom-functor  $\mathcal{C}(a, -)$. It's the panoramic, very detailed view of $\mathcal{C}$ from the vantage point of $a$. The second is given by some arbitrary functor $F \colon \mathcal{C} \to \mathbf{Set}$. Any natural transformation between them embeds one model in the other. It turns out that the set of all such natural transformations is fully determined by the set $F a$.
-
-Since the set of natural transformation is the hom-set in the functor category $[\mathcal{C}, \mathbf{Set}]$, the formal statement of the Yoneda lemma takes the form:
+由于自然变换的集合是函子范畴 $[\mathcal{C}, \mathbf{Set}]$ 中的同态集，延达引理的正式陈述形式如下：
 
 \[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
-Moreover, this isomorphism is natural in both $a$ and $F$.
+此外，这个同构在 $a$ 和 $F$ 上都是自然的。
 
-The reason this works is because all the mappings involved in this theorem are bound by the requirements of preserving the structure of the category $\mathcal{C}$ and the structure of its models. In particular, naturality conditions impose a huge set of constraints on the way the components of a natural transformation propagate from one point to another. 
+这种情况之所以成立，是因为这个定理中涉及的所有映射都必须保持 $\mathcal{C}$ 范畴的结构和它们模型的结构。特别是，自然性条件对自然变换的各个分量从一个点传播到另一个点的方式施加了大量约束。
 
-The proof of the Yoneda lemma starts with a single identity arrow and lets naturality propagate it across the whole category.
+延达引理的证明从单个恒等箭头开始，让自然性在整个范畴中传播。
 
-Here's the sketch of the proof. It consists of two parts: First, given a natural transformation we construct an element of $F a$. Second, given an element of $F a$ we construct the corresponding natural transformation. 
+以下是证明的概述。它分为两部分：首先，给定一个自然变换，我们构造一个 $F a$ 的元素。其次，给定一个 $F a$ 的元素，我们构造相应的自然变换。
 
-First, let's pick an arbitrary element on the left-hand side of the Yoneda lemma: a natural transformation $\alpha$. Its component at $x$ is a function:
+首先，让我们选择延达引理左侧的一个任意元素：一个自然变换 $\alpha$。它在 $x$ 处的分量是一个函数：
 \[ \alpha_x \colon \mathcal{C}(a, x) \to F x \]
-We can now apply the Yoneda trick: substitute $a$ for $x$:
+现在我们可以应用延达技巧：用 $a$ 替代 $x$：
 \[ \alpha_a \colon \mathcal{C}(a, a) \to F a \]
-and then pick the identity $id_a$ as the canonical element of $\mathcal{C}(a, a)$. The result is an element $\alpha_a (id_a)$ in the set $F a$. This defines a mapping in one direction, from natural transformations to elements of the set $F a$.
+然后选择 $\mathcal{C}(a, a)$ 的典型元素 $id_a$。结果是集合 $F a$ 中的一个元素 $\alpha_a (id_a)$。这定义了从自然变换到集合 $F a$ 元素的映射。
 
-Now the other way around. Given an element $p$ of the set $F a$ we want to construct a natural transformation $\alpha$. First, we assign $p$ to be the action of $\alpha_a$ on $id_a \in \cat C(a, a)$. 
+现在来看另一种情况。给定集合 $F a$ 的一个元素 $p$，我们想要构造一个自然变换 $\alpha$。首先，我们将 $p$ 赋值为 $\alpha_a$ 在 $id_a \in \cat C(a, a)$ 上的作用。
 
 \[
-\begin{tikzpicture}
-\def\ax{0}
-\def\ay{0.5}
-\def\xx{-0.5}
-\def\xy{3.7}
-\filldraw[black] (\ax, \ay) circle (1 pt);
-\node (a) at (\ax, \ay) {};
-\node[left] at (\ax, \ay) {$a$};
-\filldraw[blue] (\xx, \xy) circle (1 pt);
-\node[above] at (\xx, \xy) {$x$};
+    \begin{tikzpicture}
+        \def\ax{0}
+        \def\ay{0.5}
+        \def\xx{-0.5}
+        \def\xy{3.7}
+        \filldraw[black] (\ax, \ay) circle (1 pt);
+        \node (a) at (\ax, \ay) {};
+        \node[left] at (\ax, \ay) {$a$};
+        \filldraw[blue] (\xx, \xy) circle (1 pt);
+        \node[above] at (\xx, \xy) {$x$};
 
-\draw [->] (a) edge[out=225, in=315, loop] (a);
-\node[right] at (\ax + 0.3, \ay - 0.35) {$id_a$};
+        \draw [->] (a) edge[out=225, in=315, loop] (a);
+        \node[right] at (\ax + 0.3, \ay - 0.35) {$id_a$};
 
-\draw[blue] (\ax, \ay) edge[->, "$h$", bend right, shorten > = 4 pt] (\xx, \xy);
+        \draw[blue] (\ax, \ay) edge[->, "$h$", bend right, shorten > = 4 pt] (\xx, \xy);
 
-\end{tikzpicture}
-\hspace{80pt}
-\begin{tikzpicture}
+    \end{tikzpicture}
+    \hspace{80pt}
+    \begin{tikzpicture}
 
-\def\ax{0}
-\def\ay{0.5}
-\def\xx{-0.5}
-\def\xy{3.7}
+        \def\ax{0}
+        \def\ay{0.5}
+        \def\xx{-0.5}
+        \def\xy{3.7}
 
-\def\fax{3}
-\def\fay{0.5}
-\def\fxx{3 - 0.5}
-\def\fxy{3.7}
+        \def\fax{3}
+        \def\fay{0.5}
+        \def\fxx{3 - 0.5}
+        \def\fxy{3.7}
 
-\def\px{\fax - 0.3}
-\def\hx{\xx + 0.35}
+        \def\px{\fax - 0.3}
+        \def\hx{\xx + 0.35}
 % C(a,a)
-\draw[black] (\ax, \ay) circle (0.2);
-\filldraw[black] (\ax, \ay) circle (1 pt);
-\node[below] at (\ax, \ay-0.2) {$\cat C (a, a)$};
+        \draw[black] (\ax, \ay) circle (0.2);
+        \filldraw[black] (\ax, \ay) circle (1 pt);
+        \node[below] at (\ax, \ay-0.2) {$\cat C (a, a)$};
 % C(a,x)
-\draw[black] (\xx, \xy) ellipse (0.7 and 0.4);
+        \draw[black] (\xx, \xy) ellipse (0.7 and 0.4);
 
-\filldraw[blue] (\xx + 0.35, \xy) circle (1 pt);
-\node[left, blue] at (\hx, \xy) {$h$};
+        \filldraw[blue] (\xx + 0.35, \xy) circle (1 pt);
+        \node[left, blue] at (\hx, \xy) {$h$};
 
-\node[above] at (\xx, \xy - 1.1) {$\cat C (a, x)$};
-\draw[dashed] (\hx, \xy) edge[->, "$\alpha_x$", shorten > = 4 pt] (\fxx, \fxy);
+        \node[above] at (\xx, \xy - 1.1) {$\cat C (a, x)$};
+        \draw[dashed] (\hx, \xy) edge[->, "$\alpha_x$", shorten > = 4 pt] (\fxx, \fxy);
 
 % F a
-\draw[red] (\fax, \fay) ellipse (0.7 and 0.4);
-\filldraw[red] (\px, \fay) circle (1 pt);
-\node[right, red] at (\px, \fay) {$p$};
-\node[right, red] at (\fax + 0.7, \fay) {$F a$};
-\draw[dashed] (\ax, \ay) edge[->, "$\alpha_a$", shorten > = 3 pt] (\px, \fay);
+        \draw[red] (\fax, \fay) ellipse (0.7 and 0.4);
+        \filldraw[red] (\px, \fay) circle (1 pt);
+        \node[right, red] at (\px, \fay) {$p$};
+        \node[right, red] at (\fax + 0.7, \fay) {$F a$};
+        \draw[dashed] (\ax, \ay) edge[->, "$\alpha_a$", shorten > = 3 pt] (\px, \fay);
 % F x
-\draw[red] (\fxx, \fxy) circle (0.4);
-\filldraw[red] (\fxx, \fxy) circle (1 pt);
-\node[right, red] at (\fxx + 0.35, \fxy) {$F x$};
+        \draw[red] (\fxx, \fxy) circle (0.4);
+        \filldraw[red] (\fxx, \fxy) circle (1 pt);
+        \node[right, red] at (\fxx + 0.35, \fxy) {$F x$};
 
-\draw[blue] (\px, \fay) edge[->, "$F h$", bend right, shorten > = 12, shorten < = 12] (\fxx, \fxy);
+        \draw[blue] (\px, \fay) edge[->, "$F h$", bend right, shorten > = 12, shorten < = 12] (\fxx, \fxy);
 
-\end{tikzpicture}
+    \end{tikzpicture}
 \]
 
-
-Now let's take an arbitrary object $x$ and an arbitrary element of $\cat C(a, x)$. The latter is an arrow $h \colon a \to x$. Our natural transformation must map it to an element of $F x$. We can do it by lifting the arrow $h$ using $F$. We get a function:
+现在让我们选择一个任意的对象 $x$ 和 $\cat C(a, x)$ 的一个任意元素。后者是一个箭头 $h \colon a \to x$。我们的自然变换必须将其映射到 $F x$ 的一个元素。我们可以通过使用 $F$ 提升箭头 $h$ 来完成此操作。我们得到一个函数：
 \[F h \colon F a \to F x \]
-We can apply this function to $p$ and get an element of $F x$. We take this element to be the action of $\alpha_x$ on $h$:
+我们可以将此函数应用于 $p$ 并得到 $F x$ 的一个元素。我们将这个元素作为 $\alpha_x$ 在 $h$ 上的作用：
 \[ \alpha_x h = (F h) p \]
 
-The isomorphism in the Yoneda lemma is natural both in $a$ and in $F$. The latter means that you can ``move'' from the functor $F$ to another functor $G$ by applying an arrow in the functor category, that is a natural transformation. This is quite a leap in the levels of abstraction, but all the definitions of functoriality and naturality work equally well in the functor category, where objects are functors, and arrows are natural transformations.
+延达引理中的同构在 $a$ 和 $F$ 上都是自然的。后者意味着你可以通过在函子范畴中的箭头，即自然变换，从函子 $F$ ``移动''到另一个函子 $G$。这是抽象水平上的一次飞跃，但在函子范畴中，定义的函子性和自然性都同样适用，其中对象是函子，箭头是自然变换。
 
 \begin{exercise}
-Fill in the gap in the proof when $F a$ is empty.
+    补充证明中的缺口，当 $F a$ 为空时。
 \end{exercise}
 \begin{exercise}
-Show that the mapping 
-\[ \mathcal{C}(a, x) \to F x\]
-defined above is a natural transformation. Hint: Vary $x$ using some $f \colon x \to y$.
+    证明上述定义的
+    \[ \mathcal{C}(a, x) \to F x\]
+    的映射是自然变换。提示：使用一些 $f \colon x \to y$ 变换 $x$。
 \end{exercise}
 \begin{exercise}
-Show that the formula for $\alpha_x$ can be derived from the assumption that $\alpha_a (id_a) = p$ and the naturality condition. Hint: The lifting of $h$ by the hom-functor $\cat C(a, h)$ is given by post-composition.
+    证明公式 $\alpha_x$ 可以从假设 $\alpha_a (id_a) = p$ 和自然性条件中推导出来。提示：同态函子 $\cat C(a, h)$ 的提升由后组成给出。
 \end{exercise}
 
-\subsection{Yoneda lemma in programming}
+\subsection{Yoneda lemma in programming 延达引理在编程中的应用}
 
-Now for the trivial part: The proof of the Yoneda lemma translates directly to Haskell code. We start with the type of natural transformation between the hom-functor \hask{a->x} and some functor \hask{f}, and show that it's equivalent to the type of \hask{f} acting on \hask{a}.
+现在来谈论平凡部分：延达引理的证明直接翻译为 Haskell 代码。我们从函子 \hask{a->x} 和某些函子 \hask{f} 之间的自然变换的类型开始，表明它等同于 \hask{f} 在 \hask{a} 上的作用类型。
 \begin{haskell}
-forall x. (a -> x) -> f x.   -- is isomorphic to (f a)
+    forall x. (a -> x) -> f x.   -- is isomorphic to (f a)
 \end{haskell}
-We produce a value of the type \hask{(f a)} using the standard Yoneda trick
+我们使用标准的延达技巧生成一个类型为 \hask{(f a)} 的值：
 \begin{haskell}
-yoneda :: Functor f => (forall x. (a -> x) -> f x) -> f a
-yoneda g = g id
+    yoneda :: Functor f => (forall x. (a -> x) -> f x) -> f a
+    yoneda g = g id
 \end{haskell}
-Here's the inverse mapping:
+以下是反向映射：
 \begin{haskell}
-yoneda_1 :: Functor f => f a -> (forall x. (a -> x) -> f x)
-yoneda_1 y = \h -> fmap h y
+    yoneda_1 :: Functor f => f a -> (forall x. (a -> x) -> f x)
+    yoneda_1 y = \h -> fmap h y
 \end{haskell}
 
-Note that we are cheating a little by mixing types and sets. The Yoneda lemma in the present formulation works with  $\mathbf{Set}$-valued functors. Again, the correct incantation is to say that we use the enriched version of the Yoneda lemma in a self-enriched category.
+注意，我们通过混合类型和集合有点作弊。目前的延达引理以 $\mathbf{Set}$ 值函子形式工作。同样，正确的表述是，我们使用了在自我扩充范畴中的延达引理扩展版本。
 
-The Yoneda lemma has some interesting applications in programming. For instance, let's consider what happens when we apply the Yoneda lemma to the identity functor. We get the isomorphism between the type \hask{a} (the identity functor acting on \hask{a}) and
+延达引理在编程中有一些有趣的应用。例如，让我们考虑当我们将延达引理应用于恒等函子时会发生什么。我们得到类型 \hask{a}（恒等函子在 \hask{a} 上的作用）和
 \begin{haskell}
-forall x. (a -> x) -> x
+    forall x. (a -> x) -> x
 \end{haskell}
-We interpret this as saying that any data type \hask{a} can be replaced by a higher order polymorphic function. This function takes another function---called a handler, a callback, or a \emph{continuation}---as an argument. 
+的同构。
+我们将其解释为：任何数据类型 \hask{a} 都可以被替换为一个高阶多态函数。这个函数接受另一个函数——称为处理器、回调或\emph{延续（continuation）}——作为参数。
 
-This is the standard continuation passing transformation that's used a lot in distributed programming, for instance when the value of type \hask{a} has to be retrieved from a remote server. It's also useful as a program transformation that turns recursive algorithms into tail-recursive functions.
+这是标准的延续传递变换，在分布式编程中使用很多，例如当类型 \hask{a} 的值必须从远程服务器检索时。它也可以作为一种程序变换，用于将递归算法转化为尾递归函数。
 
-Continuation-passing style is difficult to work with because the composition of continuations is highly nontrivial, resulting in what programmers often call a ``callback hell.'' Fortunately continuations form a monad, which means their composition can be hidden behind the \hask{do} notation.
+延续传递风格难以使用，因为延续的组合非常复杂，程序员通常称之为``回调地狱''。幸运的是，延续形成了一个单子，这意味着它们的组合可以隐藏在 \hask{do} 记法背后。
 
-\subsection{The contravariant Yoneda lemma}
+\subsection{The contravariant Yoneda lemma 反变延达引理}
 
-By reversing a few arrow, the Yoneda lemma can be applied to contravariant functors as well. It works on natural transformations between the contravariant hom-functor $\mathcal{C}(-, a)$ and a contravariant functor $F$:
+通过反转几个箭头，延达引理也可以应用于反变函子。它适用于反变同态函子 $\mathcal{C}(-, a)$ 和反变函子 $F$ 之间的自然变换：
 
 \[ [\mathcal{C}^{op}, \mathbf{Set}]( \mathcal{C}(-, a), F) \cong F a \]
 
-This is the Haskell implementation of the mapping:
+这是映射的 Haskell 实现：
 \begin{haskell}
-coyoneda :: Contravariant f => (forall x. (x -> a) -> f x) -> f a
-coyoneda g = g id
+    coyoneda :: Contravariant f => (forall x. (x -> a) -> f x) -> f a
+    coyoneda g = g id
 \end{haskell}
-And this is the inverse transformation:
+这是逆变换：
 \begin{haskell}
-coyoneda_1 :: Contravariant f => f a -> (forall x. (x -> a) -> f x)
-coyoneda_1 y = \h -> contramap h y
+    coyoneda_1 :: Contravariant f => f a -> (forall x. (x -> a) -> f x)
+    coyoneda_1 y = \h -> contramap h y
 \end{haskell}
 
 \section{Yoneda Embedding}
