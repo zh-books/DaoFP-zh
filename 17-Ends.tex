@@ -851,310 +851,309 @@
  \end{exercise}
 
 
-\section{The Bicategory of Profunctors}
+ \section{伴随态射的双范畴（The Bicategory of Profunctors）}
 
-Since we know how to compose profunctors using coends, the question arises: is there a category in which they serve as morphisms? The answer is yes, as long as we relax the rules a bit. The problem is that the categorical laws for profunctor composition are nor satisfied ``on the nose,'' but only up to isomorphism. 
+ 既然我们已经知道如何使用余极限（coends）来组合伴随态射（profunctors），那么问题就来了：是否存在一个以这些伴随态射作为态射的范畴？答案是肯定的，只要我们稍微放松一下规则。问题在于，伴随态射组合的范畴定律并不能严格满足，而是只能满足同构意义上的定律。
 
-For instance, we can try to show associativity of profunctor composition. We start with:
-\[ ((P \diamond Q) \diamond R) \langle s, t \rangle = \int^b \left( \int^a P \langle s, a \rangle \times Q \langle a, b \rangle \right) \times R \langle b,  t \rangle \]
-and, after a few transformations, arrive at:
-\[ (P \diamond (Q \diamond R)) \langle s, t \rangle =  \int^a P \langle s, a \rangle \times \left( \int^b Q \langle a, b \rangle \times R \langle b,  t \rangle \right) \]
-We use the associativity of the product and the fact that we can switch the order of coends using the Fubini theorem. Both are true only up to isomorphism. We don't get associativity ``on the nose.''
+ 例如，我们可以尝试展示伴随态射组合的结合律。我们从以下开始：
+ \[ ((P \diamond Q) \diamond R) \langle s, t \rangle = \int^b \left( \int^a P \langle s, a \rangle \times Q \langle a, b \rangle \right) \times R \langle b,  t \rangle \]
+ 然后经过一些转换，得到：
+ \[ (P \diamond (Q \diamond R)) \langle s, t \rangle =  \int^a P \langle s, a \rangle \times \left( \int^b Q \langle a, b \rangle \times R \langle b,  t \rangle \right) \]
+ 我们使用了乘积的结合性和富比尼定理（Fubini theorem）中可以交换余极限的顺序。两者都只能在同构的意义上成立。我们不能获得严格的结合律。
 
-The identity profunctor turns out to be the hom-functor, which can be written symbolically as $\mathcal{C}(-, =)$, with placeholders for both arguments. For instance:
-\[ \left( \mathcal{C}(-, =) \diamond P \right) \langle s, t \rangle = \int^a  \mathcal{C}(s, a) \times P \langle a, t \rangle \cong P \langle s, t \rangle \]
-This is the consequence of the (contravariant) ninja co-Yoneda lemma, which is also an isomorphism, not an equality.
+ 恒等伴随态射实际上是同态函子（hom-functor），它可以符号化地表示为 $\mathcal{C}(-, =)$，其中两个参数为占位符。例如：
+ \[ \left( \mathcal{C}(-, =) \diamond P \right) \langle s, t \rangle = \int^a  \mathcal{C}(s, a) \times P \langle a, t \rangle \cong P \langle s, t \rangle \]
+ 这是（逆变）Ninja 共代数引理（ninja co-Yoneda lemma）的结果，这也是一个同构，而不是一个等式。
 
-A category in which categorical laws are satisfied up to isomorphism is called a \index{bicategory}bicategory. Notice that such a category must be equipped with 2-cells---morphisms between morphisms, which we've already seen in the definition of a 2-category. We need those in order to be able to define isomorphisms between 1-cells. 
+ 一个范畴，如果其范畴定律仅在同构意义上满足，则称为\index{bicategory}双范畴（bicategory）。请注意，这样的范畴必须配备2-态射（2-cells）——即态射之间的态射，这在2-范畴的定义中已经见过。我们需要这些2-态射来定义1-态射之间的同构。
 
-A bicategory $\mathbf{Prof}$ has (small) categories as objects, profunctors as 1-cells, and natural transformations as 2-cells. 
+ 一个双范畴 $\mathbf{Prof}$ 具有（小）范畴作为对象，伴随态射作为1-态射，自然变换作为2-态射。
 
-Since profunctors are functors $\mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$, the standard definition of natural transformations between them applies. It's a family of functions parameterized by objects of $\mathcal{C}^{op} \times  \mathcal{D}$, which are themselves pairs of objects. 
+ 由于伴随态射是从 $\mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$ 的函子，适用于它们的自然变换的标准定义是一个由 $\mathcal{C}^{op} \times  \mathcal{D}$ 的对象参数化的函数族，这些对象本身是对象的对。
 
-The naturality condition for a transformation $\alpha_{\langle a, b \rangle}$ between two profunctors $P$ and $Q$ takes the form:
-\[
- \begin{tikzcd}
- &P \langle a, b \rangle
- \arrow[ld, "{\alpha_{\langle a, b \rangle}}"']
- \arrow[rd, "{P \langle f, g \rangle}"]
- \\
- Q \langle a, b \rangle
- \arrow[dr, "{Q \langle f, g \rangle}"']
- &&P \langle s, t \rangle
- \arrow[dl, "{\alpha_{\langle s, t \rangle}}"]
- \\
- & Q \langle s, t \rangle
- \end{tikzcd}
-\]
-for every pair of arrows:
-\[ \langle f \colon s \to a, g \colon b \to t \rangle \]
+ 对于两个伴随态射 $P$ 和 $Q$ 之间的变换 $\alpha_{\langle a, b \rangle}$，其自然性条件如下形式：
+ \[
+  \begin{tikzcd}
+   &P \langle a, b \rangle
+   \arrow[ld, "{\alpha_{\langle a, b \rangle}}"']
+   \arrow[rd, "{P \langle f, g \rangle}"]
+   \\
+   Q \langle a, b \rangle
+   \arrow[dr, "{Q \langle f, g \rangle}"']
+   &&P \langle s, t \rangle
+   \arrow[dl, "{\alpha_{\langle s, t \rangle}}"]
+   \\
+   & Q \langle s, t \rangle
+  \end{tikzcd}
+ \]
+ 对于每对箭头：
+ \[ \langle f \colon s \to a, g \colon b \to t \rangle \]
 
-\subsection{Monads in a bicategory}
+ \subsection{双范畴中的单子（Monads in a Bicategory）}
 
-We've seen before that categories, functors, and natural transformations form a 2-category $\Cat{Cat}$. Let's focus on one object, a category $\cat C$, that is a 0-cell in $\Cat{Cat}$. The 1-cells that start and end at this object form a regular category, in this case it's the functor category $[\cat C, \cat C]$. The objects in this category are endo-1-cells of the outer 2-category $\Cat{Cat}$. The arrows between them are the 2-cells of the outer 2-category.
+ 我们之前已经看到，范畴、函子和自然变换构成了一个2-范畴 $\Cat{Cat}$。让我们关注一个对象，即一个0-态射 $\Cat{Cat}$ 中的范畴 $\cat C$。从这个对象出发并终止于它的1-态射构成了一个常规范畴，在本例中，它是函子范畴 $[\cat C, \cat C]$。这个范畴中的对象是外部2-范畴 $\Cat{Cat}$ 的端1-态射（endo-1-cells）。它们之间的箭头是外部2-范畴的2-态射。
 
-This endo-one-cell category is automatically equipped with monoidal structure. We simply define the tensor product as the composition of 1-cells---all 1-cells with the same source and target compose. The monoidal unit object is the identity 1-cell, $I$. In $[\cat C, \cat C]$ this product is the composition of endofunctors and the unit is the identity functor. 
+ 这个端1-态射范畴自动配备了单胚结构。我们简单地定义张量积为1-态射的组合——所有具有相同源和目标的1-态射可以组合。单胚单位对象是恒等1-态射 $I$。在 $[\cat C, \cat C]$ 中，这个乘积是端函子的组合，单位是恒等函子。
 
-If we now focus our attention on just one endo-1-cell $F$, we can ``square'' it, that is use the monoidal product to multiply it by itself. In other words, use the 1-cell composition to create $F \circ F$. We say that $F$ is a monad if we can find 2-cells:
-\[ \mu \colon F \circ F \to F \]
-\[ \eta \colon I \to F \]
-that behave like multiplication and unit, that is they make the associativity and unit diagrams commute. 
-\[
-   \begin{tikzpicture}
-        \node [] (star) {$\cat C$} ;
-        \path[->,draw] (star) to  [in=45,out=135, loop,distance=2cm] node[ below] {$I$} (star);
-        \path[->,draw] (star) to  [in=40,out=140, loop,distance=4cm] node[above] {$F$} (star);
-        \path[->,draw] (star) to  [ in=35,out=145, loop,distance=7cm] node[auto] {$F \circ F$} (star);
-    \end{tikzpicture}
-\]
-In fact a monad can be defined in an arbitrary bicategory, not just the 2-category $\Cat{Cat}$. 
+ 如果我们现在只关注一个端1-态射 $F$，我们可以“平方”它，即使用单胚乘积将其自身相乘。换句话说，使用1-态射组合来创建 $F \circ F$。我们说，如果我们可以找到2-态射：
+ \[ \mu \colon F \circ F \to F \]
+ \[ \eta \colon I \to F \]
+ 使得它们像乘法和单位一样，使得结合性和单位图表交换，那么 $F$ 就是一个单子。
+ \[
+  \begin{tikzpicture}
+   \node [] (star) {$\cat C$} ;
+   \path[->,draw] (star) to  [in=45,out=135, loop,distance=2cm] node[ below] {$I$} (star);
+   \path[->,draw] (star) to  [in=40,out=140, loop,distance=4cm] node[above] {$F$} (star);
+   \path[->,draw] (star) to  [ in=35,out=145, loop,distance=7cm] node[auto] {$F \circ F$} (star);
+  \end{tikzpicture}
+ \]
+ 事实上，一个单子可以在任意双范畴中定义，而不仅仅是2-范畴 $\Cat{Cat}$ 中。
 
-\subsection{Prearrows as monads in $\Cat{Prof}$}
+ \subsection{在 $\Cat{Prof}$ 中的前箭头作为单子（Prearrows as Monads in $\Cat{Prof}$）}
 
-Since $\Cat{Prof}$ is a bicategory, we can define a monad in it. It is an endo-profunctor (a 1-cell):
-\[ P \colon \cat C^{op} \times \cat C \to \Set \]
-equipped with two natural transformations (2-cells):
-\[ \mu \colon P \diamond P \to P \]
-\[ \eta \colon \cat C(-, =) \to P \]
-that satisfy the associativity and unit conditions.
+ 由于 $\Cat{Prof}$ 是一个双范畴，我们可以在其中定义一个单子。它是一个端伴随态射（端1-态射）：
+ \[ P \colon \cat C^{op} \times \cat C \to \Set \]
+ 配备两个自然变换（2-态射）：
+ \[ \mu \colon P \diamond P \to P \]
+ \[ \eta \colon \cat C(-, =) \to P \]
+ 满足结合性和单位条件。
 
-Let's look at these natural transformations as elements of ends. For instance:
-\[ \mu \in \int_{\langle a, b \rangle} \Set \big( \int^x P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
-By co-continuity, this is equivalent to:
-\[ \int_{\langle a, b \rangle, x} \Set \big(P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
-Similarly, the unit natural transformation is:
-\[ \eta \in \int_{\langle a, b \rangle} \Set (\cat C(a, b), P\langle a, b \rangle) \]
+ 让我们将这些自然变换视为余极限中的元素。例如：
+ \[ \mu \in \int_{\langle a, b \rangle} \Set \big( \int^x P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
+ 通过余连续性（co-continuity），这等价于：
+ \[ \int_{\langle a, b \rangle, x} \Set \big(P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
+ 同样，单位自然变换是：
+ \[ \eta \in \int_{\langle a, b \rangle} \Set (\cat C(a, b), P\langle a, b \rangle) \]
 
-In Haskell, such profunctor monads are called pre-arrows:
-\begin{haskell}
-class Profunctor p => PreArrow p where
+ 在 Haskell 中，这样的伴随态射单子被称为前箭头（pre-arrows）：
+ \begin{haskell}
+  class Profunctor p => PreArrow p where
   (>>>) :: p a x -> p x b -> p a b
   arr   :: (a -> b) -> p a b
-\end{haskell}
-An \hask{Arrow} is a \hask{PreArrow} that is also a Tambara module. We'll talk about Tambara modules in the next chapter.
+ \end{haskell}
+ 一个 \hask{Arrow} 是一个 \hask{PreArrow}，它同时也是一个 Tambara 模块。我们将在下一章讨论 Tambara 模块。
 
-\section{Existential Lens}
+ \section{存在透镜（Existential Lens）}
 
-The first rule of category-theory club is that you don't talk about the internals of objects.
+ 范畴论俱乐部的第一条规则是你不谈论对象的内部结构。
 
-The second rule of category-theory club is that, if you have to talk about the internals of objects, use arrows only.
+ 范畴论俱乐部的第二条规则是，如果你必须谈论对象的内部结构，请只使用箭头。
 
-\subsection{Existential lens in Haskell}
+ \subsection{Haskell 中的存在透镜（Existential Lens in Haskell）}
 
-What does it mean for an object to be a composite---to have parts? At the very minimum, you should be able to retrieve a part of such an object. Even better if you can replace that part with a new one. This pretty much defines a lens:
-\begin{haskell}
-get :: s -> a
-set :: s -> a -> s
-\end{haskell}
-Here, \hask{get} extracts the part \hask{a} from the whole \hask{s}, and \hask{set} replaces that part with a new \hask{a}. Lens laws help to reinforce this picture. And it's all done in terms of arrows. 
+ 什么意味着一个对象是复合的——即它具有部分？至少，你应该能够检索该对象的某个部分。如果你还能用一个新的部分替换这个部分，那就更好了。这几乎定义了一个透镜（lens）：
+ \begin{haskell}
+  get :: s -> a
+  set :: s -> a -> s
+ \end{haskell}
+ 这里，\hask{get} 从整体 \hask{s} 中提取部分 \hask{a}，而 \hask{set} 用一个新的 \hask{a} 替换该部分。透镜定律有助于加强这一概念。而且这一切都是通过箭头完成的。
 
-Another way of describing a composite object is to say that it can be split into a focus and a residue. The trick is that, although we want to know what type the focus is, we don't care about the type of the residue. All we need to know about the residue is that it can be combined with the focus to recreate the whole object. 
+ 描述复合对象的另一种方法是说它可以被分割为焦点和剩余部分。诀窍在于，虽然我们想知道焦点的类型，但我们不关心剩余部分的类型。我们只需要知道剩余部分可以与焦点结合以重新构建整个对象。
 
-In Haskell, we would express this idea using an existential type:
-\begin{haskell}
-data LensE s a where
-    LensE :: (s -> (c, a), (c, a) -> s) -> LensE s a
-\end{haskell}
-This tells us that there exists some unspecified type \hask{c}, such that \hask{s} can be split into, and reconstructed from, a product \hask{(c, a)}. 
+ 在 Haskell 中，我们使用存在类型来表达这个想法：
+ \begin{haskell}
+  data LensE s a where
+  LensE :: (s -> (c, a), (c, a) -> s) -> LensE s a
+ \end{haskell}
+ 这告诉我们存在某种未指定的类型 \hask{c}，使得 \hask{s} 可以被分割成一个 \hask{(c, a)}，并可以从中重建。
 
-\[
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
-\node at (0, -0.9) {$s$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
-\node at (0, 0) {$a$};
-\node at (0, -0.9) {$c$};
-\end{tikzpicture}
-\]
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
+   \node at (0, -0.9) {$s$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
+   \node at (0, 0) {$a$};
+   \node at (0, -0.9) {$c$};
+  \end{tikzpicture}
+ \]
 
+ 可以从这种存在形式中推导出 \hask{get}/\hask{set} 版本的透镜。
+ \begin{haskell}
+  toGet :: LensE s a -> (s -> a)
+  toGet (LensE (l, r)) = snd . l
 
-The \hask{get}/\hask{set} version of the lens can be derived from this existential form.
-\begin{haskell}
-toGet :: LensE s a -> (s -> a)
-toGet (LensE (l, r)) = snd . l
+  toSet :: LensE s a -> (s -> a -> s)
+  toSet (LensE (l, r)) s a = r (fst (l s), a)
+ \end{haskell}
 
-toSet :: LensE s a -> (s -> a -> s)
-toSet (LensE (l, r)) s a = r (fst (l s), a)
-\end{haskell}
+ 注意，我们不需要知道剩余部分的类型。我们利用了存在透镜包含了 \hask{c} 的生产者和消费者这一事实，而我们只是调解它们之间的关系。
 
-Notice that we don't need to know anything about the type of the residue. We take advantage of the fact that the existential lens contains both the producer and the consumer of \hask{c} and we're just mediating between the two.
+ 提取“裸”剩余部分是不可能的，正如以下代码无法编译所证明的那样：
+ \begin{haskell}
+  getResidue :: Lens s a -> c
+  getResidue (Lens (l, r)) = fst . l
+ \end{haskell}
 
-It's impossible to extract a ``naked'' residue, as witnessed by the fact that the following code doesn't compile:
-\begin{haskell}
-getResidue :: Lens s a -> c
-getResidue (Lens (l, r)) = fst . l
-\end{haskell}
+ \subsection{范畴论中的存在透镜（Existential Lens in Category Theory）}
 
-\subsection{Existential lens in category theory}
+ 我们可以很容易地将透镜的新定义翻译到范畴论中，使用余极限（coend）表达存在类型：
+ \[ \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times a, s) \]
+ 事实上，我们可以将其推广为类型变化透镜，其中焦点 $a$ 可以被替换为新类型 $b$ 的焦点。将 $a$ 替换为 $b$ 会产生一个新的复合对象 $t$：
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
+   \node at (0, 0) {$b$};
+   \node at (0, -0.9) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
+   \node at (0, -0.9) {$t$};
+  \end{tikzpicture}
+ \]
 
-We can easily translate the new definition of the lens to category theory by expressing the existential type as a coend:
-\[ \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times a, s) \]
-In fact, we can generalize it to a type-changing lens, in which the focus $a$ can be replaced with a new focus of a different type $b$. Replacing $a$ with $b$ will produce a new composite object $t$:
-\[
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
-\node at (0, 0) {$b$};
-\node at (0, -0.9) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
-\node at (0, -0.9) {$t$};
-\end{tikzpicture}
-\]
+ 透镜现在由两对对象参数化：$\langle s, t\rangle$ 为外部对象对，$\langle a, b \rangle$ 为内部对象对。存在剩余 $c$ 仍然是隐藏的：
+ \[ \mathcal{L}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times b, t) \]
+ 余极限下的乘积是一个在 $y$ 上协变、在 $x$ 上逆变的伴随态射的对角部分：
+ \[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
+ \begin{exercise}
+  证明：
+  \[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
+  是一个在 $\langle x, y\rangle$ 上的伴随态射。
+ \end{exercise}
 
-The lens is now parameterized by two pairs of objects: $\langle s, t\rangle$ for the outer ones, and $ \langle a, b \rangle$ for the inner ones. The existential residue $c$ remains hidden:
-\[ \mathcal{L}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times b, t) \]
-The product under the coend is the diagonal part of the profunctor that is covariant in $y$ and contravariant in $x$:
-\[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
-\begin{exercise}
-Show that:
-\[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
-is a profunctor in $\langle x, y\rangle$.
-\end{exercise}
+ \subsection{Haskell 中的类型变化透镜（Type-changing Lens in Haskell）}
 
-
-\subsection{Type-changing lens in Haskell}
-In Haskell, we can define a type-changing lens as the following existential type:
-\begin{haskell}
-data LensE s t a b where
+ 在 Haskell 中，我们可以定义一个类型变化透镜为以下存在类型：
+ \begin{haskell}
+  data LensE s t a b where
   LensE :: (s -> (c, a)) -> ((c, b) -> t) -> LensE s t a b
-\end{haskell}
+ \end{haskell}
 
-As before, we can use the existential lens to get and set the focus:
-\begin{haskell}
-toGet :: LensE s t a b -> (s -> a)
-toGet (LensE l r) = snd . l
+ 和之前一样，我们可以使用存在透镜来获取和设置焦点：
+ \begin{haskell}
+  toGet :: LensE s t a b -> (s -> a)
+  toGet (LensE l r) = snd . l
 
-toSet :: LensE s t a b -> (s -> b -> t)
-toSet (LensE l r) s a = r (fst (l s), a)
-\end{haskell}
+  toSet :: LensE s t a b -> (s -> b -> t)
+  toSet (LensE l r) s a = r (fst (l s), a)
+ \end{haskell}
 
-The two functions, \hask{s->(c, a)} and \hask{(c, b)->t} are often called the \emph{forward} and the \emph{backward} pass. 
-The forward pass can be used to extract the focus \hask{a}. The backward pass provides the answer to the question: If we wanted the result of the forward pass to be some other \hask{b}, what \hask{t} should we pass to it? 
+ 这两个函数，\hask{s->(c, a)} 和 \hask{(c, b)->t}，通常被称为\emph{前向}和\emph{后向}传递。
+ 前向传递可以用于提取焦点 \hask{a}。后向传递提供了一个问题的答案：如果我们希望前向传递的结果是另一个 \hask{b}，我们应该传递给它什么 \hask{t}？
 
-And sometimes we're just asking: What change \hask{t} should we make to the input if we wanted to change the focus by \hask{b}. The latter point of view is especially useful when using lenses to describe \index{neural networks}neural networks.
+ 有时我们只是问：如果我们希望通过 \hask{b} 更改焦点，我们应该对输入进行什么更改 \hask{t}？这种观点在使用透镜描述\index{神经网络}神经网络（neural networks）时特别有用。
 
-The simplest example of a lens acts on a product. It can extract or replace one component of the product, treating the other as the residue. In Haskell, we'd implement it as:
-\begin{haskell}
-prodLens :: LensE (c, a) (c, b) a b
-prodLens = LensE id id
-\end{haskell}
-Here, the type of the whole is the product \hask{(c, a)}. When we replace \hask{a} with \hask{b} we end up with the target type \hask{(c, b)}. Since the source and the target are already products, the two functions in the definition of the existential lens are just identities.
+ 透镜的最简单示例作用于乘积。它可以提取或替换乘积的一个分量，将另一个分量视为剩余部分。在 Haskell 中，我们将其实现为：
+ \begin{haskell}
+  prodLens :: LensE (c, a) (c, b) a b
+  prodLens = LensE id id
+ \end{haskell}
+ 在这里，整体的类型是乘积 \hask{(c, a)}。当我们将 \hask{a} 替换为 \hask{b} 时，我们最终得到目标类型 \hask{(c, b)}。由于源和目标已经是乘积，存在透镜定义中的两个函数只是恒等函数。
 
-\subsection{Lens composition}
+ \subsection{透镜组合（Lens Composition）}
 
-The main advantage of using lenses is that they compose. A composition of two lenses lets us zoom in on a subcomponent of a component. 
+ 使用透镜的主要优点在于它们可以组合。两个透镜的组合使我们可以放大到某个分量的子分量。
 
-Suppose that we start with a lens that lets us access the focus \hask{a}  and change it to \hask{b}. This focus is part of a whole described by the source \hask{s} and the target \hask{t}. 
+ 假设我们从一个透镜开始，它使我们可以访问焦点 \hask{a} 并将其更改为 \hask{b}。这个焦点是整体的一部分，由源 \hask{s} 和目标 \hask{t} 描述。
 
-We also have the inner lens that can access the focus of \hask{a'}  inside the whole of \hask{a}, and replace it with \hask{b'} to give us a new \hask{b}. 
+ 我们还有一个内部透镜，它可以访问 \hask{a} 内的焦点 \hask{a'}，并将其替换为 \hask{b'}，从而为我们提供一个新的 \hask{b}。
 
-We can now construct a composite lens that can access \hask{a'} and \hask{b'} inside of \hask{s} and \hask{t}. The trick is to realize that we can take, as the new residue, a product of the two residues:
-\[
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
-\node at (0, -1.1) {$s$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\node at (0, 0) {$a$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
-\node at (0, 0) {$a'$};
-\node at (0, -0.6) {$c'$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\]
+ 现在我们可以构造一个组合透镜，使我们能够在 \hask{s} 和 \hask{t} 中访问 \hask{a'} 和 \hask{b'}。诀窍是意识到我们可以将两个剩余部分的乘积作为新的剩余部分：
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
+   \node at (0, -1.1) {$s$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \node at (0, 0) {$a$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
+   \node at (0, 0) {$a'$};
+   \node at (0, -0.6) {$c'$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+ \]
 
-\[
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
-\node at (0, 0) {$b'$};
-\node at (0, -0.6) {$c'$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\node at (0, 0) {$b$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
-\node at (0, -1.1) {$t$};
-\end{tikzpicture}
-\]
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
+   \node at (0, 0) {$b'$};
+   \node at (0, -0.6) {$c'$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \node at (0, 0) {$b$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
+   \node at (0, -1.1) {$t$};
+  \end{tikzpicture}
+ \]
 
 
 
-\begin{haskell}
-compLens :: LensE a b a' b' -> LensE s t a b -> LensE s t a' b'
-compLens (LensE l2 r2) (LensE l1 r1) = LensE l3 r3
+ \begin{haskell}
+  compLens :: LensE a b a' b' -> LensE s t a b -> LensE s t a' b'
+  compLens (LensE l2 r2) (LensE l1 r1) = LensE l3 r3
   where l3 = assoc' . bimap id l2  . l1
-        r3 = r1 . bimap id r2 . assoc
-\end{haskell}
-The left mapping in the new lens is given by the following composite:
-\[ s \xrightarrow{l_1} (c, a)   \xrightarrow{(id, l_2)} (c, (c', a'))  \xrightarrow{assoc'} ((c, c'), a')\]
-and the right mapping is given by:
-\[ ((c, c'), b') \xrightarrow{assoc}  (c, (c', b')) \xrightarrow{(id, r_2)} (c, b) \xrightarrow{r_1} t \]
+  r3 = r1 . bimap id r2 . assoc
+ \end{haskell}
+ 新透镜中的左映射由以下组合给出：
+ \[ s \xrightarrow{l_1} (c, a)   \xrightarrow{(id, l_2)} (c, (c', a'))  \xrightarrow{assoc'} ((c, c'), a')\]
+ 右映射由以下公式给出：
+ \[ ((c, c'), b') \xrightarrow{assoc}  (c, (c', b')) \xrightarrow{(id, r_2)} (c, b) \xrightarrow{r_1} t \]
 
-We have used the associativity and functoriality of the product:
-\begin{haskell}
-assoc :: ((c, c'), b') -> (c, (c', b'))
-assoc ((c, c'), b') = (c, (c', b'))
+ 我们使用了乘积的结合性和函子性：
+ \begin{haskell}
+  assoc :: ((c, c'), b') -> (c, (c', b'))
+  assoc ((c, c'), b') = (c, (c', b'))
 
-assoc' :: (c, (c', a')) -> ((c, c'), a')
-assoc' (c, (c', a')) = ((c, c'), a')
+  assoc' :: (c, (c', a')) -> ((c, c'), a')
+  assoc' (c, (c', a')) = ((c, c'), a')
 
-instance Bifunctor (,) where
+  instance Bifunctor (,) where
   bimap f g (a, b) = (f a, g b)
-\end{haskell}
+ \end{haskell}
 
-As an example, let's compose two product lenses:
-\begin{haskell}
-l3 :: LensE (c, (c', a')) (c, (c', b')) a' b'
-l3 = compLens prodLens prodLens
-\end{haskell}
-and apply it to a nested product:
-\begin{haskell}
-x :: (String, (Bool, Int))
-x = ("Outer", (True, 42))
-\end{haskell}
-Our composite lens lets us not only retrieve the innermost component:
-\begin{haskell}
-toGet l3 x
-> 42
-\end{haskell}
-but also replace it with a value of a different type (here, \hask{Char}):
-\begin{haskell}
-toSet l3 x 'z'
-> ("Outer",(True,'z'))
-\end{haskell}
+ 作为示例，让我们组合两个乘积透镜：
+ \begin{haskell}
+  l3 :: LensE (c, (c', a')) (c, (c', b')) a' b'
+  l3 = compLens prodLens prodLens
+ \end{haskell}
+ 并将其应用于嵌套的乘积：
+ \begin{haskell}
+  x :: (String, (Bool, Int))
+  x = ("Outer", (True, 42))
+ \end{haskell}
+ 我们的组合透镜不仅让我们检索最内层的组件：
+ \begin{haskell}
+  toGet l3 x
+  > 42
+ \end{haskell}
+ 还可以用不同类型的值（这里是 \hask{Char}）替换它：
+ \begin{haskell}
+  toSet l3 x 'z'
+  > ("Outer",(True,'z'))
+ \end{haskell}
 
-\subsection{Category of lenses}
+ \subsection{透镜的范畴（Category of Lenses）}
 
-Since lenses can be composed, you might be wondering if there is a category in which lenses are hom-sets. 
+ 由于透镜可以组合，你可能会想知道是否存在一个范畴，其中透镜作为同态集（hom-sets）。
 
-Indeed, there is a category $\mathbf{Lens}$ whose objects are pairs of objects in $\mathcal{C}$, and arrows from $\langle s, t\rangle$ to $ \langle a, b \rangle$ are elements of  $\mathcal{L} \langle s, t\rangle \langle a, b \rangle$.
+ 确实存在一个范畴 $\mathbf{Lens}$，其对象是 $\mathcal{C}$ 中对象的对，而从 $\langle s, t\rangle$ 到 $ \langle a, b \rangle$ 的箭头是 $\mathcal{L} \langle s, t\rangle \langle a, b \rangle$ 的元素。
 
-The formula for the composition of existential lenses is too complicated to be useful in practice. In the next chapter we'll see an alternative representation of lenses using Tambara modules, in which composition is just a composition of functions.
+ 存在透镜的组合公式太复杂，以至于在实际操作中难以使用。在下一章中，我们将看到使用 Tambara 模块表示透镜的另一种表示法，其中组合只是函数的组合。
 
 \section{Lenses and Fibrations}
 
