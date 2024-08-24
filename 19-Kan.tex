@@ -409,83 +409,83 @@
  得到：
  \[  \text{Ran}_P F \cong F \circ P^{-1} \]
  由于伴随关系是逆的弱化，这个结果与Kan扩展“逆转”$P$并跟随$F$的直觉是一致的。
- 
 
-\subsection{Right Kan extension in Haskell}
-The end formula for the right Kan extension can be immediately translated to Haskell:
+ \subsection{Right Kan extension in Haskell（Haskell中的右Kan扩展）}
+
+ 右Kan扩展的末端公式可以直接翻译为Haskell代码：
  \begin{haskell}
-newtype Ran p f b = Ran (forall e. (b -> p e) -> f e)
+  newtype Ran p f b = Ran (forall e. (b -> p e) -> f e)
  \end{haskell}
- 
- The counit $\varepsilon$ of the right Kan extension is a natural transformation from the composition of \hask{(Ran p f)} after \hask{p} to \hask{f}:
- \begin{haskell}
-counit :: forall p f e'. Ran p f (p e') -> f e'
-\end{haskell}
-To implement it, we have to produce the value of the type \hask{(f c')} given a polymorphic function 
- \begin{haskell}
-h :: forall e. (p e' -> p e) -> f e
-\end{haskell}
-We do it by instantiating this function at the type \hask{e = e'} and calling it with the identity on \hask{(p e')}:
- \begin{haskell}
-counit (Ran h) = h id
-\end{haskell}
 
-The computational power of the right Kan extension comes from its universal property. We start with a functor $G$ equipped with a natural transformation: 
-\[ \alpha \colon G \circ P \to F \]
-This can be expressed as a Haskell data type:
-\begin{haskell}
-type Alpha p f g = forall e. g (p e) -> f e
-\end{haskell}
-Universality tells us that there is a unique natural transformation $\sigma$ from this functor to the corresponding right Kan extension:
-\begin{haskell}
-sigma :: Functor g => Alpha p f g -> forall b. (g b -> Ran p f b)
-sigma alpha gb = Ran (\b_pe -> alpha $ fmap b_pe gb)
-\end{haskell}
-that factorizes $\alpha$ through the counit $\varepsilon$:
+ 右Kan扩展的余单位$\varepsilon$是一个从\hask{(Ran p f)}和\hask{p}的组合到\hask{f}的自然变换：
+ \begin{haskell}
+  counit :: forall p f e'. Ran p f (p e') -> f e'
+ \end{haskell}
+ 为了实现它，我们需要生成一个类型为\hask{(f c')}的值，给定一个多态函数
+ \begin{haskell}
+  h :: forall e. (p e' -> p e) -> f e
+ \end{haskell}
+ 我们通过在类型\hask{e = e'}上实例化此函数并用\hask{(p e')}上的身份函数调用它来实现：
+ \begin{haskell}
+  counit (Ran h) = h id
+ \end{haskell}
+
+ 右Kan扩展的计算能力来自其泛性质。我们从一个带有自然变换的函子$G$开始：
+ \[ \alpha \colon G \circ P \to F \]
+ 这可以表示为一个Haskell数据类型：
+ \begin{haskell}
+  type Alpha p f g = forall e. g (p e) -> f e
+ \end{haskell}
+ 泛化性质告诉我们，存在一个唯一的自然变换$\sigma$，从这个函子到相应的右Kan扩展：
+ \begin{haskell}
+  sigma :: Functor g => Alpha p f g -> forall b. (g b -> Ran p f b)
+  sigma alpha gb = Ran (\b_pe -> alpha $ fmap b_pe gb)
+ \end{haskell}
+ 该变换通过余单位$\varepsilon$分解$\alpha$：
 \[ \alpha = \varepsilon \cdot (\sigma \circ P) \]
-Recall that whiskering means that we instantiate \hask{sigma} at \hask{b = p c}. It is then followed by \hask{counit}. The factorization of $\alpha$ is thus given by:
+请记住，卷须（whiskering）意味着我们在\hask{b = p c}时实例化\hask{sigma}。然后它跟随\hask{counit}。$\alpha$的分解由下式给出：
 \begin{haskell}
 factorize' :: Functor g => Alpha p f g -> forall e. g (p e) -> f e
 factorize' alpha gpc = alpha gpc
 \end{haskell}
 
-The components of the three natural transformations are all morphism in the target category $\cat C$:
+这三个自然变换的成分都是目标范畴$\cat C$中的态射：
 \[
 \begin{tikzpicture}
-  \def\Xa{0};
-   \def\Xm{1.3}
-    \def\Xb{2.25};
-      \def\Xc{3};
-  \def\Yc{2.5};
-  \def\Yb{1.75};
-  \def\Ya{0};
- 
-  \node at ( \Xa, \Yc) { $\cat E$ };
-  \node at ( \Xa, \Ya) { $\cat B$ };
-  \node (1) at (\Xb, \Yc) {};
-  \node (2) at (\Xb, \Yb - 0.25) {};
-  \node (3) at (\Xb + 1, \Yb - 0.25) {};
+\def\Xa{0};
+\def\Xm{1.3}
+\def\Xb{2.25};
+\def\Xc{3};
+\def\Yc{2.5};
+\def\Yb{1.75};
+\def\Ya{0};
 
-  \draw (\Xc - 0.3, \Yc - 0.6)[fill=blue!50!green!20]  ellipse (1 and 1);
+\node at ( \Xa, \Yc) { $\cat E$ };
+\node at ( \Xa, \Ya) { $\cat B$ };
+\node (1) at (\Xb, \Yc) {};
+\node (2) at (\Xb, \Yb - 0.25) {};
+\node (3) at (\Xb + 1, \Yb - 0.25) {};
 
-  % F
-  \node at ( \Xm-0.25, \Yc + 0.25) { $F$ };
-  \draw[->, dashed](\Xa + 0.25, \Yc) -- (1);
-  % P
-  \node at (\Xa - 0.25, \Yb - 0.25) { $P$ };
-  \draw[->, dashed](\Xa, \Yc - 0.25) -- (\Xa, \Ya + 0.25);
-  % Ran
-  \node at (\Xm - 0.5, \Yb - 0.5) { $\text{Ran}$ };
-  \draw[->, dashed](\Xa + 0.25, \Ya + 0.25) -- (2);
+\draw (\Xc - 0.3, \Yc - 0.6)[fill=blue!50!green!20]  ellipse (1 and 1);
 
-  % G
-  \node at (\Xb - 0.2, \Ya) { $\text{G}$ };
-  \draw[->, dashed](\Xa + 0.25, \Ya + 0.25) to [out=-1, in=-90] (3);
-  
-  \draw[->] (2) -- (1) node[midway, left] {$\varepsilon$};
-  \draw[->] (3) -- (2) node[midway, below] {$\sigma \circ P$};
-  \draw[->] (3) to [out=90, in=0] (1);
-  \node at (\Xb + 1, \Yb + 0.5) {$\alpha$};
+% F
+\node at ( \Xm-0.25, \Yc + 0.25) { $F$ };
+\draw[->, dashed](\Xa + 0.25, \Yc) -- (1);
+% P
+\node at (\Xa - 0.25, \Yb - 0.25) { $P$ };
+\draw[->, dashed](\Xa, \Yc - 0.25) -- (\Xa, \Ya + 0.25);
+% Ran
+\node at (\Xm - 0.5, \Yb - 0.5) { $\text{Ran}$ };
+\draw[->, dashed](\Xa + 0.25, \Ya + 0.25) -- (2);
+
+% G
+\node at (\Xb - 0.2, \Ya) { $\text{G}$ };
+\draw[->, dashed](\Xa + 0.25, \Ya + 0.25) to [out=-1, in=-90] (3);
+
+\draw[->] (2) -- (1) node[midway, left] {$\varepsilon$};
+\draw[->] (3) -- (2) node[midway, below] {$\sigma \circ P$};
+\draw[->] (3) to [out=90, in=0] (1);
+\node at (\Xb + 1, \Yb + 0.5) {$\alpha$};
 \end{tikzpicture}
 \]
 
@@ -493,233 +493,231 @@ The components of the three natural transformations are all morphism in the targ
 Implement the \hask{Functor} instance for \hask{Ran}.
 \end{exercise}
 
-\subsection{Limits as Kan extensions}
- We have previously defined limits as universal cones. The definition of a cone involves two categories: the indexing category $\cat J$ that defines the shape of the diagram, and the target category $\cat C$. A diagram is a functor $D \colon \cat J \to \cat C$ that embeds the shape in the target category. 
- 
- We can introduce a third category $\mathbf 1$: the terminal category that contains a single object and a single identity arrow. We can then use a functor $X$ from that category to pick the apex $x$ of the cone in $\cat E$. Since $\mathbf 1$ is terminal in $\mathbf{Cat}$, we also have the unique functor from $\cat J$ to it, which we'll call $!$. It maps all objects to the only object of $\mathbf 1$, and all arrows to its identity arrow.
- 
-It turns out that the limit of $D$ is the right Kan extension of the diagram $D$ along $!$. First, let's observe that the composition $X \circ !$ maps the shape $\cat J$ to a single object $x$, so it does the job of the constant functor $\Delta_x$. It thus picks the apex of a cone. A cone with the apex $x$ is a natural transformation $\gamma$: 
+\subsection{Limits as Kan extensions（作为Kan扩展的极限）}
+我们之前已经定义了极限（limits）为泛锥（universal cones）。锥的定义涉及两个范畴：定义图形的指标范畴$\cat J$和目标范畴$\cat C$。图（diagram）是一个函子$D \colon \cat J \to \cat C$，它将形状嵌入目标范畴中。
+
+我们可以引入第三个范畴$\mathbf 1$：一个包含单个对象和单个恒等箭头的终范畴。然后我们可以使用从该范畴到锥顶点$x$的函子$X$。由于$\mathbf 1$在$\mathbf{Cat}$中是终范畴，因此我们也有从$\cat J$到它的唯一函子，我们称之为$!$。它将所有对象映射到$\mathbf 1$的唯一对象，并将所有箭头映射到其恒等箭头。
+
+事实证明，$D$的极限是沿着$!$的图$D$的右Kan扩展。首先，观察组合$X \circ !$将形状$\cat J$映射到单个对象$x$，因此它充当了常函子$\Delta_x$的作用。它选择锥的顶点。一个以$x$为顶点的锥是一个自然变换$\gamma$：
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat J
- \arrow[rr, "D", "" {name=ID, below} ]
- \arrow[d, bend right, "!"']
- && \cat C
- \\
- \mathbf 1
-  \arrow[urr, bend right, "X"']
- \arrow[Rightarrow, "\gamma",  to=ID]
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat J
+\arrow[rr, "D", "" {name=ID, below} ]
+\arrow[d, bend right, "!"']
+&& \cat C
+\\
+\mathbf 1
+\arrow[urr, bend right, "X"']
+\arrow[Rightarrow, "\gamma",  to=ID]
+\end{tikzcd}
 \]
 
-The following diagrams illustrate this. On the left we have two categories: $\mathbf 1$ with a single object $*$, and $\cat J$ with three objects forming the shape for the diagram. On the right we have the image of $D$ and the image of $X \circ !$, which is the apex $x$. The three components of $\gamma$ connect the apex $x$ to the diagram. Naturality of $\gamma$ ensures that the triangles that form the sides of the cone commute.
+下图说明了这一点。左图中有两个范畴：具有单个对象$*$的$\mathbf 1$和具有三个对象形成图形的$\cat J$。右图中有$D$的图像和$X \circ !$的图像，即顶点$x$。$\gamma$的三个成分将顶点$x$连接到图上。$\gamma$的自然性确保形成锥边的三角形是交换的。
 
 \[
- \begin{tikzcd}
-  & *
- \\
+\begin{tikzcd}
+& *
 \\
-1 
+\\
+1
 \arrow[rr, red]
 \arrow[rd, red]
 && 2
 \arrow[dl, red]
 \\
 & 3
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
-  & x
+\end{tikzcd}
+\qquad
+\begin{tikzcd}
+& x
 \arrow[ddr, "\gamma_2"]
- \arrow[ddl, "\gamma_1"']
- \arrow[ddd, "\gamma_3"]
- \\
+\arrow[ddl, "\gamma_1"']
+\arrow[ddd, "\gamma_3"]
 \\
-D 1 
+\\
+D 1
 \arrow[rr, red]
 \arrow[rd, red]
 && D 2
 \arrow[dl, red]
 \\
 & D 3
- \end{tikzcd}
- \]
+\end{tikzcd}
+\]
 
-The right Kan extension $(\text{Ran}_! D, \varepsilon)$ is the universal such cone. $\text{Ran}_! D$ is a functor from $\mathbf 1$ to $\cat C$, so it selects an object in $\cat C$. This is indeed the apex, $\text{Lim} D$, of the universal cone. 
+右Kan扩展$(\text{Ran}_! D, \varepsilon)$是泛化的这种锥。$\text{Ran}_! D$是一个从$\mathbf 1$到$\cat C$的函子，因此它选择$\cat C$中的一个对象。这确实是泛锥的顶点$\text{Lim} D$。
 
-Universality means that for any pair $(X, \gamma)$ there is a natural transformation $\sigma \colon X \to \text{Ran}_! D$ 
+泛化性意味着对于任何对$(X, \gamma)$，都有一个自然变换$\sigma \colon X \to \text{Ran}_! D$
 \[
 \begin{tikzcd}[row sep=2cm, column sep=2cm]
 \cat J  \ar[d, "!"', "" {name=P}]
-            \ar[r, "D", ""  {name=F, below, near start, bend right}]
+\ar[r, "D", ""  {name=F, below, near start, bend right}]
 &
 \cat C
 \\
 \mathbf 1
-    \ar[ur, bend left, "X", "" {name=G, below}]
-    \ar[ur, bend right, "\text{Ran}_! D"', "" {name=Ran}]
+\ar[ur, bend left, "X", "" {name=G, below}]
+\ar[ur, bend right, "\text{Ran}_! D"', "" {name=Ran}]
 \arrow[Rightarrow, "\sigma", from=G, to=Ran]
 \end{tikzcd}
 \]
-which factorizes $\gamma$. 
+它分解$\gamma$。
 
-The transformation $\sigma$ has only one component $\sigma_*$, which is an arrow $h$ connecting the apex $x$ to the apex $\text{Lim} D$. The factorization:
- \[ \gamma = \varepsilon \cdot (\sigma \circ !) \]
-reads, in components:
+变换$\sigma$只有一个成分$\sigma_*$，它是将顶点$x$连接到顶点$\text{Lim} D$的箭头$h$。分解如下：
+\[ \gamma = \varepsilon \cdot (\sigma \circ !) \]
+以分量的形式：
 \[ \gamma_i = \varepsilon_i \circ h \]
-It makes the triangles in the following diagram commute:
+它使下图中的三角形交换：
 \[
- \begin{tikzcd}[row sep=1cm]
-  & x
+\begin{tikzcd}[row sep=1cm]
+& x
 \arrow[dddl, "\gamma_1"']
 \arrow[ddddr, "\gamma_3"]
 \arrow[dddrr, "\gamma_2"]
 \arrow[dd, dashed, "h"']
- \\
- \\
- & \text{Lim} D
+\\
+\\
+& \text{Lim} D
 \arrow[dl, blue, "\varepsilon_1"]
 \arrow[ddr, blue, "\varepsilon_3"']
 \arrow[drr, blue, "\varepsilon_2"]
 \\
-D 1 
+D 1
 \arrow[rrr, red]
 \arrow[rrd, red]
 &&& D 2
 \arrow[dl, red]
 \\
 && D 3
- \end{tikzcd}
- \]
-This universal condition makes $\text{Lim} D$ the limit of the diagram $D$.
-
-
- \subsection{Left adjoint as a right Kan extension}
- 
- We started by describing Kan extensions as a generalization of adjunctions. Looking at the pictures, if we have a pair of adjoint functors $L \dashv R$, we expect the left functor to be the right Kan extension of the identity along the right functor.
- \[ L \cong \text{Ran}_R \text{Id} \]
-Indeed, the counit of the Kan extension is the same as the counit of the adjunction:
-
- \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat C
- \arrow[rr, "\text{Id}", "" {name=ID, below} ]
- \arrow[d, bend right, "R"']
- && \cat C
- \\
- \cat D
-  \arrow[urr, bend right, "L"']
- \arrow[Rightarrow, "\varepsilon",  to=ID]
- \end{tikzcd}
+\end{tikzcd}
 \]
-We also have to show universality:
+这种泛化条件使$\text{Lim} D$成为图$D$的极限。
+
+\subsection{Left adjoint as a right Kan extension（作为右Kan扩展的左伴随）}
+
+我们开始描述Kan扩展作为伴随的推广。观察这些图，如果我们有一对伴随函子$L \dashv R$，我们希望左函子是沿右函子的恒等函子的右Kan扩展。
+\[ L \cong \text{Ran}_R \text{Id} \]
+实际上，Kan扩展的余单位与伴随的余单位相同：
+
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat C
- \arrow[rr, "\text{\text{Id}}", "" {name=ID, below} ]
- \arrow[d, bend right, "R"']
- && \cat C
- \\
- \cat D
-  \arrow[urr, bend right, "G"']
- \arrow[Rightarrow, "\alpha",  to=ID]
- \end{tikzcd}
- \qquad %----%
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat C
+\arrow[rr, "\text{Id}", "" {name=ID, below} ]
+\arrow[d, bend right, "R"']
+&& \cat C
+\\
+\cat D
+\arrow[urr, bend right, "L"']
+\arrow[Rightarrow, "\varepsilon",  to=ID]
+\end{tikzcd}
+\]
+我们还需要展示泛化性：
+\[
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat C
+\arrow[rr, "\text{\text{Id}}", "" {name=ID, below} ]
+\arrow[d, bend right, "R"']
+&& \cat C
+\\
+\cat D
+\arrow[urr, bend right, "G"']
+\arrow[Rightarrow, "\alpha",  to=ID]
+\end{tikzcd}
+\qquad %----%
 \begin{tikzcd}[row sep=2cm, column sep=2cm]
 \cat C  \ar[d, "R"', "" {name=P}]
-            \ar[r, "R", ""  {name=F, below, near start, bend right}]
+\ar[r, "R", ""  {name=F, below, near start, bend right}]
 &
 \cat D
 \\
 \cat D
-    \ar[ur, bend left, "G", "" {name=G, below}]
-    \ar[ur, bend right, "L"', "" {name=Ran}]
+\ar[ur, bend left, "G", "" {name=G, below}]
+\ar[ur, bend right, "L"', "" {name=Ran}]
 \arrow[Rightarrow, "\sigma", from=G, to=Ran]
 \end{tikzcd}
 \]
-To do that, we have at our disposal the unit of the adjunction:
+为此，我们可以使用伴随的单位：
 \[ \eta \colon \text{Id} \to R \circ L \]
-We construct $\sigma$ as the composite:
+我们将$\sigma$构造为复合：
 \[ G \rightarrow G \circ \text{Id} \xrightarrow{G \circ \eta} G \circ R \circ L \xrightarrow{\alpha \circ L} \text{Id} \circ L \rightarrow L\]
-In other words, we define $\sigma$ as:
+换句话说，我们将$\sigma$定义为：
 \[ \sigma = (\alpha \circ L) \cdot (G \circ \eta) \]
 
-We could ask the converse question: if $\text{Ran}_R \text{Id}$ exists, is it automatically the left adjoint to $R$? It turns out that we need one more condition for that: The Kan extension must be preserved by $R$, that is:
-
+我们可以问反向问题：如果$\text{Ran}_R \text{Id}$存在，它是否自动成为$R$的左伴随？事实证明，为此我们需要一个额外的条件：Kan扩展必须被$R$保留，即：
 \[ R \circ \text{Ran}_R \text{Id} \cong \text{Ran}_R R \]
-We'll see in the next section that the right-hand side of this condition defines the codensity monad.
+我们将在下一节中看到这个条件的右侧定义了密度余子模。
 
 \begin{exercise}
-Show the factorization condition: 
+Show the factorization condition:
 \[ \alpha = \varepsilon \cdot (\sigma \circ R) \]
 for the $\sigma$ that was defined above. Hint: draw the corresponding string diagrams and use the triangle identity for the adjunction.
 \end{exercise}
 
- \subsection{Codensity monad}
- 
- We've seen that every adjunction $L \dashv F$ produces a monad $F \circ L$. It turns out that this monad is the right Kan extension of $F$ along $F$. Interestingly, even if $F$ doesn't have a left adjoint, the Kan extension $\text{Ran}_F F$ is still a monad called the \emph{codensity monad} denoted by $T^F$:
- \[ T^F = \text{Ran}_F F \]
- 
-If we were serious about the interpretation of Kan extensions as fractions, a codensity monad would correspond to $F/F$. A functor for which this ``fraction'' is equal to identity is called codense.
+\subsection{Codensity monad（密度余子模）}
 
-To see that $T^F$ is a monad, we have to define monadic unit and multiplication:
+我们已经看到，每个伴随$L \dashv F$都会产生一个子模$F \circ L$。事实证明，这个子模是沿$F$的$F$的右Kan扩展。有趣的是，即使$F$没有左伴随，Kan扩展$\text{Ran}_F F$仍然是一个被称为\emph{密度余子模}的子模，记为$T^F$：
+\[ T^F = \text{Ran}_F F \]
+
+如果我们认真对待Kan扩展作为分数的解释，密度余子模将对应于$F/F$。对于这种“分数”等于恒等的函子，称为密度。
+
+为了看到$T^F$是一个子模，我们需要定义子模的单位和乘法：
 \[ \eta \colon \text{Id} \to T^F \]
 \[ \mu \colon T^F \circ T^F \to  T^F \]
- Both follow from universality. For every $(G, \alpha)$ we have a $\sigma$:
+这两者都来自泛化性。对于每个$(G, \alpha)$，我们都有一个$\sigma$：
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat D
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "F"']
- && \cat C
- \\
- \cat C
-  \arrow[urr, bend right, "G"']
- \arrow[Rightarrow, "\alpha",  to=ID]
- \end{tikzcd}
- \qquad
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat D
+\arrow[rr, "F", "" {name=ID, below} ]
+\arrow[d, bend right, "F"']
+&& \cat C
+\\
+\cat C
+\arrow[urr, bend right, "G"']
+\arrow[Rightarrow, "\alpha",  to=ID]
+\end{tikzcd}
+\qquad
 \begin{tikzcd}[row sep=2cm, column sep=2cm]
 \cat D  \ar[d, "F"', "" {name=P}]
-            \ar[r, "F", ""  {name=F, below, near start, bend right}]
+\ar[r, "F", ""  {name=F, below, near start, bend right}]
 &
 \cat C
 \\
 \cat C
-    \ar[ur, bend left, "G", "" {name=G, below}]
-    \ar[ur, bend right, "T^F = \text{Ran}_F F"', "" {name=Ran}]
+\ar[ur, bend left, "G", "" {name=G, below}]
+\ar[ur, bend right, "T^F = \text{Ran}_F F"', "" {name=Ran}]
 \arrow[Rightarrow, "\sigma", from=G, to=Ran]
 \end{tikzcd}
 \]
 
-To get the unit, we replace $G$ with the identity functor $\text{Id}$ and $\alpha$ with the identity natural transformation. 
+为了得到单位，我们用恒等函子$\text{Id}$替换$G$，并用恒等自然变换替换$\alpha$。
 
-To get multiplication, we replace $G$ with $T^F \circ T^F$ and note that we have at our disposal the counit of the Kan extension:
+为了得到乘法，我们用$T^F \circ T^F$替换$G$，并注意到我们有Kan扩展的余单位：
 \[ \varepsilon \colon  T^F \circ F \to F \]
-We can chose $\alpha$ of the type:
+我们可以选择$\alpha$类型的：
 \[ \alpha \colon T^F \circ T^F \circ F \to F \]
-to be the composite:
+作为复合：
 \[ T^F \circ T^F \circ F \xrightarrow{id \circ \varepsilon} T^F \circ F \xrightarrow{\varepsilon} F\]
-or, using the whiskering notation:
+或者，使用卷须表示法：
 \[ \alpha = \varepsilon \cdot (T^F \circ \varepsilon) \]
-The corresponding $\sigma$ gives us the monadic multiplication.
+对应的$\sigma$给我们子模的乘法。
 
-Let's now show that, if we start from an adjunction:
+现在让我们来展示一下，如果我们从一个伴随开始：
 \[ \cat D(L c, d) \cong \cat C (c, F d) \]
-the codensity monad is given by $F \circ L$. Let's start with the mapping from an arbitrary functor $G$ to $F \circ L$:
+密度余子模由$F \circ L$给出。让我们从将任意函子$G$映射到$F \circ L$开始：
 \[ [\cat C, \cat C](G, F \circ L) \cong  \int_c \cat C (G c, F (L c)) \]
-We can rewrite it using the Yoneda lemma:
+我们可以使用Yoneda引理重写它：
 \[ \cong \int_c \int_d \Set\big(\cat D(L c, d), \cat C (G c, F d)\big) \]
-Here, taking the end over $d$ has the effect of replacing $d$ with $L c$. We can now use the adjunction:
+这里，对$d$的末端求值的效果是将$d$替换为$L c$。我们现在可以使用伴随：
 \[ \cong \int_c \int_d \Set\big(\cat C(c, F d), \cat C (G c, F d)\big) \]
-and perform the ninja-Yoneda integration over $c$ to get:
+并执行忍者Yoneda对$c$的积分以得到：
 \[ \cong \int_d \cat C (G (F d), F d) \]
-This, in turn, defines a set of natural transformations:
+这反过来定义了一组自然变换：
 \[ \cong [\cat D, \cat C](G \circ F, F) \]
-The pre-composition by $F$ is the left adjoint to the right Kan extension:
+由$F$的前置组合是右Kan扩展的左伴随：
 \[ [\cat D, \cat C](G \circ F, F) \cong  [\cat C, \cat C] (G, \text{Ran}_F F)\]
-Since $G$ was arbitrary, we conclude that $F \circ L$ is indeed the codensity monad $\text{Ran}_F F$.
+由于$G$是任意的，我们可以得出结论，$F \circ L$确实是密度余子模$\text{Ran}_F F$。
 
-Since every monad can be derived from some adjunction, it follows that \emph{every monad is a codensity monad} for some adjunction.
+由于每个子模都可以从某种伴随中得出，因此\emph{每个子模都是某种伴随的密度余子模}。
 
 \subsection{Codensity monad in Haskell}
 
