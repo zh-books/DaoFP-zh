@@ -1,417 +1,420 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{16}
+ \setcounter{chapter}{16}
 
-\chapter{Ends and Coends}
+ \chapter{Ends and Coends（极限与余极限）}
 
-\section{Profunctors}
+ \section{Profunctors（泛函）}
 
-In the rarified air of category theory we encounter patterns that are so far removed from their origins that we have problems visualizing them. It doesn't help that the more abstract a pattern gets the more dissimilar the concrete examples of it are. 
+ 在范畴论的高度抽象中，我们会遇到一些模式，这些模式离其起源如此遥远，以至于我们难以将其具象化。更为抽象的模式通常与其具体实例的相似度更低，这使得我们理解起来更加困难。
 
-An arrow from $a$ to $b$ is relatively easy to visualize. We have a very familiar model for it: a function that consumes elements of $a$ and produces elements of $b$. A hom-set is a collection of such arrows. 
+ 从$a$到$b$的箭头（arrow）相对容易理解。我们对它有一个非常熟悉的模型：一个函数，它消耗$a$的元素并生成$b$的元素。态射集（hom-set）是一组这样的箭头的集合。
 
-A functor is an arrow between categories. It consumes objects and arrows from one category and produces objects and arrows from another. We can think of it a recipe for building such objects (and arrows) from materials provided by the source category. In particular, we  often think of an endofunctor as a container of building materials.
+ 函子（functor）是范畴之间的箭头。它消耗来自一个范畴的对象和箭头，并生成另一个范畴中的对象和箭头。我们可以将其视为一种使用源范畴提供的材料来构建这些对象（和箭头）的配方。尤其是，我们通常将自函子（endofunctor）视为构建材料的容器。
 
-A profunctor maps a pair of objects $\langle a, b \rangle$ to a set $P\langle a, b \rangle$ and a pair of arrows:
-\[ \langle f \colon s \to a, g \colon b \to t \rangle \]
-to a function:
-\[ P\langle f, g \rangle \colon P\langle a, b \rangle \to P\langle s, t \rangle\]
+ 泛函（profunctor）将一对对象$\langle a, b \rangle$映射到一个集合$P\langle a, b \rangle$，并将一对箭头
+ \[ \langle f \colon s \to a, g \colon b \to t \rangle \]
+ 映射到一个函数：
+ \[ P\langle f, g \rangle \colon P\langle a, b \rangle \to P\langle s, t \rangle \]
 
-A profunctor is an abstraction that combines elements of many other abstractions. Since it's a functor $ \mathcal{C}^{op} \times  \mathcal{C} \to \mathbf{Set}$, we can think of it as constructing a set from a pair of objects, and a function from a pair of arrows (one of them going in the opposite direction). This doesn't help our imagination though.
+ 泛函是结合了许多其他抽象元素的抽象。因为它是一个从$ \mathcal{C}^{op} \times  \mathcal{C}$到$\mathbf{Set}$的函子，我们可以将其视为从一对对象中构造一个集合，并从一对箭头（其中一个箭头的方向相反）中构造一个函数。然而，这并不有助于我们进行想象。
 
-Fortunately, we have a good model for a profunctor: the hom-functor. The set of arrows between two objects behaves like a profunctor when you vary the objects. It also makes sense that there is a difference between varying the source and the target of the hom-set. 
+ 幸运的是，我们有一个关于泛函的良好模型：同态函子（hom-functor）。在变动对象时，两者之间的箭头集表现得像一个泛函。并且明显的是，改变源对象和目标对象的同态集（hom-set）之间存在区别。
 
-We can, therefore, think of an arbitrary profunctor as generalizing the hom-functor. A profunctor provides additional bridges between objects, on top of hom-sets that are already there. 
+ 因此，我们可以将任意泛函视为同态函子的泛化。泛函在已有的同态集基础上，为对象之间提供了额外的桥梁。
 
-There is, however one big difference between an element of the hom-set $ \mathcal{C}(a, b)$ and an element of the set $P\langle a, b \rangle$. Elements of hom-sets are arrows, and arrows can be composed. It's not immediately obvious how to compose profunctors. 
+ 然而，泛函$ \mathcal{C}(a, b)$的元素与集合$P\langle a, b \rangle$的元素之间有一个很大的区别。前者的元素是箭头，而箭头可以组合（compose）。对于泛函如何组合，并没有一目了然的方法。
 
-Granted, the lifting of arrows by a profunctor can be seen as generalizing composition---just not between profuctors, but between hom-sets and profunctors. For instance, we can ``precompose'' $P \langle a, b \rangle$ with an arrow $f \colon s \to a$ to obtain $P \langle s, b \rangle$:
-\[ P\langle f, id_b \rangle \colon P \langle a, b \rangle \to P \langle s, b \rangle \]
-Similarly, we can ``postcompose'' it with $g \colon b \to t$:
-\[ P \langle id_a, g \rangle \colon P \langle a, b \rangle \to P \langle a, t \rangle \]
-This kind of heterogenous composition takes a composable pair consisting of an arrow and an element of a profunctor and produces an element of a profunctor.
+ 当然，可以认为泛函通过提升箭头（lifting of arrows）来泛化组合——不过不是在泛函之间，而是在同态集与泛函之间。例如，我们可以用箭头$f \colon s \to a$来“预组合”$P \langle a, b \rangle$，以得到$P \langle s, b \rangle$：
+ \[ P\langle f, id_b \rangle \colon P \langle a, b \rangle \to P \langle s, b \rangle \]
+ 类似地，我们可以用$g \colon b \to t$“后组合”它：
+ \[ P \langle id_a, g \rangle \colon P \langle a, b \rangle \to P \langle a, t \rangle \]
+ 这种异质的组合方式，接受由一个箭头和一个泛函元素组成的可组合对，并生成一个泛函的元素。
 
-A profunctor can be extended this way on both sides by lifting a pair of arrows:
+ 泛函可以通过提升一对箭头在两侧进行扩展：
 
-\[
- \begin{tikzcd}
-  & s
-  \arrow[r, bend left, dashed, blue, "f"]
- & a
- \arrow[r, bend right, "P"]
- & b
-  \arrow[r, bend left, dashed, blue, "g"]
- &  t
+ \[
+  \begin{tikzcd}
+   & s
+   \arrow[r, bend left, dashed, blue, "f"]
+   & a
+   \arrow[r, bend right, "P"]
+   & b
+   \arrow[r, bend left, dashed, blue, "g"]
+   &  t
   \end{tikzcd}
-\]
+ \]
 
-\subsection{Collages}
+ \subsection{Collages（拼接）}
 
-There is no reason to restrict a profunctor to a single category. We can easily define a profunctor between two categories as a functor $ P \colon \mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$. Such a profunctor can be used to glue two categories together by generating the missing hom-sets from the objects in $\mathcal{C}$ to the objects in $\mathcal{D}$. 
+ 没有理由将泛函限制在单一范畴上。我们可以轻松定义一个在两个范畴之间的泛函，例如$ P \colon \mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$。这样的泛函可以通过生成从$\mathcal{C}$中的对象到$\mathcal{D}$中的对象的同态集（hom-set）来将两个范畴连接在一起。
 
-A collage (or a \index{cograph}cograph) of two categories $\mathcal{C}$ and $\mathcal{D}$ is a category whose objects are objects from both categories (a disjoint union). A hom-set between two objects $x$ and $y$ is either a hom-set in $\mathcal{C}$, if both objects are in $\mathcal{C}$; a hom-set in $\mathcal{D}$, if both are in $\mathcal{D}$; or the set $P \langle x, y\rangle$ if $x$ is in $\mathcal{C}$ and $y$ is in $\mathcal{D}$. Otherwise the hom-set is empty. 
+ 两个范畴$\mathcal{C}$和$\mathcal{D}$的拼接（collage）是一个范畴，其对象是来自两个范畴的对象（不相交的并集）。对于两个对象$x$和$y$之间的同态集，要么是$\mathcal{C}$中的同态集（如果两个对象都在$\mathcal{C}$中）；要么是$\mathcal{D}$中的同态集（如果两个对象都在$\mathcal{D}$中）；要么是集合$P \langle x, y\rangle$（如果$x$在$\mathcal{C}$中，$y$在$\mathcal{D}$中）。否则，同态集是空的。
 
-Composition of morphisms is the usual composition, except if one of the morphisms is an element of $P \langle x, y \rangle$. In that case we lift the morphism we're trying to pre- or post-compose. 
+ 态射的组合是通常的组合方式，除非其中一个态射是$P \langle x, y \rangle$的元素。这种情况下，我们需要提升我们尝试进行前组合或后组合的态射。
 
-It's easy to see that a collage is indeed a category. The new morphisms that go between the two sides of the collage are sometimes called \index{heteromorphism}heteromorphisms. They can only go from $\mathcal{C}$ to $\mathcal{D}$, never the other way around. 
+ 很容易看出，拼接确实是一个范畴。新的态射跨越了拼接的两边，有时被称为异态射（heteromorphisms）。它们只能从$\mathcal{C}$到$\mathcal{D}$，而不能反向进行。
 
-Seen this way, a profunctor $ \mathcal{C}^{op} \times  \mathcal{C} \to \mathbf{Set}$ should really be called an \emph{endo}-profunctor. It defines a collage of $\mathcal{C}$ with itself.
+ 从这个角度看，一个从$ \mathcal{C}^{op} \times  \mathcal{C}$到$\mathbf{Set}$的泛函应该真正被称为一个\emph{内}泛函（endo-profunctor）。它定义了$\mathcal{C}$与其自身的拼接。
 
-\begin{exercise}
-Show that there is a functor from a collage of two categories to a stick-figure ``walking arrow'' category that has two objects and one arrow between them (and two identity arrows).
-\end{exercise}
-\begin{exercise}
-Show that, if there is a functor from $\mathcal{C}$ to the walking arrow category then $\mathcal{C}$ can be split into a collage of two categories. 
-\end{exercise}
+ \begin{exercise}
+  证明从两个范畴的拼接到一个有两个对象和一个箭头（以及两个恒等箭头）的“步行箭头”范畴（walking arrow category）之间存在一个函子。
+ \end{exercise}
 
-\subsection{Profunctors as relations}
+ \begin{exercise}
+  证明，如果从$\mathcal{C}$到步行箭头范畴存在一个函子，那么$\mathcal{C}$可以分解成两个范畴的拼接。
+ \end{exercise}
 
-Under a microscope, a profunctor looks like a hom-functor, and the elements of the set $P \langle a, b \rangle$ look like individual arrows. But when we zoom out, we can view a profunctor as a relation between objects. These are not the usual relations; they are \index{proof-relevant relation}\emph{proof-relevant} relations.
+ \subsection{Profunctors as relations（作为关系的泛函）}
 
-To understand this concept better, let's consider a regular functor $F \colon \mathcal{C} \to \mathbf{Set}$ (in other words, a co-presheaf). One way to interpret it is to say that it defines a \index{proof-relevant subset} subset of objects of $\mathcal{C}$, namely those objects that are mapped to non-empty sets. Every element of $F a$ is then treated as a proof that $a$ is a member of this subset. If, on the other hand, $F a$ is an empty set, then $a$ is not a member of the subset.
+ 在微观层面上，泛函看起来像一个同态函子，并且集合$P \langle a, b \rangle$的元素看起来像个别箭头。但是，当我们放大观察时，可以将泛函视为对象之间的关系。这些关系不是普通的关系；它们是\emph{证明相关关系}（proof-relevant relations）。
 
-We can apply the same interpretation to profunctors. If the set $P \langle a, b \rangle$ is empty, we say that $b$ is not related to $a$. If it's not empty, we say that each element of the set $P \langle a, b \rangle$ represents a proof that $b$ is related to $a$. We can then treat a profunctor as a proof-relevant relation. 
+ 为了更好地理解这一概念，让我们考虑一个普通的函子$F \colon \mathcal{C} \to \mathbf{Set}$（换句话说，一个余预层（co-presheaf））。可以将其解释为，它定义了$\mathcal{C}$对象的一个\emph{证明相关子集}（proof-relevant subset），即映射到非空集合的那些对象。$F a$中的每个元素都被视为$a$是此子集成员的证明。另一方面，如果$F a$是一个空集合，则$a$不是该子集的成员。
 
-Notice that we don't assume anything about this relation. It doesn't have to be reflexive, as it's possible for $P \langle a, a \rangle$ to be empty (in fact, $P \langle a, a \rangle$ makes sense only for endo-profunctors). It doesn't have to be symmetric either.
+ 我们可以对泛函应用相同的解释。如果集合$P \langle a, b \rangle$为空，我们说$b$与$a$不相关。如果它非空，我们说该集合中的每个元素代表了$b$与$a$相关的一个证明。然后，我们可以将泛函视为一种证明相关的关系。
 
-Since the hom-functor is an example of an (endo-) profunctor, this interpretation lets us view the hom-functor in a new light: as a built-in proof-relevant relation between objects in a category. If there's an arrow between two objects, they are related. Notice that this relation is reflexive, since $\mathcal{C}(a, a)$ is never empty: at the very least, it contains the identity morphism. 
+ 请注意，我们对这种关系没有做任何假设。它不必是自反的，因为$P \langle a, a \rangle$可能为空（实际上，$P \langle a, a \rangle$仅对内泛函有意义）。它也不必是对称的。
 
-Moreover, as we've seen before, hom-functors interact with profunctors. If $a$ is related to $b$ through $P$, and the hom-sets $\mathcal{C}(s, a)$ and $\mathcal{D}(b, t)$ are non-empty, then automatically $s$ is related to $t$ through $P$. Profunctors are therefore proof-relevant relations that are compatible with the structure of the categories in which they operate.
+ 由于同态函子是（内）泛函的一个例子，这种解释使我们可以从新的角度看待同态函子：作为范畴中对象之间的一种内建的证明相关关系。如果两个对象之间有箭头，它们是相关的。请注意，这种关系是自反的，因为$\mathcal{C}(a, a)$从不为空：至少它包含恒等态射。
 
-We know how to compose a profunctor with hom-functors, but how would we compose two profunctors? We can get a clue from the composition of relations. 
+ 此外，正如我们之前所见，同态函子与泛函相互作用。如果$a$通过$P$与$b$相关，并且同态集$\mathcal{C}(s, a)$和$\mathcal{D}(b, t)$是非空的，那么$s$与$t$通过$P$自动相关。因此，泛函是与它们所操作的范畴结构兼容的证明相关关系。
 
-Suppose that you want to charge your cellphone, but you don't have a charger. In order to connect you to a charger it's enough that you have a friend who owns a charger. Any friend will do. You compose the relation of having a friend with the relation of a person having a charger to get a relation of being able to charge your phone. The proof that you can charge your phone is a pair of proofs, one of friendship and one of the possession of a charger. 
+ 我们知道如何将同态函子与泛函组合在一起，但我们如何组合两个泛函呢？我们可以从关系的组合中得到线索。
 
-In general, we say that two objects are related by the composite relation if there exists an object in the middle that is related to both of them. 
+ 假设你想为手机充电，但你没有充电器。要将你连接到充电器，你只需有一个拥有充电器的朋友。任何朋友都可以。你将拥有朋友的关系与拥有充电器的关系组合在一起，以获得可以为手机充电的关系。你能够为手机充电的证明是一对证明：一个是友情的证明，一个是拥有充电器的证明。
 
-\subsection{Profunctor composition in Haskell}
+ 一般而言，我们说，如果存在一个中间对象与两者都相关，那么两个对象通过组合关系相关。
 
-Composition of relations can be translated to profunctor composition in Haskell. Let's first recall the definition of a profunctor:
-\begin{haskell}
-class Profunctor p where
+ \subsection{Profunctor composition in Haskell（Haskell中的泛函组合）}
+
+ 关系的组合可以翻译为Haskell中的泛函组合。首先回顾泛函的定义：
+ \begin{haskell}
+  class Profunctor p where
   dimap :: (s -> a) -> (b -> t) -> (p a b -> p s t)
-\end{haskell}
+ \end{haskell}
 
-The key to understanding profunctor composition is that it requires the \emph{existence} of the object in the middle. For object $b$ to be related to object $a$ through the composite $P \diamond Q$ there has to exist an object $x$ that bridges the gap:
-\[
- \begin{tikzcd}
-  & a
-  \arrow[r, bend left, blue, "Q"]
- & x
-  \arrow[r, bend left, red, "P"]
- & b
+ 理解泛函组合的关键在于它需要中间对象的\emph{存在}。对于对象$b$通过组合$P \diamond Q$与对象$a$相关，必须存在一个对象$x$来弥合这个差距：
+ \[
+  \begin{tikzcd}
+   & a
+   \arrow[r, bend left, blue, "Q"]
+   & x
+   \arrow[r, bend left, red, "P"]
+   & b
   \end{tikzcd}
-\]
+ \]
 
-This can be encoded in Haskell using an existential type. Given two profunctors \hask{p} and \hask{q}, their composition is a new profunctor \hask{Procompose p q}:
-\begin{haskell}
-data Procompose p q a b where
+ 这可以在Haskell中使用存在类型进行编码。给定两个泛函\hask{p}和\hask{q}，它们的组合是一个新的泛函\hask{Procompose p q}：
+ \begin{haskell}
+  data Procompose p q a b where
   Procompose ::  q a x -> p x b -> Procompose p q a b
-\end{haskell}
-We are using a \hask{GADT} to express the existential nature of the object \hask{x}. The two arguments to the data constructor can be seen as a pair of proofs: one proves that \hask{x} is related to \hask{a}, and the other that \hask{b} is related to \hask{x}. This pair then constitutes the proof that \hask{b} is related to \hask{a}.
+ \end{haskell}
+ 我们使用\hask{GADT}来表达对象\hask{x}的存在性。数据构造函数的两个参数可以看作是一对证明：一个证明\hask{x}与\hask{a}相关，另一个证明\hask{b}与\hask{x}相关。然后，这对证明构成了\hask{b}与\hask{a}相关的证明。
 
-An existential type can be seen as a generalization of a sum type. We are summing over all possible types \hask{x}. Just like a finite sum can be constructed by injecting one of the alternatives (think of the two constructors of \hask{Either}), the existential type can be constructed by picking one particular type for \hask{x} and injecting it into the definition of \hask{Procompose}. 
+ 存在类型可以被视为和类型的推广。我们正在对所有可能的类型\hask{x}进行求和。就像有限求和可以通过注入其中一个备选项来构造（想想\hask{Either}的两个构造函数），存在类型可以通过为\hask{x}选择一个特定类型并将其注入\hask{Procompose}的定义中来构造。
 
-Just as mapping out from a sum type requires a pair of function, one per each alternative; a mapping out from an existential type requires a family of functions, one per every type. The mapping out from \hask{Procompose}, for instance, is given by a polymorphic function:
-\begin{haskell}
-mapOut :: Procompose p q a b -> (forall x. q a x -> p x b -> c) -> c
-mapOut (Procompose qax pxb) f = (f qax pxb)
-\end{haskell}
+ 就像从和类型映射出需要一对函数，每个备选项一个；从存在类型映射出需要一个函数族，每个类型一个。比如，从\hask{Procompose}映射出的函数由一个多态函数定义：
+ \begin{haskell}
+  mapOut :: Procompose p q a b -> (forall x. q a x -> p x b -> c) -> c
+  mapOut (Procompose qax pxb) f = (f qax pxb)
+ \end{haskell}
 
-The composition of profunctors is again a profunctor, as can be seen from this instance:
-\begin{haskell}
-instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) 
+ 泛函的组合本身也是一个泛函，如以下实例所示：
+ \begin{haskell}
+  instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q)
   where
-    dimap l r (Procompose qax pxb) = 
-               Procompose (dimap l id qax) (dimap id r pxb)
-\end{haskell}
-This is just saying that you can extend the composite profunctor by extending the first one to the left and the second one to the right.
+  dimap l r (Procompose qax pxb) =
+  Procompose (dimap l id qax) (dimap id r pxb)
+ \end{haskell}
+ 这只是说你可以通过将第一个泛函扩展到左边，将第二个泛函扩展到右边来扩展组合泛函。
 
-The fact that this definition of profunctor composition happens to work in Haskell is due to parametricity. The language constraints the types of profunctors in a way that makes this work. In general, though, taking a simple sum over intermediate objects would result in over-counting, so in category theory we have to compensate for that.
+ 在Haskell中这个泛函组合定义之所以能正常工作，是由于参数多态性。语言通过类型限制了泛函，使其能够正常工作。然而，一般来说，如果仅对中间对象进行简单求和，会导致过度计数，因此在范畴论中我们必须对此进行补偿。
 
-\section{Coends}
+ \section{Coends（余极限）}
 
-The over-counting in the naive definition of profunctor composition happens when two candidates for the object in the middle are connected by a morphism:
-\[
- \begin{tikzcd}
-  & a
-  \arrow[r, bend left, blue, "Q"]
-  &x
-  \arrow[r, dashed, "f"]
- & y
-  \arrow[r, bend left, red, "P"]
- & b
+ 在泛函组合的简单定义中，过度计数发生在两个候选中间对象之间通过一个态射连接时：
+ \[
+  \begin{tikzcd}
+   & a
+   \arrow[r, bend left, blue, "Q"]
+   &x
+   \arrow[r, dashed, "f"]
+   & y
+   \arrow[r, bend left, red, "P"]
+   & b
   \end{tikzcd}
-\]
-We can either extend $Q$ on the right, by lifting $Q \langle id, f \rangle$, and use $y$ as the middle object; or we can extend $P$ on the left, by lifting $P \langle f, id \rangle$, and use $x$ as the intermediary.
+ \]
+ 我们可以在右边扩展$Q$，通过提升$Q \langle id, f \rangle$，并使用$y$作为中间对象；或者我们可以在左边扩展$P$，通过提升$P \langle f, id \rangle$，并使用$x$作为中介。
 
-In order to avoid the double-counting, we have to tweak our definition of a sum type when applied to profunctors. The resulting construction is called a coend. 
+ 为了避免双重计数，我们必须在应用于泛函时调整我们的和类型定义。得到的构造被称为余极限（coend）。
 
-First, let's re-formulate the problem. We are trying to sum over all objects $x$ in the product:
-\[ P \langle a, x \rangle \times Q \langle x, b \rangle \]
-The double-counting happens because we can open up the gap between the two profunctors, as long as there is a morphism that we can fit between them. So we are really looking at a more general product:
-\[ P \langle a, x \rangle \times Q \langle y, b \rangle \]
-The important observation is that, if we fix the endpoints $a$ and $b$, this product is a profunctor in $\langle y, x \rangle$. This is easily seen after a little rearrangement (up to isomorphism):
-\[ Q \langle y, b \rangle \times P \langle a, x \rangle \]
-We are interested in the sum of the diagonal parts of this profunctor, that is when $x$ is equal to $y$. 
+ 首先，让我们重新表述问题。我们试图对所有对象$x$在乘积上求和：
+ \[ P \langle a, x \rangle \times Q \langle x, b \rangle \]
+ 双重计数发生是因为我们可以在两个泛函之间打开一个间隙，只要有一个态射可以填充其中。因此，我们真正关注的是一个更通用的乘积：
+ \[ P \langle a, x \rangle \times Q \langle y, b \rangle \]
+ 重要的是，如果我们固定端点$a$和$b$，这个乘积是$\langle y, x \rangle$中的一个泛函。这可以通过一些排列（同构）轻松看出：
+ \[ Q \langle y, b \rangle \times P \langle a, x \rangle \]
+ 我们感兴趣的是这个泛函的对角部分的和，也就是说，当$x$等于$y$时。
 
-So let's see how we would go about defining the sum of all diagonal entries of a general profunctor $P$. In fact, this construction works for any functor $P \colon \cat C^{op} \times \cat C \to D$, not just for $\Set$-valued profunctors. 
+ 因此，让我们看看如何定义一个泛函$P$的对角项的和。实际上，这种构造适用于任何函子$P \colon \cat C^{op} \times \cat C \to D$，而不仅仅是$\Set$值的泛函。
 
-The sum of the diagonal objects is defined by injections; in this case, one per every object in $\cat C$. Here we show just two of them and the dashed line representing all the rest:
-\[
- \begin{tikzcd}
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[rr, dash, dashed]
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- & d
- \end{tikzcd}
-\]
+ 对角项的和由注入定义；在这种情况下，每个对象$\cat C$有一个注入。这里我们只展示其中的两个，虚线代表所有其他的注入：
+ \[
+  \begin{tikzcd}
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[rr, dash, dashed]
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   & d
+  \end{tikzcd}
+ \]
 
-If we were defining a sum, we'd make it a universal object equipped with such injections. But because we are dealing with functors of two variables, we want to identify the injections that are related by ``extending'' some common ancestor---here, $P \langle y, x \rangle$. We want the following diagram to commute, whenever there is a connecting morphism $f\colon x \to y$:
+ 如果我们在定义一个和，我们会使其成为一个带有这些注入的泛函对象。但由于我们处理的是两个变量的函子，我们希望识别那些通过“扩展”一些公共祖先（这里是$P \langle y, x \rangle$）而相关的注入。我们希望下图在存在连接态射$f \colon x \to y$时交换：
 
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-This diagram is called a \index{co-wedge}co-wedge, and its commuting condition is called the co-wedge condition. For every $f \colon x \to y$, we demand that:
-\[ i_x \circ P \langle f, id_y \rangle = i_y \circ P \langle id_x, f \rangle \]
-The \emph{universal} co-wedge is called a coend.
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 这个图被称为\emph{余楔形图}（co-wedge），其交换条件称为余楔条件。对于每个$f \colon x \to y$，我们要求：
+ \[ i_x \circ P \langle f, id_y \rangle = i_y \circ P \langle id_x, f \rangle \]
+ \emph{通用}余楔被称为余极限（coend）。
 
-Since a coend generalizes the sum to a potentially infinite domain, we write it using the integral sign, with the ``integration variable'' at the top:
-\[ \int^{x\colon \mathcal{C}} P \langle x, x \rangle \]
-Universality means that, whenever there is an object $d$ in $\cat D$ equipped with a family of arrows $g_x \colon P \langle x, x \rangle \to d$ satisfying the co-wedge condition, there is a unique mapping out from the coend:
-\[ h \colon \int^{x\colon \mathcal{C}} P \langle x, x \rangle \to d \]
-that factorizes every $g_x$ through the injection $i_x$:
-\[ g_x = h \circ i_x \]
-Pictorially, we have:
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[ddr, bend right,  "g_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \arrow[ddl, bend left,  "g_x"]
- \\
- &\int^x P \langle x, x \rangle
- \arrow[d, dashed, "h"]
- \\
- &d
- \end{tikzcd}
-\]
+ 由于余极限将和推广到可能的无限域，我们用积分符号表示它，上方标出“积分变量”：
+ \[ \int^{x\colon \mathcal{C}} P \langle x, x \rangle \]
+ 通用性意味着，任何配备了满足余楔条件的箭头族$g_x \colon P \langle x, x \rangle \to d$的对象$d$，都会有一个唯一的从余极限映射出的映射：
+ \[ h \colon \int^{x\colon \mathcal{C}} P \langle x, x \rangle \to d \]
+ 可以通过注入$i_x$因式分解所有的$g_x$：
+ \[ g_x = h \circ i_x \]
+ 如图所示：
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[ddr, bend right,  "g_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \arrow[ddl, bend left,  "g_x"]
+   \\
+   &\int^x P \langle x, x \rangle
+   \arrow[d, dashed, "h"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
 
-Compare this with the definition of a sum of two objects:
+ 将其与两个对象之和的定义进行比较：
 
-\[
- \begin{tikzcd}
- a
- \arrow[dr, "\text{Left}"]
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, "\text{Right}"']
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& d
- \end{tikzcd}
-\]
-Just like the sum was defined as a universal cospan, a coend is defined as a universal co-wedge. 
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr, "\text{Left}"]
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, "\text{Right}"']
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & d
+  \end{tikzcd}
+ \]
+ 正如和被定义为通用的余图形（cospan），余极限被定义为通用的余楔形图。
 
-In particular, if you were to construct a coend of a $\Set$-valued profunctor, you would start with a sum (a discriminated union) of all the sets $P \langle x, x \rangle$. Then you would identify all the elements of this sum that satisfy the co-wedge condition. You'd identify the element $a \in P \langle x, x \rangle$ with the element $b \in P \langle y, y \rangle$ whenever there is an element $c  \in P \langle y, x \rangle$ and a morphism $f \colon x \to y$, such that:
-\[ P \langle id, f \rangle (c) = b\]
-and
-\[ P \langle f, id \rangle (c) = a\]
+ 特别是，如果你要构造一个$\Set$值泛函的余极限，你会从所有集合$P \langle x, x \rangle$的和（带鉴别的并集）开始。然后你会识别出所有满足余楔条件的和元素。你会将$P \langle x, x \rangle$中的元素$a$与$P \langle y, y \rangle$中的元素$b$相识别，每当存在$P \langle y, x \rangle$中的元素$c$和态射$f \colon x \to y$，使得：
+ \[ P \langle id, f \rangle (c) = b\]
+ 且
+ \[ P \langle f, id \rangle (c) = a\]
 
-Notice that, in a discrete category (which is just a set of objects with no arrows between them) the co-wedge condition is trivial (there are no $f$'s other than identities), so a coend is just a straightforward sum (coproduct) of the diagonal objects $P \langle x, x \rangle$.
+ 请注意，在离散范畴中（它只是一个对象集，不存在它们之间的箭头），余楔条件是平凡的（除了恒等箭头外没有其他$f$），所以余极限只是对角对象$P \langle x, x \rangle$的直接和（余并）。
 
-\subsection{Extranatural transformations}
+ \subsection{Extranatural transformations（超自然变换）}
 
-A family of arrows in the target category parameterized by the objects of the source category can often be combined into a single natural transformation between two functors. 
+ 在目标范畴中由源范畴的对象参数化的箭头族通常可以合并为两个函子之间的单一自然变换。
 
-The injections in our definition of a cowedge form a family of functions that is parameterized by objects, but they don't neatly fit into a definition of a natural transformation.
-\[
- \begin{tikzcd}
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[rr, dash, dashed]
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-The problem is that the functor $P \colon \cat C^{op} \times \cat C \to \cat D$ is contravariant in the first argument and covariant in the second; so its diagonal part, which on objects is defined as $x \mapsto P \langle x, x \rangle$, is neither.
+ 在余楔的定义中，注入构成了一个由对象参数化的函数族，但它们不能很好的契合自然变换的定义。
+ \[
+  \begin{tikzcd}
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[rr, dash, dashed]
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 问题在于函子$P \colon \cat C^{op} \times \cat C \to \cat D$在第一个参数中是反变的，在第二个参数中是协变的；因此，其对角部分在对象上定义为$x \mapsto P \langle x, x \rangle$，但它并非自然变换。
 
-The closest analog of naturality at our disposal is the cowedge condition:
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-Indeed, as is the case with the naturality square, it involves the interaction between the lifting of a morphism $f \colon x \to y$ (here, in two different ways) and the components of the transformation $i$. 
+ 我们可以利用的最接近的自然性（naturality）是余楔条件：
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 的确，与自然性方块一样，它涉及的是态射$f \colon x \to y$的提升（这里有两种不同的方式）与变换$i$的分量之间的交互。
 
-Granted, the standard naturality condition deals with pairs of functors. Here, the target of the transformation is a fixed object $d$. But we can always reinterpret it as the output of a constant profunctor $\Delta_d \colon \cat C^{op} \times \cat C \to \cat D$. Thus to generalize naturality, we replace $\Delta_d$ with an arbitrary profunctor $Q$.
+ 当然，标准的自然性条件涉及的是函子对。在这里，变换的目标是一个固定的对象$d$。但我们总是可以将其重新解释为常量泛函$\Delta_d \colon \cat C^{op} \times \cat C \to \cat D$的输出。因此，为了推广自然性，我们将$\Delta_d$替换为任意泛函$Q$。
 
-We reinterpret the cowedge condition as a special case of the more general \index{extranatural transformation}\emph{extranatural} transformation. An extranatural transformation is a family of arrows:
-\[ \alpha_{c d} \colon P \langle c, c \rangle \to Q \langle d, d \rangle \]
-between two functors of the form:
-\[ P \colon \cat C^{op} \times \cat C \to \cat E \]
-\[ Q \colon \cat D^{op} \times \cat D \to \cat E \]
-Extranaturality in $c$ means that the following diagram commutes for any morphism $f \colon c \to c'$:
-\[
- \begin{tikzcd}
- &P \langle c', c \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
-      P \langle c', c' \rangle
- \arrow[dr, "\alpha_{c' d}"']
- &&P \langle c, c \rangle
- \arrow[dl, "\alpha_{c d}"]
- \\
- & Q \langle d, d \rangle
- \end{tikzcd}
-\]
-Extranaturality in $d$ means that the following diagram commutes for any morphism $g \colon d \to d'$:
-\[
- \begin{tikzcd}
- &P \langle c, c \rangle
- \arrow[ld, "\alpha_{c d}"']
- \arrow[rd, "\alpha_{c d'}"]
- \\
-      Q \langle d, d \rangle
- \arrow[dr, "{Q \langle id, g\rangle}"']
- &&Q \langle d', d' \rangle
- \arrow[dl, "{Q \langle g,  id\rangle}"]
- \\
- & Q \langle d, d' \rangle
- \end{tikzcd}
-\]
+ 我们将余楔条件重新解释为更一般的\emph{超自然变换}（extranatural transformation）的特例。超自然变换是一个箭头族：
+ \[ \alpha_{c d} \colon P \langle c, c \rangle \to Q \langle d, d \rangle \]
+ 在两个函子之间：
+ \[ P \colon \cat C^{op} \times \cat C \to \cat E \]
+ \[ Q \colon \cat D^{op} \times \cat D \to \cat E \]
+ 在$c$中的超自然性意味着，对于任何态射$f \colon c \to c'$，以下图表交换：
+ \[
+  \begin{tikzcd}
+   &P \langle c', c \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle c', c' \rangle
+   \arrow[dr, "\alpha_{c' d}"']
+   &&P \langle c, c \rangle
+   \arrow[dl, "\alpha_{c d}"]
+   \\
+   & Q \langle d, d \rangle
+  \end{tikzcd}
+ \]
+ 在$d$中的超自然性意味着，对于任何态射$g \colon d \to d'$，以下图表交换：
+ \[
+  \begin{tikzcd}
+   &P \langle c, c \rangle
+   \arrow[ld, "\alpha_{c d}"']
+   \arrow[rd, "\alpha_{c d'}"]
+   \\
+   Q \langle d, d \rangle
+   \arrow[dr, "{Q \langle id, g\rangle}"']
+   &&Q \langle d', d' \rangle
+   \arrow[dl, "{Q \langle g,  id\rangle}"]
+   \\
+   & Q \langle d, d' \rangle
+  \end{tikzcd}
+ \]
 
-Given this definition, we get our cowedge condition as the extranaturality of the mapping between the profunctor $P$ and the constant profunctor $\Delta_d$. 
+ 基于此定义，我们可以将余楔条件重新解释为从泛函$P$到常量泛函$\Delta_d$的映射的超自然性。
 
-We can now reformulate the definition of the coend as a pair $(c, i)$ where $c$ is the object equipped with the extranatural transformation  $i \colon P \to \Delta_c$ that is universal among such pairs.
+ 现在我们可以将余极限定义为对$(c, i)$的配对，其中$c$是配备了从$P$到$\Delta_c$的超自然变换$i$的对象，并且在此类对中是通用的。
 
-Universality means that for any object $d$ equipped with the extranatural transformation $\alpha \colon P \to \Delta_d$ there is a unique morphism $h \colon c \to d$ that factorizes all the components of $\alpha$ through the components of $i$:
-\[ \alpha_x = h \circ i_x \]
-We call this object $c$ the coend, and write it as:
-\[ c = \int^x P\langle x, x \rangle \]
+ 通用性意味着，对于任何配备了从$P$到$\Delta_d$的超自然变换$\alpha$的对象$d$，存在一个唯一的态射$h \colon c \to d$，它通过$i$的所有分量对$\alpha$的所有分量进行因式分解：
+ \[ \alpha_x = h \circ i_x \]
+ 我们将这个对象$c$称为余极限，并将其写为：
+ \[ c = \int^x P\langle x, x \rangle \]
 
-\begin{exercise}
-Verify that that, for the extranatural transformation $P \to \Delta_d$, the first extranaturality diamond is equivalent to the cowedge condition, and the second is trivially satisfied.
-\end{exercise}
+ \begin{exercise}
+  验证对于从$P$到$\Delta_d$的超自然变换，第一个超自然性菱形等价于余楔条件，第二个条件是平凡的。
+ \end{exercise}
 
-\subsection{Profunctor composition using coends}
+ \subsection{Profunctor composition using coends（使用余极限的泛函组合）}
 
-Equipped with the definition of a coend we can now formally define the composition of two profunctors:
+ 有了余极限的定义，我们现在可以正式定义两个泛函的组合：
 
-\[ (P \diamond Q)\langle a, b \rangle = \int^{x\colon \mathcal{C}} Q \langle a, x \rangle \times P \langle x, b \rangle\]
-Compare this with:
-\begin{haskell}
-data Procompose p q a b where
+ \[ (P \diamond Q)\langle a, b \rangle = \int^{x\colon \mathcal{C}} Q \langle a, x \rangle \times P \langle x, b \rangle\]
+ 将其与以下内容进行比较：
+ \begin{haskell}
+  data Procompose p q a b where
   Procompose ::  q a x -> p x b -> Procompose p q a b
-\end{haskell}
+ \end{haskell}
 
-The reason why in Haskell we don't have to worry about the co-wedge condition is analogous to the reason why all parametrically polymorphic functions automatically satisfy naturality condition. A coend is defined using a family of injections; in Haskell all these injections are defined by a \emph{single} polymorphic function:
-\begin{haskell}
-data Coend p where
+ 在Haskell中我们不需要担心余楔条件的原因类似于所有参数多态函数自动满足自然性条件的原因。余极限是使用箭头族定义的；在Haskell中，所有这些注入都是由\emph{单个}多态函数定义的：
+ \begin{haskell}
+  data Coend p where
   Coend ::  p x x -> Coend p
-\end{haskell}
-\index{parametricity}Parametricity then enforces the co-wedge condition.
+ \end{haskell}
+ \emph{参数多态性}（parametricity）然后强制执行余楔条件。
 
-Coends introduce a new level of abstraction in dealing with profunctors. Calculations using coends usually take advantage of their mapping-out property. To define a mapping out of a coend to some object $d$:
-\[ \int^x P \langle x, x \rangle \to d \]
- it's enough to define a family of functions from the diagonal entries of the functor to $d$:
+ 余极限在处理泛函时引入了一个新的抽象层次。使用余极限进行计算通常利用其映射出属性。要定义从余极限到某个对象$d$的映射：
+ \[ \int^x P \langle x, x \rangle \to d \]
+ 只需定义从函子的对角项到$d$的一族函数：
  \[ g_x \colon P \langle x, x \rangle \to d \]
- satisfying the cowedge condition. You can get a lot of mileage from this trick, especially when combined with the Yoneda lemma. We'll see examples of this in what follows.
+ 满足余楔条件。这个技巧结合Yoneda引理可以带来很大的好处。我们将在接下来的内容中看到一些例子。
 
-\begin{exercise}
-Define a \hask{Profunctor} instance for the pair of profunctors:
-\begin{haskell}
-newtype ProPair q p a b x y = ProPair (q a y, p x b)
-\end{haskell}
-Hint: Keep the first four parameters fixed:
-\begin{haskell}
-instance (Profunctor p, Profunctor q) => Profunctor (ProPair q p a b)
-\end{haskell}
-\end{exercise}
+ \begin{exercise}
+  为以下泛函对定义一个\hask{Profunctor}实例：
+  \begin{haskell}
+   newtype ProPair q p a b x y = ProPair (q a y, p x b)
+  \end{haskell}
+  提示：保持前四个参数固定：
+  \begin{haskell}
+   instance (Profunctor p, Profunctor q) => Profunctor (ProPair q p a b)
+  \end{haskell}
+ \end{exercise}
 
-\begin{exercise}
-Profunctor composition can be expressed using a coend:
-\begin{haskell}
-newtype CoEndCompose p q a b = CoEndCompose (Coend (ProPair q p a b))
-\end{haskell}
-Define a \hask{Profunctor} instance for \hask{CoEndCompose}.
-\end{exercise}
+ \begin{exercise}
+  泛函组合可以使用余极限表示：
+  \begin{haskell}
+   newtype CoEndCompose p q a b = CoEndCompose (Coend (ProPair q p a b))
+  \end{haskell}
+  为\hask{CoEndCompose}定义一个\hask{Profunctor}实例。
+ \end{exercise}
 
-\subsection{Colimits as coends}
-A function of two variables that ignores one of its arguments is equivalent to a function of one variable. Similarly, a profunctor that ignores one of its arguments is equivalent to a functor. Conversely, given a functor $F$, we can construct a trivial profunctor. Its action on objects is given by:
-\[P \langle x, y \rangle = F y \]
-Its action on a pair of arrows ignores one of the arrows:
-\[P \langle f, g \rangle = F g \]
+ \subsection{Colimits as coends（作为余极限的余极限）}
+ 一个忽略其参数之一的二元函数等价于一个一元函数。类似地，一个忽略其参数之一的泛函等价于一个函子。反过来，给定一个函子$F$，我们可以构造一个平凡的泛函。它在对象上的作用由以下公式给出：
+ \[P \langle x, y \rangle = F y \]
+ 它在箭头对上的作用忽略了其中一个箭头：
+ \[P \langle f, g \rangle = F g \]
 
-For any   $f \colon x \to y$, our definition of a coend for such a profunctor reduces to the following diagram:
-\[
- \begin{tikzcd}
- & F x
- \arrow[ld, "F f"']
- \arrow[rd, dashed, "id_{F x}"]
- \\
- F y
- \arrow[dr, "i_y"']
- \arrow[ddr, bend right,  "g_y"']
- && F x
- \arrow[dl, "i_x"]
- \arrow[ddl, bend left,  "g_x"]
- \\
- &\int^x F x
- \arrow[d, dashed, "h"]
- \\
- &d
- \end{tikzcd}
-\]
-After shrinking the identity arrows, the original co-wedge becomes a co-cone, and the universal condition turns into the definition of a colimit. This justifies the use the coend notation for colimits:
-\[ \int^x F x = \text{colim} F \]
-The functor $F$ defines a diagram in the target category. The pattern is the whole source category.
+ 对于任意$f \colon x \to y$，我们这种泛函的余极限的定义简化为以下图表：
+ \[
+  \begin{tikzcd}
+   & F x
+   \arrow[ld, "F f"']
+   \arrow[rd, dashed, "id_{F x}"]
+   \\
+   F y
+   \arrow[dr, "i_y"']
+   \arrow[ddr, bend right,  "g_y"']
+   && F x
+   \arrow[dl, "i_x"]
+   \arrow[ddl, bend left,  "g_x"]
+   \\
+   &\int^x F x
+   \arrow[d, dashed, "h"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 在缩小恒等箭头之后，原始的余楔形图变成了余锥形图（co-cone），通用条件变成了余极限的定义。这就证明了将余极限符号用于余极限的合理性：
+ \[ \int^x F x = \text{colim} F \]
+ 函子$F$定义了目标范畴中的一个图形。这个模式是整个源范畴。
 
-We can gain useful intuition if we consider a discrete category, in which a profunctor is a (possibly infinite) matrix and a coend is the sum (coproduct) if its diagonal elements. A profunctor that is constant along one axis corresponds to a matrix whose rows are identical (each given by a ``vector'' $F x$). The sum of the diagonal elements of such a matrix is equal to the sum of all components of the vector $F x$.
-\[
-\begin{pmatrix}
-\color{red} F a & F b & F c & ... \\
-F a & \color{red}F b & F c & ...\\
-F a & F b &\color{red}F c & ...\\
-... & ... & ... & ...
-\end{pmatrix}
-\]
-In a non-discrete category, this sum generalizes to a colimit.
+ 如果我们考虑一个离散范畴，其中泛函是一个（可能是无限的）矩阵，余极限是其对角线元素的和（余并）。沿着一条轴恒定的泛函对应于每一行相同的矩阵（每行由一个向量$F x$给出）。这样的矩阵的对角线元素之和等于向量$F x$的所有元素之和。
+ \[
+  \begin{pmatrix}
+   \color{red} F a & F b & F c & ... \\
+   F a & \color{red}F b & F c & ...\\
+   F a & F b &\color{red}F c & ...\\
+   ... & ... & ... & ...
+  \end{pmatrix}
+ \]
+ 在非离散范畴中，这个和则推广为余极限。
+
+
 \section{Ends}
 
 Just like a coend generalizes the sum of the diagonal elements of a profunctor---its dual, an end, generalizes the product. A product is defined by its projections, and so is an end. 
