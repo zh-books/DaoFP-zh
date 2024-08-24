@@ -415,442 +415,440 @@
  在非离散范畴中，这个和则推广为余极限。
 
 
-\section{Ends}
+ \section{Ends（余极限）}
 
-Just like a coend generalizes the sum of the diagonal elements of a profunctor---its dual, an end, generalizes the product. A product is defined by its projections, and so is an end. 
+ 就像余极限（coend）推广了伴随态射（profunctor）的对角元素之和一样，它的对偶概念，极限（end），推广了乘积的概念。乘积通过它的投影来定义，极限也是如此。
 
-The generalization of a span that we used in the definition of a product would be an object $d$ with a family of projections, one per every object $x$:
-\[ \pi_x \colon d \to P \langle x, x \rangle \]
-The dual to a co-wedge is called a \index{wedge}wedge:
-\[
- \begin{tikzcd}
- &d
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- P \langle x, x \rangle
- \arrow[dr, "{P \langle id, f \rangle}"']
- &&P \langle y, y \rangle
- \arrow[dl, "{P \langle f, id \rangle}"]
- \\
- & P \langle x, y \rangle
- \end{tikzcd}
-\]
-For every arrow $f \colon x \to y$ we demand that:
-\[ P \langle f, id_y \rangle \circ \pi_y = P \langle id_x, f \rangle \circ \pi_x \]
+ 我们在定义乘积时使用的广义“跨越”（span）的概念可以推广为一个对象 $d$，该对象有一系列投影，每个对象 $x$ 对应一个投影：
+ \[ \pi_x \colon d \to P \langle x, x \rangle \]
+ 与余契（co-wedge）相对的是所谓的\index{wedge}契（wedge）：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   P \langle x, x \rangle
+   \arrow[dr, "{P \langle id, f \rangle}"']
+   &&P \langle y, y \rangle
+   \arrow[dl, "{P \langle f, id \rangle}"]
+   \\
+   & P \langle x, y \rangle
+  \end{tikzcd}
+ \]
+ 对于每一个箭头 $f \colon x \to y$，我们要求：
+ \[ P \langle f, id_y \rangle \circ \pi_y = P \langle id_x, f \rangle \circ \pi_x \]
 
-The end is a universal wedge. We use the integral sign for it too, this time with the ``integration variable'' at the bottom. 
-\[ \int_{x \colon \cat C} P \langle x, x \rangle \]
+ 极限（end）是一个具有普遍性质的契（universal wedge）。我们为其使用积分符号，这次积分变量写在符号的下方：
+ \[ \int_{x \colon \cat C} P \langle x, x \rangle \]
 
-You might be wondering why, in calculus, integrals based on multiplication rather than summation are rarely used. That's because we can always use a logarithm to replace multiplication with addition. We don't have this luxury in category theory, so ends and coends are equally important.
+ 你可能会想知道，为什么在微积分中，基于乘法的积分而不是加法的积分很少被使用。那是因为我们总是可以通过对数将乘法转换为加法。但在范畴论中，我们没有这种奢侈的选择，因此极限和余极限同样重要。
 
-To summarize, an end is an object equipped with a family of morphisms (projections):
-\[ \pi_a \colon \left( \int_x P \langle x, x \rangle \right) \to P \langle a, a \rangle \]
-satisfying the wedge condition. 
+ 总结一下，极限是一个具备一系列态射（projections）的对象：
+ \[ \pi_a \colon \left( \int_x P \langle x, x \rangle \right) \to P \langle a, a \rangle \]
+ 并满足契（wedge）条件。
 
-It is universal among such objects; that is, for any other object $d$ equipped with a family of arrows $g_x$ satisfying the wedge condition, there is a unique morphism $h$ that factorizes the family $g_x$ through the family $\pi_x$:
-\[ g_x = \pi_x \circ h \]
-Pictorially, we have:
-\[
- \begin{tikzcd}
- &d
- \arrow[ddl, bend right, "g_x"']
- \arrow[ddr, bend left, "g_y"]
- \arrow[d, dashed, "h"]
- \\
- & \int_x P \langle x, x \rangle
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- P \langle x, x \rangle
- \arrow[dr, "{P \langle id, f \rangle}"']
- &&P \langle y, y \rangle
- \arrow[dl, "{P \langle f, id \rangle}"]
- \\
- & P \langle x, y \rangle
- \end{tikzcd}
-\]
+ 它在此类对象中具有普遍性；也就是说，对于任何其他对象 $d$，如果其带有一系列满足契条件的箭头 $g_x$，那么存在唯一的态射 $h$，使得 $g_x$ 的这系列态射通过 $\pi_x$ 的这系列态射来分解：
+ \[ g_x = \pi_x \circ h \]
+ 图解如下：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ddl, bend right, "g_x"']
+   \arrow[ddr, bend left, "g_y"]
+   \arrow[d, dashed, "h"]
+   \\
+   & \int_x P \langle x, x \rangle
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   P \langle x, x \rangle
+   \arrow[dr, "{P \langle id, f \rangle}"']
+   &&P \langle y, y \rangle
+   \arrow[dl, "{P \langle f, id \rangle}"]
+   \\
+   & P \langle x, y \rangle
+  \end{tikzcd}
+ \]
 
-Equivalently, we can say that the end is a pair $(e, \pi)$ consisting of an object $e = \int_x P\langle x, x\rangle$ and an  \index{extranatural transformation}extranatural transformation $\pi \colon \Delta_d \to e$ that is universal among such pairs. The wedge condition turns out to be a special case of extranaturality condition.
+ 同样地，我们可以说极限是一个 $(e, \pi)$ 对，其中 $e = \int_x P\langle x, x\rangle$ 是一个对象，$\pi \colon \Delta_d \to e$ 是一个\index{extranatural transformation}额外自然变换（extranatural transformation），并且在所有此类对中具有普遍性。契条件实际上是额外自然性条件（extranaturality condition）的特例。
 
-If you were to construct an end of a $\Set$-valued profunctor, you'd start with a giant product of all $P \langle x, x \rangle$ for all objects in the category $\cat C$, and then prune the tuples that don't satisfy the wedge condition. 
+ 如果你要构建一个 $\Set$-值的伴随态射的极限，你可以从包含类别 $\cat C$ 中所有对象 $x$ 的 $P \langle x, x \rangle$ 的巨大积开始，然后剪除不满足契条件的元组。
 
-In particular, imagine using the singleton set $1$ in place of $d$. The family $g_x$ would select one element from each set $P \langle x, x \rangle$. This would give you a giant tuple. You'd weed out most of these tuples, leaving only the ones that satisfy the wedge condition. 
+ 具体来说，假设使用单例集（singleton set）$1$ 代替 $d$。族 $g_x$ 将从每个集合 $P \langle x, x \rangle$ 中选择一个元素。这会给你一个巨大的元组。然后你将剔除大部分的元组，只保留那些满足契条件的元组。
 
-Again, in Haskell, due to \index{parametricity}parametricity, the wedge condition is automatically satisfied, and the definition of the end for a profunctor \hask{p} simplifies to:
+ 同样地，在 Haskell 中，由于\index{parametricity}参数化（parametricity）的原因，契条件自动得到满足，并且对一个伴随态射 \hask{p} 的极限定义简化为：
 
-\begin{haskell}
-type End p = forall x. p x x
-\end{haskell}
+ \begin{haskell}
+  type End p = forall x. p x x
+ \end{haskell}
 
-The Haskell implementation of an \hask{End} doesn't showcase the fact that it is dual to the \hask{Coend}. This is because, at the time of this writing, Haskell doesn't have a built-in syntax for existential types. If it did, the \hask{Coend} would be implemented as:
-\begin{haskell}
-type Coend p = exists x. p x x
-\end{haskell}
+ Haskell 中的 \hask{End} 实现并没有展示它是 \hask{Coend} 的对偶这一事实。这是因为在撰写本文时，Haskell 还没有内置的存在类型语法。如果有的话，\hask{Coend} 可以实现为：
+ \begin{haskell}
+  type Coend p = exists x. p x x
+ \end{haskell}
 
-The existential/universal duality between a \hask{Coend} and an \hask{End} means that it's easy to construct a \hask{Coend}---all you need is to pick one type \hask{x} for which you have a value of the type \hask{p x x}. On the other end, to construct an \hask{End} you have to provide a whole family of values \hask{p x x}, one for every type \hask{x}. In other words, you need a polymorphic formula that is parameterized by \hask{x}. A definition of a polymorphic function is a canonical example of such a formula.
+ \hask{Coend} 和 \hask{End} 之间的存在/普遍性二元对立意味着构造 \hask{Coend} 很容易——你只需要选择一个类型 \hask{x}，对于该类型你有一个类型 \hask{p x x} 的值。另一方面，要构造一个 \hask{End}，你必须提供整个族的值 \hask{p x x}，对于每个类型 \hask{x} 都有一个。换句话说，你需要一个以 \hask{x} 为参数的多态公式。多态函数的定义是这种公式的典型示例。
 
+ \subsection{Natural transformations as an end（作为余极限的自然变换）}
 
-\subsection{Natural transformations as an end}
+ 极限的最有趣的应用是简洁地定义自然变换（natural transformations）的集合。考虑两个函子 $F$ 和 $G$，它们在两个范畴 $\mathcal{B}$ 和 $\mathcal{C}$ 之间移动。它们之间的自然变换是一个在 $\mathcal{C}$ 中的箭头族 $\alpha_x$。你可以将其视为从每个同态集合 $\mathcal{C} (F x, G x)$ 中选择一个元素 $\alpha_x$。
+ \[
+  \begin{tikzcd}
+   && F x
+   \arrow[dd, "{\alpha_x \in \cat C (F x, G x)}"]
+   \\
+   x
+   \arrow[urr, dashed, "F"]
+   \arrow[drr, dashed, "G"]
+   \\
+   && G x
+  \end{tikzcd}
+ \]
 
-The most interesting application of an end is in concisely defining the set of natural transformations. Consider two functors, $F$ and $G$, going between two categories  $\mathcal{B}$ and $\mathcal{C}$. A natural transformation between them is a family of arrows $\alpha_x$ in $\mathcal{C}$. You may think of it as picking one element $\alpha_x$ from each hom-set  $\mathcal{C} (F x, G x)$.
-\[
- \begin{tikzcd}
- && F x
- \arrow[dd, "{\alpha_x \in \cat C (F x, G x)}"]
- \\
- x
- \arrow[urr, dashed, "F"]
- \arrow[drr, dashed, "G"]
- \\
- && G x
- \end{tikzcd}
-\]
+ 我们知道，映射 $\langle a, b \rangle \to \mathcal{C} (a, b)$ 定义了一个伴随态射。事实证明，对于任何一对函子，映射 $\langle a, b \rangle \to \mathcal{C} (F a, G b)$ 也表现得像一个伴随态射。此伴随态射对一对箭头 $\langle f \colon s \to a, g \colon b \to t \rangle$ 的作用是一个函数：
+ \[ \cat C(F a, G b) \to \cat C (F s, G t) \]
+ 该函数通过以下方式实现组合：
+ \[ F s \xrightarrow{F f} F a \xrightarrow{h} G b \xrightarrow{G g} G t \]
+ 其中 $h$ 是 $\mathcal{C} (F a, G b)$ 的一个元素。
 
-We know that the mapping $\langle a, b \rangle \to \mathcal{C} (a, b)$ defines a profunctor.  It turns out that, for any pair of functors, the mapping  $\langle a, b \rangle \to \mathcal{C} (F a, G b)$ also behaves like a profunctor. The action of this profunctor on a pair of arrows $\langle f \colon s \to a, g \colon b \to t \rangle$ is a function:
-\[ \cat C(F a, G b) \to \cat C (F s, G t) \]
-given by the composition:
-\[ F s \xrightarrow{F f} F a \xrightarrow{h} G b \xrightarrow{G g} G t \]
-where $h$ is an  element of $ \mathcal{C} (F a, G b)$.
+ 这个伴随态射的对角部分是自然变换分量的完美候选。在实际操作中，这个极限：
+ \[  \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x) \]
+ 定义了从 $F$ 到 $G$ 的自然变换的集合。
 
-The diagonal parts of this profunctor are perfect candidates for the components of a natural transformation. In fact, the end:
-\[  \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x) \]
-defines a set of natural transformations from $F$ to $G$.
+ 为了证明这一点，让我们检查契条件。将我们的伴随态射代入，可以得到：
 
-To show this, let's check the wedge condition. Plugging in our profunctor, we get:
+ \[
+  \begin{tikzcd}
+   & \int_{x} \mathcal{C}(F x, G x)
+   \arrow[ld, "\pi_a"']
+   \arrow[rd, "\pi_b"]
+   \\
+   \mathcal{C} ( F a, G a )
+   \arrow[dr, "{(Ff \, \circ \, -)}"']
+   && \mathcal{C} \langle F b, G b \rangle
+   \arrow[dl, "{(- \, \circ\, Gf)}"]
+   \\
+   &  \mathcal{C} ( F a, G b )
+  \end{tikzcd}
+ \]
 
-\[
- \begin{tikzcd}
- & \int_{x} \mathcal{C}(F x, G x)
- \arrow[ld, "\pi_a"']
- \arrow[rd, "\pi_b"]
- \\
-  \mathcal{C} ( F a, G a )
- \arrow[dr, "{(Ff \, \circ \, -)}"']
- && \mathcal{C} \langle F b, G b \rangle
- \arrow[dl, "{(- \, \circ\, Gf)}"]
- \\
- &  \mathcal{C} ( F a, G b )
- \end{tikzcd}
-\]
+ 我们可以通过单例集实例化普遍条件，选择集合 $\int_{x} \mathcal{C}(F x, G x)$ 的一个单一元素：
 
-We can pick a single element of the set $\int_{x} \mathcal{C}(F x, G x)$ by instantiating the universal condition for the singleton set:
+ \[
+  \begin{tikzcd}
+   & 1
+   \arrow[d, dashed, "\alpha"]
+   \arrow[ddl, bend right, "\alpha_a"']
+   \arrow[ddr, bend left, "\alpha_b"]
+   \\
+   & \int_{x} \mathcal{C}(F x, G x)
+   \arrow[ld, "\pi_a"']
+   \arrow[rd, "\pi_b"]
+   \\
+   \mathcal{C} ( F a, G a )
+   \arrow[dr, "{(F f \, \circ \, -)}"']
+   && \mathcal{C} \langle F b, G b \rangle
+   \arrow[dl, "{(- \, \circ\, G f)}"]
+   \\
+   &  \mathcal{C} ( F a, G b )
+  \end{tikzcd}
+ \]
+ 我们从同态集合 $\mathcal{C} ( F a, G a )$ 中选择了分量 $\alpha_a$，从 $\mathcal{C} ( F b, G b )$ 中选择了分量 $\alpha_b$。契条件最终归结为：
+ \[ F f \circ \alpha_a = \alpha_b \circ G f \]
+ 对于任何 $f \colon a \to b$，这正是自然性条件。因此，极限中的任何元素 $\alpha$ 都自动是一个自然变换。
 
-\[
- \begin{tikzcd}
- & 1
- \arrow[d, dashed, "\alpha"]
-\arrow[ddl, bend right, "\alpha_a"']
- \arrow[ddr, bend left, "\alpha_b"]
- \\
- & \int_{x} \mathcal{C}(F x, G x)
- \arrow[ld, "\pi_a"']
- \arrow[rd, "\pi_b"]
- \\
-  \mathcal{C} ( F a, G a )
- \arrow[dr, "{(F f \, \circ \, -)}"']
- && \mathcal{C} \langle F b, G b \rangle
- \arrow[dl, "{(- \, \circ\, G f)}"]
- \\
- &  \mathcal{C} ( F a, G b )
- \end{tikzcd}
-\]
-We pick the component $\alpha_a$ from the hom-set $\mathcal{C} ( F a, G a )$ and the component $\alpha_b$ from $\mathcal{C} ( F b, G b )$. The wedge condition then boils down to:
-\[ F f \circ \alpha_a = \alpha_b \circ G f \]
-for any $f \colon a \to b$. This is exactly the naturality condition. So any element $\alpha$ of this end is automatically a natural transformation.
+ 自然变换的集合，或者说函子范畴中的同态集合，由极限给出：
+ \[ [\mathcal{C}, \mathcal{D}] (F, G) \cong \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x)\]
 
-The set of natural transformations, or the hom-set in the functor category, is thus given by the end:
-\[ [\mathcal{C}, \mathcal{D}] (F, G) \cong \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x)\]
+ 在 Haskell 中，这与我们之前的定义是一致的：
+ \begin{haskell}
+  type Natural f g = forall x. f x -> g x
+ \end{haskell}
 
-In Haskell, this is consistent with our earlier definition:
-\begin{haskell}
-type Natural f g = forall x. f x -> g x
-\end{haskell}
+ 正如我们前面讨论的那样，要构造一个 \hask{End}，我们必须提供一个以类型为参数的整个族的值。在这里，这些值就是多态函数的分量。
 
-As we discussed earlier, to construct an \hask{End} we have to give it a whole family of values parameterized by types. Here, these values are the components of a polymorphic function. 
+ \subsection{Limits as ends（极限作为余极限）}
+ 正如我们能够将余极限表示为余极限，我们也可以将极限表示为极限。同样地，我们定义了一个忽略其第一个参数的平凡伴随态射：
+ \begin{align*}
+  P \langle x, y \rangle &= F y \\
+  P \langle f, g \rangle &= F g
+ \end{align*}
+ 定义极限的普遍条件成为定义普遍锥体的条件：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ddl, bend right, "g_x"']
+   \arrow[ddr, bend left, "g_y"]
+   \arrow[d, dashed, "h"]
+   \\
+   & \int_x F x
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   F x
+   \arrow[dr, "F f"']
+   &&F y
+   \arrow[dl, dashed, "id_{F y}"]
+   \\
+   & F y
+  \end{tikzcd}
+ \]
+ 因此我们可以使用极限符号表示极限：
+ \[ \int_x F x = \text{lim} F \]
 
-\subsection{Limits as ends}
-Just like we were able to express colimits as coends, we can express limits as ends. As before, we define a trivial profunctor that ignores its first argument:
-\begin{align*}
- P \langle x, y \rangle &= F y \\
- P \langle f, g \rangle &= F g 
-\end{align*}
-The universal condition that defines an end becomes the definition of a universal cone:
-\[
- \begin{tikzcd}
- &d
- \arrow[ddl, bend right, "g_x"']
- \arrow[ddr, bend left, "g_y"]
- \arrow[d, dashed, "h"]
- \\
- & \int_x F x
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- F x
- \arrow[dr, "F f"']
- &&F y
- \arrow[dl, dashed, "id_{F y}"]
- \\
- & F y
- \end{tikzcd}
-\]
-We can thus use the end notation for limits:
-\[ \int_x F x = \text{lim} F \]
+ \begin{exercise}
+  一个乘积是从两个对象的范畴 $\Cat 2$ 到某个范畴的函子的极限。证明它可以被定义为一个余极限。提示：在 $\Cat 2$ 中没有非恒等态射。
+ \end{exercise}
 
-\begin{exercise}
-A product is a limit of a functor from a two-object category $\Cat 2$. Show that it can be defined as an end. Hint: There are no non-identity morphisms in $\Cat 2$.
-\end{exercise}
+ \section{Continuity of the Hom-Functor（同态函子的连续性）}
 
-\section{Continuity of the Hom-Functor}
+ 在范畴论中，如果一个函子 $F$ 保持极限（也就是说，它保持极限和余极限），我们就称它是\index{continuous functor}连续函子（continuous functor）。这意味着，如果你在源范畴中有一个图表，那么无论是先使用 $F$ 映射图表，然后在目标范畴中取极限，还是在源范畴中取极限然后使用 $F$ 映射这个极限，结果是一样的。
 
-In category theory, a functor $F$ is called \index{continuous functor}\emph{continuous} if it preserves limits (and co-continuous, if it preserves colimits). It means that, if you have a diagram in the source category, it doesn't matter if you first use $F$ to map the diagram and then take the limit in the target category, or take the limit in the source category and then use $F$ to map this limit. 
+ 同态函子是一个在其第二个参数中连续的函子的例子。由于乘积是最简单的极限示例，这意味着特别地：
+ \[ \mathcal{C}(x, a \times b) \cong \mathcal{C}(x, a) \times \mathcal{C}(x, b) \]
+ 左边将同态函子应用于乘积（一个跨越的极限）。右边映射图表，这里仅是一个对象对，并在目标范畴中取乘积（极限）。对于同态函子来说，目标范畴是 $\mathbf{Set}$，因此这只是一个笛卡尔乘积。通过乘积的普遍性质，这两边是同构的：映射到乘积中的映射是通过映射到两个对象的对定义的。
 
-The hom-functor is an example of a functor that is continuous in its second argument. Since a product is the simplest example of a limit, this means, in particular, that:
-\[ \mathcal{C}(x, a \times b) \cong \mathcal{C}(x, a) \times \mathcal{C}(x, b) \]
-The left hand side applies the hom-functor to the product (a limit of a span). The right hand side maps the diagram, here just a pair of objects, and takes the product (limit) in the target category. The target category for the hom-functor is $\mathbf{Set}$, so this is just a cartesian product. The two sides are isomorphic by the universal property of the product: the mapping into the product is defined by a pair of mappings into the two objects. 
+ 同态函子在第一个参数中的连续性是相反的：它将余极限映射到极限。再一次，最简单的余极限示例是和，因此我们有：
+ \[ \mathcal{C}(a + b, x) \cong \mathcal{C}(a, x) \times \mathcal{C}(b, x) \]
+ 这来自和的普遍性：从和映射出的映射由从两个对象映射出的对定义。
 
-Continuity of the hom-functor in the first argument is reversed: it maps colimits to limits. Again, the simplest example of a colimit is the sum, so we have:
-\[ \mathcal{C}(a + b, x) \cong \mathcal{C}(a, x) \times \mathcal{C}(b, x) \]
-This follows from the universality of the sum: a mapping out of the sum is defined by a pair of mapping out of the two objects.
+ 可以证明，极限可以表示为极限，余极限可以表示为余极限。因此，通过同态函子的连续性，我们总是可以将积分符号从同态集合中拉出。通过与乘积的类比，我们有极限的映射公式：
+ \[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D(d, P\langle a, a \rangle) \]
+ 通过与和的类比，我们有余极限的映射公式：
+ \[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D(P\langle a, a \rangle, d) \]
+ 请注意，在这两种情况下，右边的表达式是一个余极限。
 
-It can be shown that an end can be expressed as a limit, and a coend as a colimit. Therefore, by continuity of the hom-functor, we can always pull out the integral sign from inside a hom-set. By analogy with the product, we have the mapping-in formula for an end:
-\[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D(d, P\langle a, a \rangle) \]
-By analogy with the sum, we have a mapping-out formula for the coend:
-\[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D(P\langle a, a \rangle, d) \]
-Notice that, in both cases, the right-hand side is an end.
+ \section{Fubini Rule（富比尼法则）}
 
-\section{Fubini Rule}
+ 富比尼法则（Fubini rule）在微积分中指出了我们可以交换双重积分中积分顺序的条件。事实证明，我们也可以类似地交换双重极限和余极限的顺序。对于形式为 $P \colon \cat C \times \cat C^{op} \times \cat D \times \cat D^{op} \to \cat E$ 的函子，\index{Fubini rule}富比尼法则适用于以下表达式（只要它们存在）是同构的：
+ \[ \int_{c \colon \cat C} \int_{d \colon \cat D} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{d \colon \cat D} \int_{c \colon \cat C} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{\langle c, d \rangle \colon \cat C \times \cat D}  P\langle c, c \rangle \langle d, d \rangle \]
+ 在最后一个极限中，函子 $P$ 被重新解释为 $P \colon (\cat C  \times \cat D)^{op} \times (\cat C \times \cat D)\to \cat E$
 
-The Fubini rule in calculus states the conditions under which we can switch the order of integration in double integrals. It turns out that we can similarly switch the order of double ends and coends. The \index{Fubini rule}Fubini rule for ends works for functors of the form $P \colon \cat C \times \cat C^{op} \times \cat D \times \cat D^{op} \to \cat E$. The following expressions, as long as they exist, are isomorphic:
-\[ \int_{c \colon \cat C} \int_{d \colon \cat D} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{d \colon \cat D} \int_{c \colon \cat C} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{\langle c, d \rangle \colon \cat C \times \cat D}  P\langle c, c \rangle \langle d, d \rangle \]
-In the last end, the functor $P$ is reinterpreted as $P \colon (\cat C  \times \cat D)^{op} \times (\cat C \times \cat D)\to \cat E$
+ 类似的规则也适用于余极限。
 
-The analogous rule works for coends as well.
+ \section{Ninja Yoneda Lemma（Ninja 代数引理）}
 
-\section{Ninja Yoneda Lemma}
+ 在表达了自然变换的集合作为极限之后，我们现在可以重新写代数引理（Yoneda lemma）。这是原始的表述：
+ \[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
+ 在这里，$F$ 是一个从 $\mathcal{C}$ 到 $\mathbf{Set}$（一个反预层）的（协变）函子，同态函子 $\mathcal{C}(a, -)$ 也是。
+ 将自然变换的集合表达为极限，我们得到：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
 
-Having expressed the set of natural transformations as an end, we can now rewrite the Yoneda lemma. This is the original formulation:
-\[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
-Here, $F$ is a (covariant) functor from $\mathcal{C}$ to $\mathbf{Set}$ (a co-presheaf), and so is the hom-functor $\mathcal{C}(a, -)$. 
-Expressing the set of natural transformations as an end we get:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
+ 类似地，我们有一个适用于逆变函子（一个预层）$G$ 的代数引理：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
 
-Similarly, we have the Yoneda lemma for a contravariant functor (a presheaf) $G$:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
+ 这些版本的代数引理以极限的形式表达，通常半开玩笑地称之为 Ninja 代数引理。因为“积分变量”是显式的，这使得它们在复杂公式中更容易使用。
 
-These versions of the Yoneda lemma, expressed in terms of ends, are often half-jokingly called ninja-Yoneda lemmas. The fact that the ``integration variable'' is explicit makes them somewhat easier to use in complex formulas.
+ 还有一组对偶的 Ninja 共代数引理，它们使用余极限。对于协变函子，我们有：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
+ 对于逆变函子，我们有：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(a, x) \times G x \cong G a \]
 
-There is also a dual set of ninja co-Yoneda lemmas that use coends instead. For a covariant functor, we have:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
-and for the contravariant one we have:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(a, x) \times G x \cong G a \]
+ 物理学家可能会注意到这些公式与涉及狄拉克 $\delta$ 函数的积分的相似性——严格来说，$\delta$ 是一种分布。这就是为什么伴随态射有时被称为\index{distributors}分布器（distributors），遵循“分布器对于函子就像分布对于函数”的格言。工程师可能会注意到同态函子与冲激函数的相似性。
 
-Physicists might notice the similarity of these formulas to integrals involving the Dirac delta function---strictly speaking, a distribution. This is why profunctors are sometimes called \index{distributors}distributors, following the adage that ``distributors are to functors as distributions are to functions.'' Engineers might notice the similarity of the hom-functor to the impulse function.
+ 这种直觉通常被表达为我们可以在这个公式中执行“对 $x$ 的积分”，从而将被积函数中的 $x$ 替换为 $a$。
 
-This intuition is often expressed by saying that we can perform the ``integration over $x$'' in this formula, resulting in replacing $x$ with $a$ in the integrand $G x$. 
+ 如果 $\cat C$ 是一个离散范畴，余极限简化为和（余积），同态函子简化为单位矩阵（克罗内克 $\delta$）。共代数引理变为：
+ \[ \sum_j \delta_i^j v_j = v_i \]
+ 事实上，许多线性代数可以直接翻译为 $\Set$-值函子的理论。你可以经常将这些函子视为向量空间中的向量，其中同态函子形成一个基。伴随态射变为矩阵，余极限用于乘以这些矩阵，计算它们的迹，或将向量与矩阵相乘。
 
-If $\cat C$ is a discrete category, the coend reduces to the sum (coproduct), and the hom-functor reduces to the unit matrix (the Kronecker delta). The co-Yoneda lemma then becomes:
-\[ \sum_j \delta_i^j v_j = v_i \]
-In fact, a lot of linear algebra translates directly to the theory of $\Set$-valued functors. You may often view such functors as vectors in a vector space, in which hom-functors form a basis. Profunctors become matrices and coends are used to multiply such matrices, calculate their traces, or multiply vectors by matrices.
+ 在澳大利亚，伴随态射还有一个名称，叫做\index{bimodule}双模（bimodules）。这是因为通过伴随态射提升态射的行为类似于集上的左作用和右作用。
 
-Yet another name for profunctors, especially in Australia, is \index{bimodule}``bimodules.'' This is because the lifting of morphisms by a profunctor is somewhat similar to the left and right actions on sets. 
+ 我们现在将继续证明共代数引理，它相当具有指导意义，因为它使用了一些常见的技巧。最重要的是，我们依赖于代数引理的推论，它说，如果从两个对象映射到任意对象的所有映射是同构的，那么这两个对象本身是同构的。在我们的例子中，我们将考虑映射到任意集合 $S$ 的映射，并表明：
+ \[ \mathbf{Set} \left(\int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x, S \right) \cong
+ \Set (F a, S)\]
+ 使用同态函子的余连续性，我们可以将积分符号提取出来，将余极限替换为极限：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) \times F x, S \right) \]
+ 由于集合范畴是笛卡尔闭的，我们可以对积进行柯里化：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) , S^{F x} \right) \]
+ 我们现在可以使用代数引理“对 $x$ 进行积分”。结果是 $S^{F a}$。最后，在 $\mathbf{Set}$ 中，指数对象与同态集合同构：
+ \[S^{F a} \cong \mathbf{Set}(F a, S)\]
+ 由于 $S$ 是任意的，我们得出结论：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
 
-We'll now proceed with the proof of the co-Yoneda lemma, which is quite instructive, as it uses a few common tricks. Most importantly, we rely on the corollary of the Yoneda lemma, which says that, if all the mappings out from two objects to an arbitrary object are isomorphic, then the two objects are themselves isomorphic. In our case, we'll consider the mappings-out to an arbitrary set $S$ and show that:
-\[ \mathbf{Set} \left(\int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x, S \right) \cong 
-    \Set (F a, S)\]
-Using the co-continuity of the hom-functor, we can pull out the integral sign, replacing the coend with an end:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) \times F x, S \right) \]
-Since the category of sets is cartesian closed, we can curry the product:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) , S^{F x} \right) \]
-We can now use the Yoneda lemma to ``integrate over $x$.'' The result is $S^{F a}$. Finally, in $\mathbf{Set}$, the exponential object is isomorphic to the hom-set:
-\[S^{F a} \cong \mathbf{Set}(F a, S)\]
-Since $S$ was arbitrary, we conclude that:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
+ \begin{exercise}
+  证明共代数引理的逆变版本。
+ \end{exercise}
 
-\begin{exercise}
-Prove the contravariant version of the co-Yoneda lemma.
-\end{exercise}
+ \subsection{Yoneda lemma in Haskell（Haskell中的代数引理）}
 
-\subsection{Yoneda lemma in Haskell}
+ 我们已经在 Haskell 中实现了代数引理。我们现在可以将其以极限的形式重写。我们首先定义一个将在极限下使用的伴随态射。它的类型构造器接收一个函子 \hask{f} 和一个类型 \hask{a}，并生成一个在 \hask{x} 上逆变，在 \hask{y} 上协变的伴随态射：
+ \begin{haskell}
+  data Yo f a x y = Yo ((a -> x) -> f y)
+ \end{haskell}
+ 代数引理建立了这个伴随态射下的极限与通过对 \hask{a} 应用函子 \hask{f} 获得的类型之间的同构。这种同构通过一对函数来实现：
+ \begin{haskell}
+  yoneda :: Functor f => End (Yo f a) -> f a
+  yoneda (Yo g) = g id
 
-We've already seen the Yoneda lemma implemented in Haskell. We can now rewrite it in terms of an end. We start by defining a profunctor that will go under the end. Its type constructor takes a functor \hask{f} and a type \hask{a} and generates a profunctor that's contravariant in \hask{x} and covariant in \hask{y}:
-\begin{haskell}
-data Yo f a x y = Yo ((a -> x) -> f y)
-\end{haskell}
-The Yoneda lemma establishes the isomorphism between the end over this profunctor and the type obtained by acting with the functor  \hask{f} on \hask{a}. This isomorphism is witnessed by a pair of functions:
-\begin{haskell}
-yoneda :: Functor f => End (Yo f a) -> f a
-yoneda (Yo g) = g id
+  yoneda_1 :: Functor f => f a -> End (Yo f a)
+  yoneda_1 fa = Yo (\h -> fmap h fa)
+ \end{haskell}
 
-yoneda_1 :: Functor f => f a -> End (Yo f a)
-yoneda_1 fa = Yo (\h -> fmap h fa)
-\end{haskell}
+ 类似地，共代数引理使用下面这个伴随态射上的余极限：
+ \begin{haskell}
+  data CoY f a x y = CoY (x -> a) (f y)
+ \end{haskell}
+ 同构由一对函数表示。第一个函数说明，如果你有一个函数 \hask{x -> a} 和一个包含 \hask{x} 的函子，你就可以使用 \hask{fmap} 创建一个包含 \hask{a} 的函子：
+ \begin{haskell}
+  coyoneda :: Functor f => Coend (CoY f a) -> f a
+  coyoneda (Coend (CoY g fa)) = fmap g fa
+ \end{haskell}
+ 你可以做到这一点，而不需要知道存在类型 \hask{x} 的任何信息。
 
-Similarly, the co-Yoneda lemma uses a coend over the following profunctor:
-\begin{haskell}
-data CoY f a x y = CoY (x -> a) (f y)
-\end{haskell}
-The isomorphism is witnessed by a pair of functions. The first one says that if you have a function \hask{x -> a} and a functorful of \hask{x} then you can make a functorful of \hask{a} using the \hask{fmap}:
-\begin{haskell}
-coyoneda :: Functor f => Coend (CoY f a) -> f a
-coyoneda (Coend (CoY g fa)) = fmap g fa
-\end{haskell}
-You can do it without knowing anything about the existential type \hask{x}.
+ 第二个函数说明，如果你有一个包含 \hask{a} 的函子，你可以通过将它（连同恒等函数）注入到存在类型中创建一个余极限：
+ \begin{haskell}
+  coyoneda_1 :: Functor f => f a -> Coend (CoY f a)
+  coyoneda_1 fa = Coend (CoY id fa)
+ \end{haskell}
 
-The second says that if you have a functorful of \hask{a}, you can create a coend by injecting it (together with the identity function) into the existential type:
-\begin{haskell}
-coyoneda_1 :: Functor f => f a -> Coend (CoY f a)
-coyoneda_1 fa = Coend (CoY id fa)
-\end{haskell}
+ \section{Day Convolution（Day 卷积）}
 
-\section{Day Convolution}
+ 电气工程师熟悉卷积的概念。我们可以通过移位其中一个流并求其与另一个流的乘积和来卷积两个流：
+ \[ (f \star g)(x) = \int^{\infty}_{-\infty} f(y) g(x - y) dy \]
+ 这个公式几乎可以直接翻译为范畴论。我们可以从用余极限替换积分开始。问题是，我们不知道如何对对象进行减法操作。然而，我们确实知道如何在共笛卡尔范畴中对它们进行加法操作。
 
-Electrical engineers are familiar with the idea of convolution. We can convolve two streams by shifting one of them and summing its product with the other one: 
-\[ (f \star g)(x) = \int^{\infty}_{-\infty} f(y) g(x - y) dy \]
-This formula can be translated almost verbatim to category theory. We can start by replacing the integral with a coend. The problem is, we don't know how to subtract objects. We do however know how to add them, in a co-cartesian category. 
+ 请注意，这两个函数的参数之和等于 $x$。我们可以通过引入狄拉克 $\delta$ 函数或“冲激函数”（$\delta(a + b - x)$）来强制执行这一条件。在范畴论中，我们使用同态函子 $\cat C (a + b, x)$ 来实现同样的效果。因此，我们可以定义两个 $\Set$-值函子的卷积：
+ \[ (F \star G) x = \int^{a, b} \cat C (a + b, x) \times F a \times G b \]
+ 非正式地说，如果我们可以定义减法为共积的右伴随函数，我们可以写成：
+ \[ \int^{a, b} \cat C (a + b, x) \times F a \times G b \cong \int^{a, b} \cat C (a, b - x) \times F a \times G b \cong \int^b F (b - x) \times G b\]
 
-Notice that the sum of the arguments to the two functions is equal to $x$. We could enforce this condition by introducing the Dirac delta function or the ``impulse function,'' $\delta(a + b - x)$. In category theory we use the hom-functor $\cat C (a + b, x)$ to do the same. Thus we can define a convolution of two $\Set$-valued functors:
-\[ (F \star G) x = \int^{a, b} \cat C (a + b, x) \times F a \times G b \]
-Informally, if we could define subtraction as the right adjoint to coproduct, we'd write:
-\[ \int^{a, b} \cat C (a + b, x) \times F a \times G b \cong \int^{a, b} \cat C (a, b - x) \times F a \times G b \cong \int^b F (b - x) \times G b\]
+ 共积没有什么特别之处，因此，通常情况下，Day 卷积在具有张量积的任何单胚范畴中都可以定义：
+ \[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
 
-There is nothing special about coproduct so, in general, Day convolution is defined in any monoidal category with a tensor product:
-\[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+ 实际上，Day 卷积为一个单胚范畴 $(\cat C, \otimes, I)$ 赋予了 $[\cat C, \Set]$ 的共预层范畴一个单胚结构。简单来说，如果你可以在 $\cat C$ 中对对象进行乘法，你就可以在 $\cat C$ 上对 $\Set$-值函子进行乘法。
 
-In fact, Day convolution for a monoidal category $(\cat C, \otimes, I)$ endows the category of co-presheaves $[\cat C, \Set]$ with a monoidal structure. Simply said, if you can multiply objects in $\cat C$, you can multiply set-valued functors on $\cat C$.
+ 很容易证明 Day 卷积是关联的（最多是同构），并且 $\cat C(I, -)$ 作为单位对象。例如，我们有：
+ \[ (\cat C(I, -) \star G) x =  \int^{a, b} \cat C (a \otimes b, x) \times \cat C(I, a) \times G b \cong
+ \int^{b} \cat C (I \otimes b, x) \times  G b \cong G x\]
+ 因此，Day 卷积的单位是对单胚单位采取的 Yoneda 函子，这引出了一个字谜般的口号，“Day 的 ONE 是 ONE 的 Yoneda。”
 
-It's easy to check that Day convolution is associative (up to isomorphism) and that $\cat C(I, -)$ serves as the unit object. For instance, we have:
-\[ (\cat C(I, -) \star G) x =  \int^{a, b} \cat C (a \otimes b, x) \times \cat C(I, a) \times G b \cong 
-  \int^{b} \cat C (I \otimes b, x) \times  G b \cong G x\]
-So the unit of Day convolution is the Yoneda functor taken at monoidal unit, which lends itself to the anagrammatic slogan, ``ONE of DAY is the YONEDA of ONE.''
+ 如果张量积是对称的，那么相应的 Day 卷积也是对称的（最多是同构）。
 
-If the tensor product is symmetric, then the corresponding Day convolution is also symmetric (up to isomorphism).
+ 在笛卡尔闭范畴的特殊情况下，我们可以使用柯里化调整来简化公式：
+ \[ (F \star G) x = \int^{a, b} \cat C (a \times b, x) \times F a \times G b \cong  \int^{a, b} \cat C (a, x^b) \times F a \times G b \cong  \int^{b}  F (x^b) \times G b\]
 
-In the special case of a cartesian closed category, we can use the currying adjunction to simplify the formula:
-\[ (F \star G) x = \int^{a, b} \cat C (a \times b, x) \times F a \times G b \cong  \int^{a, b} \cat C (a, x^b) \times F a \times G b \cong  \int^{b}  F (x^b) \times G b\]
-
-In Haskell, the product-based Day convolution can be defined using an existential type:
-\begin{haskell}
-data Day f g x where
+ 在 Haskell 中，基于乘积的 Day 卷积可以使用存在类型来定义：
+ \begin{haskell}
+  data Day f g x where
   Day :: ((a, b) -> x) -> f a -> g b -> Day f g x
-\end{haskell}
+ \end{haskell}
 
-If we think of functors as containers of values, Day convolution tells us how to combine two different containers into one---given a function that combines two different values into one. 
+ 如果我们将函子视为值的容器，Day 卷积告诉我们如何将两个不同的容器组合成一个——只需给出一个将两个不同值组合成一个的函数。
 
-\begin{exercise}
-Define the \hask{Functor} instance for \hask{Day}.
-\end{exercise}
+ \begin{exercise}
+  为 \hask{Day} 定义 \hask{Functor} 实例。
+ \end{exercise}
 
-\begin{exercise}
-Implement the associator for \hask{Day}.
-\begin{haskell}
-assoc :: Day f (Day g h) x -> Day (Day f g) h x
-\end{haskell}
-\end{exercise}
+ \begin{exercise}
+  为 \hask{Day} 实现关联器。
+  \begin{haskell}
+   assoc :: Day f (Day g h) x -> Day (Day f g) h x
+  \end{haskell}
+ \end{exercise}
 
+ \subsection{Applicative functors as monoids（作为单胚的应用函子）}
 
-\subsection{Applicative functors as monoids}
- 
- We've seen before the definition of applicative functors as lax monoidal functors. It turns out that, just like monads, applicative functors can also be defined as monoids. 
- 
-Recall that a monoid is an object in a monoidal category. The category we're interested in is the co-presheaf category $[\cat C, \Set]$. If $\cat C$ is cartesian, then the co-presheaf category is monoidal with respect to Day convolution, with the unit object $\cat C(I, -)$. A monoid in this category is a functor $F$ equipped with two natural transformations that serve as unit and multiplication:
-\[ \eta \colon \cat C(I, -) \to F \]
-\[ \mu \colon F \star F \to F \]
-In particular, in a cartesian closed category where the unit is the terminal object, $\cat C(1, a)$ is isomorphic to $a$, and the component of the unit at $a$ is:
-\[ \eta_a \colon a \to F a \] 
-You may recognize this function as \hask{pure} in the definition of \hask{Applicative}.
-\begin{haskell}
-pure :: a -> f a
-\end{haskell}
+ 我们之前看到了应用函子作为松弛单胚函子的定义。事实证明，就像单子一样，应用函子也可以定义为单胚。
 
-Let's consider the set of natural transformations from which $\mu$ is taken. We'll write it as an end:
-\[ \mu \in \int_x \Set \big( (F \star F) x, F x \big) \]
-Pluggin in the definition of Day convolution, we get:
-\[ \int_x \Set \big( \int^{a, b} \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
-We can pull out the coend using co-continuity of the hom-functor:
-\[ \int_{x, a, b} \Set \big( \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
-We can then use the currying adjunction in $\Set$ to obtain:
-\[ \int_{x, a, b} \Set \big( \cat C (a \times b, x),  \Set( F a \times  F b, F x) \big) \]
-Finally, we apply the Yoneda lemma to perform the integration over $x$:
-\[ \int_{a, b}  \Set \big( F a \times  F b, F (a \times b) \big) \]
-The result is the set of natural transformations from which to select the second part of the lax monoidal functor:
-\begin{haskell}
-  (>*<) :: f a -> f b -> f (a, b)
-\end{haskell}
+ 回想一下，单胚是一个单胚范畴中的对象。我们感兴趣的范畴是 $[\cat C, \Set]$ 的共预层范畴。如果 $\cat C$ 是笛卡尔的，那么共预层范畴相对于 Day 卷积是单胚的，单位对象是 $\cat C(I, -)$。此范畴中的单胚是一个函子 $F$，它带有两个自然变换，分别作为单位和乘法：
+ \[ \eta \colon \cat C(I, -) \to F \]
+ \[ \mu \colon F \star F \to F \]
+ 特别是在一个笛卡尔闭范畴中，其中单位是终对象，$\cat C(1, a)$ 与 $a$ 同构，并且单位在 $a$ 处的分量是：
+ \[ \eta_a \colon a \to F a \]
+ 你可能会认出这个函数就是 \hask{pure} 在 \hask{Applicative} 定义中的作用。
+ \begin{haskell}
+  pure :: a -> f a
+ \end{haskell}
 
-\subsection{Free Applicatives}
+ 让我们考虑从中选择 $\mu$ 的自然变换的集合。我们将其写为一个极限：
+ \[ \mu \in \int_x \Set \big( (F \star F) x, F x \big) \]
+ 代入 Day 卷积的定义，我们得到：
+ \[ \int_x \Set \big( \int^{a, b} \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
+ 我们可以使用同态函子的余连续性来提取余极限：
+ \[ \int_{x, a, b} \Set \big( \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
+ 然后我们可以在 $\Set$ 中使用柯里化调整：
+ \[ \int_{x, a, b} \Set \big( \cat C (a \times b, x),  \Set( F a \times  F b, F x) \big) \]
+ 最后，我们应用代数引理来对 $x$ 进行积分：
+ \[ \int_{a, b}  \Set \big( F a \times  F b, F (a \times b) \big) \]
+ 结果是从中选择松弛单胚函子的第二部分的自然变换的集合：
+ \begin{haskell}
+ (>*<) :: f a -> f b -> f (a, b)
+ \end{haskell}
 
-We have just learned that applicative functors are monoids in the monoidal category:
-\[ ([\cat C, \Set], \cat C(I, -), \star) \]
-It's only natural to ask what a free monoid in that category is. 
+ \subsection{Free Applicatives（自由应用函子）}
 
-Just like we did with free monads, we'll construct a free applicative as the initial algebra, or the least fixed point of the list functor. Recall that the list functor was defined as:
-\[ \Phi_a x = 1 + a \otimes x \]
-In our case it becomes:
-\[ \Phi_F G = \cat C(I, -) + F \star G \]
-Its fixed point is given by the recursive formula:
-\[ A_F \cong \cat C(I, -) + F \star A_F\]
+ 我们刚刚了解到，应用函子是单胚范畴中的单胚：
+ \[ ([\cat C, \Set], \cat C(I, -), \star) \]
+ 自然会问，这个范畴中的自由单胚是什么。
 
-When translating this to Haskell, we observe that functions from the unit \hask{()->a} are isomorphic to elements of \hask{a}. 
+ 就像我们对自由单子所做的那样，我们将构造一个自由应用函子作为初始代数，或者列表函子的最小不动点。回想一下，列表函子被定义为：
+ \[ \Phi_a x = 1 + a \otimes x \]
+ 在我们的情况下，它变为：
+ \[ \Phi_F G = \cat C(I, -) + F \star G \]
+ 它的不动点由以下递归公式给出：
+ \[ A_F \cong \cat C(I, -) + F \star A_F\]
 
-Corresponding to the two addends in the definition of $A_F$, we get two constructors:
-\begin{haskell}
-data FreeA f x where
+ 将此公式翻译为 Haskell 时，我们观察到从单位 \hask{()->a} 到元素 \hask{a} 的函数是同构的。
+
+ 对应于 $A_F$ 定义中的两个加数，我们得到两个构造函数：
+ \begin{haskell}
+  data FreeA f x where
   DoneA :: x -> FreeA f x
   MoreA :: ((a, b) -> x) -> f a -> FreeA f b -> FreeA f x
-\end{haskell}
-I have inlined the definition of Day convolution:
-\begin{haskell}
-data Day f g x where
+ \end{haskell}
+ 我将 Day 卷积的定义内联化了：
+ \begin{haskell}
+  data Day f g x where
   Day :: ((a, b) -> x) -> f a -> g b -> Day f g x
-\end{haskell}
+ \end{haskell}
 
-The easiest way to show that \hask{FreeA f} is an applicative functor is to go through \hask{Monoidal}:
-\begin{haskell}
-class Monoidal f where
+ 最简单的方式展示 \hask{FreeA f} 是一个应用函子是通过 \hask{Monoidal}：
+ \begin{haskell}
+  class Monoidal f where
   unit  :: f ()
   (>*<) :: f a -> f b -> f (a, b)
-\end{haskell}
+ \end{haskell}
 
-Since \hask{FreeA f} is a generalization of a list, the \hask{Monoidal} instance for free applicative generalizes the idea of list concatenation. We do the pattern matching on the first list, resulting in two cases.
+ 由于 \hask{FreeA f} 是列表的泛化，自由应用函子的 \hask{Monoidal} 实例泛化了列表连接的概念。我们对第一个列表进行模式匹配，导致两个情况。
 
-In the first case, instead of an empty list we have \hask{DoneA x}. Prepending it to the second argument doesn't change the length of the list, but it modifies the type of the values stored in it. It pairs each of them with \hask{x}:
-\begin{haskell}
-  (DoneA x) >*< fry = fmap (x,) fry
-\end{haskell}
+ 在第一种情况下，代替一个空列表，我们有 \hask{DoneA x}。将其附加到第二个参数中不会改变列表的长度，但会修改存储在其中的值的类型。它将每个值与 \hask{x} 配对：
+ \begin{haskell}
+ (DoneA x) >*< fry = fmap (x,) fry
+ \end{haskell}
 
-The second case is a ``list'' whose head \hask{fa} is a functorful of \hask{a}'s, and the tail \hask{frb} is of the type \hask{FreeA f b}. The two are glued using a function \hask{abx :: (a, b) -> x}. 
-\begin{haskell}
-  (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
-\end{haskell}
-To produce the result, we concatenate the two tails using the recursive call to \hask{>*<} and prepend \hask{fa} to it. To glue this head to the new tail we have to provide a function that re-associates the pairs:
-\begin{haskell}
-reassoc :: ((a, b)-> x) -> (a, (b, y)) -> (x, y)
-reassoc abx (a, (b, y)) = (abx (a, b), y)
-\end{haskell}
+ 第二种情况是一个列表，其头部 \hask{fa} 是 \hask{a} 的函子，尾部 \hask{frb} 是类型 \hask{FreeA f b}。这两者通过一个函数 \hask{abx :: (a, b) -> x} 粘合在一起。
+ \begin{haskell}
+ (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
+ \end{haskell}
+ 为了生成结果，我们使用对 \hask{>*<} 的递归调用连接两个尾部，并将 \hask{fa} 附加到它上面。为了将这个头部粘合到新的尾部，我们必须提供一个重新关联这些对的函数：
+ \begin{haskell}
+  reassoc :: ((a, b)-> x) -> (a, (b, y)) -> (x, y)
+  reassoc abx (a, (b, y)) = (abx (a, b), y)
+ \end{haskell}
 
-The complete instance is thus:
-\begin{haskell}
-instance Functor f => Monoidal (FreeA f) where
+ 完整的实例如下：
+ \begin{haskell}
+  instance Functor f => Monoidal (FreeA f) where
   unit = DoneA ()
   (DoneA x) >*< fry = fmap (x,) fry
   (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
-\end{haskell}
+ \end{haskell}
 
-Once we have the \hask{Monoidal} instance, it's straightforward to produce the \hask{Applicative} instance:
-\begin{haskell}
-instance Functor f => Applicative (FreeA f) where
+ 一旦我们有了 \hask{Monoidal} 实例，就很容易生成 \hask{Applicative} 实例：
+ \begin{haskell}
+  instance Functor f => Applicative (FreeA f) where
   pure a = DoneA a
   ff <*> fx = fmap app (ff >*< fx)
-  
-app :: (a -> b, a) -> b
-app (f, a) = f a
-\end{haskell}
 
-\begin{exercise}
-Define the \hask{Functor} instance for the free applicative.
-\end{exercise}
+  app :: (a -> b, a) -> b
+  app (f, a) = f a
+ \end{haskell}
+
+ \begin{exercise}
+  为自由应用函子定义 \hask{Functor} 实例。
+ \end{exercise}
 
 
 \section{The Bicategory of Profunctors}
