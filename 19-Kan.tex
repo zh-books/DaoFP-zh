@@ -719,97 +719,104 @@ for the $\sigma$ that was defined above. Hint: draw the corresponding string dia
 
 由于每个子模都可以从某种伴随中得出，因此\emph{每个子模都是某种伴随的密度余子模}。
 
-\subsection{Codensity monad in Haskell}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{tikz-cd}
+\usepackage{haskell}
 
-Translating the codensity monad to Haskell, we get:
- \begin{haskell}
+\begin{document}
+
+\subsection{Codensity Monad in Haskell (Haskell中的Codensity Monad)}
+
+将codensity monad翻译为Haskell，我们得到以下代码：
+\begin{haskell}
 newtype Codensity f c = C (forall d. (c -> f d) -> f d)
- \end{haskell}
- together with the extractor:
- \begin{haskell}
+\end{haskell}
+以及提取函数：
+\begin{haskell}
 runCodensity :: Codensity f c -> forall d. (c -> f d) -> f d
 runCodensity (C h) = h
- \end{haskell}
-This looks very similar to a continuation monad. In fact it turns into continuation monad if we choose \hask{f} to be the identity functor. We can think of \hask{Codensity} as taking a callback \hask{(c -> f d)} and calling it when the result of type \hask{c} becomes available. 
-
-Here's the monad instance:
- \begin{haskell}
-instance Monad (Codensity f) where
-  return x = C (\k -> k x)
-  m >>= kl = C (\k -> runCodensity m (\a -> runCodensity (kl a) k))
- \end{haskell}
- Again, this is almost exactly like the continuation monad:
- \begin{haskell}
-instance Monad (Cont r) where
-  return x = Cont (\k -> k x)
-  m >>= kl = Cont (\k -> runCont m (\a -> runCont (kl a) k))
 \end{haskell}
-This is why \hask{Codensity} has the performance advantages of the continuation passing style. Since it nests continuations ``inside out,'' it can be used to optimize long chains of binds that are produced by \hask{do} blocks. 
+这看起来非常类似于一个continuation monad。事实上，如果我们将\hask{f}选为identity函子，它就变成了continuation monad。我们可以将\hask{Codensity}看作是接受一个回调\hask{(c -> f d)}，并在类型为\hask{c}的结果可用时调用它。
 
-This property is especially important when working with free monads, which accumulate binds in tree-like structures. When we finally interpret a free monad, these accumulated binds require traversing the ever-growing tree. For every bind, the traversal starts at the root. Compare this with the earlier example of reversing a list, which was optimized by accumulating functions in a FIFO queue. The codensity monad offers the same kind of performance improvement.
+下面是monad实例：
+\begin{haskell}
+instance Monad (Codensity f) where
+return x = C (\k -> k x)
+m >>= kl = C (\k -> runCodensity m (\a -> runCodensity (kl a) k))
+\end{haskell}
+同样，这几乎与continuation monad完全相同：
+\begin{haskell}
+instance Monad (Cont r) where
+return x = Cont (\k -> k x)
+m >>= kl = Cont (\k -> runCont m (\a -> runCont (kl a) k))
+\end{haskell}
+这就是为什么\hask{Codensity}具有continuation passing style的性能优势。由于它将continuations“内部嵌套”，它可以用来优化由\hask{do}块生成的长链binds。
+
+这种特性在处理free monads时尤为重要，free monads在树状结构中积累binds。当我们最终解释一个free monad时，这些积累的binds需要遍历不断增长的树。对于每一个bind，遍历从根节点开始。将此与前面反转列表的示例进行比较，该示例通过在FIFO队列中累积函数进行了优化。codensity monad提供了同样类型的性能提升。
 
 \begin{exercise}
-Implement the \hask{Functor} instance for \hask{Codensity}.
+实现\hask{Codensity}的\hask{Functor}实例。
 \end{exercise}
 \begin{exercise}
-Implement the \hask{Applicative} instance for \hask{Codensity}.
+实现\hask{Codensity}的\hask{Applicative}实例。
 \end{exercise}
 
-\section{Left Kan extension}
+\section{Left Kan Extension (左Kan扩展)}
 
-Just like the right Kan extension was defined as a \emph{right} adjoint to functor pre-compositon, the left Kan extension is defined as the \emph{left} adjoint to functor pre-composition:
+就像右Kan扩展被定义为函子预组合的\emph{右}伴随一样，左Kan扩展被定义为函子预组合的\emph{左}伴随：
 \[ [\cat B, \cat C](\text{Lan}_P F , G) \cong  [\cat E, \cat C] (F, G \circ P) \]
- (There are also adjoints to \emph{post}-composition: they are called Kan lifts.)
+（还有\emph{后}组合的伴随：它们被称为Kan lifts。）
 
-Alternatively, $\text{Lan}_P F$ can be defined as a functor equipped with a natural transformation called the unit:
+另一种定义$\text{Lan}_P F$的方法是将其定义为一个函子，并带有称为单位元的自然变换：
 \[ \eta \colon F \to \text{Lan}_P F \circ P \]
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, blue, bend right, "\text{Lan}_P F"']
- \arrow[Rightarrow, blue, "\eta",  from=ID]
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat E
+\arrow[rr, "F", "" {name=ID, below} ]
+\arrow[d, bend right, "P"']
+&& \cat C
+\\
+\cat B
+\arrow[urr, blue, bend right, "\text{Lan}_P F"']
+\arrow[Rightarrow, blue, "\eta",  from=ID]
+\end{tikzcd}
 \]
-Notice that the direction of the unit of the left Kan extension is opposite of that of the counit of the right Kan extension.
+注意，左Kan扩展的单位元方向与右Kan扩展的余单位元方向相反。
 
-The pair $(\text{Lan}_P F, \eta)$ is universal, meaning that, for any other pair $(G, \alpha)$, where 
-\[ \alpha \colon F \to G \circ P\] 
+$(\text{Lan}_P F, \eta)$是普遍的，这意味着，对于任何其他对$(G, \alpha)$，其中
+\[ \alpha \colon F \to G \circ P\]
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, red, bend right, "G"']
- \arrow[Rightarrow, red, "\alpha",  from=ID]
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat E
+\arrow[rr, "F", "" {name=ID, below} ]
+\arrow[d, bend right, "P"']
+&& \cat C
+\\
+\cat B
+\arrow[urr, red, bend right, "G"']
+\arrow[Rightarrow, red, "\alpha",  from=ID]
+\end{tikzcd}
 \]
-there is a unique mapping $\sigma \colon \text{Lan}_P F \to G$ 
+存在唯一的映射$\sigma \colon \text{Lan}_P F \to G$
 \[
 \begin{tikzcd}[row sep=2cm, column sep=2cm]
 \cat E  \ar[d, "P"', "" {name=P}]
-            \ar[r, "F", ""  {name=F, below, near start, bend right}]
+\ar[r, "F", ""  {name=F, below, near start, bend right}]
 &
 \cat C
 \\
 \cat B
-    \ar[ur, red, bend left, "G", "" {name=G, below}]
-    \ar[ur, blue, bend right, "\text{Lan}_P F"', "" {name=Lan}]
+\ar[ur, red, bend left, "G", "" {name=G, below}]
+\ar[ur, blue, bend right, "\text{Lan}_P F"', "" {name=Lan}]
 \arrow[Rightarrow, "\sigma", from=Lan, to=G]
 \end{tikzcd}
 \]
-that factorizes $\alpha$:
+将$\alpha$因式分解：
 \[ \alpha = (\sigma \circ P) \cdot \eta \]
-Again, the direction of $\sigma$ is reversed with respect to the right Kan extension.
+再次强调，$\sigma$的方向与右Kan扩展相反。
 
-Using string diagrams, we can picture the universal condition as:
+使用弦图，我们可以将普遍条件表示为：
 \[
 \begin{tikzpicture}
 \def \dx {0.7}
@@ -892,103 +899,103 @@ Using string diagrams, we can picture the universal condition as:
 \end{tikzpicture}
 \]
 
-This establishes the one-to-one mapping between two sets of natural transformations. For every $\alpha$ on the left there is a unique $\sigma$ on the right:
+这确立了两个自然变换集合之间的一一映射。对于左边的每一个$\alpha$，右边都有一个唯一的$\sigma$：
 \[  [\cat E, \cat C] (F, G \circ P) \cong [\cat B, \cat C](\text{Lan}_P F , G)  \]
 
 
-\subsection{Left Kan extension as a coend}
+\subsection{Left Kan Extension as a Coend (左Kan扩展作为共端)}
 
-Recall the ninja co-Yoneda lemma. For every co-presheaf $F$, we have:
+回想一下忍者co-Yoneda引理。对于每一个co-presheaf $F$，我们有：
 \[ F b \cong \int^{c} \cat B(c, b) \times F c \]
-The left Kan extension generalizes this formula to:
+左Kan扩展将此公式推广为：
 \[ (\text{Lan}_P F)\, b \cong \int^{e} \cat B (P e, b) \times F e \]
-For a general functor $F \colon \cat E \to \cat C$, we replace the product with the \index{copower}copower:
+对于一般的函子$F \colon \cat E \to \cat C$，我们将乘积替换为\index{copower}copower：
 \[ (\text{Lan}_P F)\, b \cong \int^{e} \cat B(P e, b) \cdot F e \]
 
-As long as the coend in question exists, we can prove this formula by considering a mapping out to some functor $G$. We represent the set of natural transformations as the end over $b$:
+只要所涉及的共端存在，我们可以通过考虑映射到某个函子$G$的映射来证明这一公式。我们将自然变换集合表示为对$b$的端：
 \[\int_b \cat C \big(\int^e \cat B(P e, b) \cdot F e, G b\big) \]
-Using cocontinuity, we pull out the coend, turning it into an end:
+利用余小连续性，我们将共端拉出，变成一个端：
 \[\int_b \int_e \cat C \big(\cat B(P e, b) \cdot F e, G b\big) \]
-and we plug in the definition of co-power:
+然后我们代入copower的定义：
 \[\int_b \int_e \cat C \big(\cat B(P e, b), \cat C (F e, G b)\big) \]
-We can now use the Yoneda lemma to integrate over $b$, replacing $b$ with $P e$:
+现在我们可以使用Yoneda引理对$b$进行积分，将$b$替换为$P e$：
 \[\int_e \cat C (F e, G (P e))\big) \cong  [\cat E, \cat C] (F, G \circ P) \]
-This indeed gives us the left adjoint to functor pre-composition:
+这确实为我们提供了函子预组合的左伴随：
 \[ [\cat B, \cat C](\text{Lan}_P F , G) \cong  [\cat E, \cat C] (F, G \circ P) \]
 
-In $\Set$, the co-power decays to a cartesian product, so we get a simpler formula:
+在$\Set$中，copower衰减为笛卡尔积，所以我们得到一个更简单的公式：
 \[ (\text{Lan}_P F)\, b \cong \int^{e} \cat B (P e, b) \times F e \]
 
- Notice that, if the functor $P$ has a right adjoint, let's call it $P^{-1}$:
- \[ \cat B(P e , b) \cong \cat E(e, P^{-1} b) \]
- we can use the ninja co-Yoneda lemma to get:
- \[  (\text{Lan}_P F)\, b \cong (F \circ P^{-1}) b \]
- thus reinforcing the intuition that a Kan extension inverts $P$ and follows it with $F$.
- 
-\subsection{Left Kan extension in Haskell}
+注意，如果函子$P$有一个右伴随，我们称之为$P^{-1}$：
+\[ \cat B(P e , b) \cong \cat E(e, P^{-1} b) \]
+我们可以使用忍者co-Yoneda引理来得到：
+\[  (\text{Lan}_P F)\, b \cong (F \circ P^{-1}) b \]
+从而进一步增强了Kan扩展逆转$P$并跟随$F$的直观理解。
 
-When translating the formula for the left Kan extension to Haskell, we replace the coend with the existential type. Symbolically:
- \begin{haskell}
-type Lan p f b = exists e. (p e -> b, f e)
- \end{haskell}
-This is how we would encode the existential using \hask{GADT}'s:
- \begin{haskell}
-data Lan p f b where
-    Lan :: (p e -> b) -> f e -> Lan p f b
- \end{haskell}
- 
- The unit of the left Kan extension is a natural transformation from the functor \hask{f} to the composition of \hask{(Lan p f)} after \hask{p}:
- \begin{haskell}
-unit :: forall p f e'. 
-    f e' -> Lan p f (p e')
-\end{haskell}
-To implement the unit, we start with a value of the type \hask{(f e')}. We have to come up with some type \hask{e}, a function \hask{p e -> p e'}, and a value of the type \hask{(f e)}. The obvious choice is to pick \hask{e = e'} and use the identity at \hask{(p e')}:
+\subsection{Left Kan Extension in Haskell (Haskell中的左Kan扩展)}
+
+当我们将左Kan扩展的公式翻译为Haskell时，我们将共端替换为存在类型。符号表示：
 \begin{haskell}
-unit fe = Lan id fe 
+type Lan p f b = exists e. (p e -> b, f e)
+\end{haskell}
+这是我们如何使用\hask{GADT}编码存在性的方式：
+\begin{haskell}
+data Lan p f b where
+Lan :: (p e -> b) -> f e -> Lan p f b
 \end{haskell}
 
-The computational power of the left Kan extension lies in its universal property. Given a functor \hask{g} and a natural transformation from \hask{f} to the composition of \hask{g} after \hask{p}:
+左Kan扩展的单位元是一个从函子\hask{f}到\hask{(Lan p f)}之后\hask{p}组合的自然变换：
+\begin{haskell}
+unit :: forall p f e'.
+f e' -> Lan p f (p e')
+\end{haskell}
+为了实现单位元，我们从一个类型为\hask{(f e')}的值开始。我们必须得出某个类型\hask{e}、一个函数\hask{p e -> p e'}，以及一个类型为\hask{(f e)}的值。显然的选择是取\hask{e = e'}并在\hask{(p e')}上使用身份：
+\begin{haskell}
+unit fe = Lan id fe
+\end{haskell}
+
+左Kan扩展的计算能力体现在其普遍性上。给定一个函子\hask{g}以及从\hask{f}到\hask{g}之后\hask{p}组合的自然变换：
 \begin{haskell}
 type Alpha p f g = forall e. f e -> g (p e)
 \end{haskell}
-there is a unique natural transformation $\sigma$ from the corresponding left Kan extension to \hask{g}:
+存在一个唯一的自然变换$\sigma$，从对应的左Kan扩展到\hask{g}：
 \begin{haskell}
 sigma :: Functor g => Alpha p f g -> forall b. (Lan p f b -> g b)
 sigma alpha (Lan pe_b fe) = fmap pe_b (alpha fe)
 \end{haskell}
-that factorizes $\alpha$ through the unit $\eta$:
+它通过单位元$\eta$将$\alpha$因式分解：
 \[ \alpha = (\sigma \circ P) \cdot \eta \]
-The whiskering of $\sigma$ means instantiating it at \hask{b = p e}, so the factorization of $\alpha$ is implemented as:
+$\sigma$的whiskering意味着将其在\hask{b = p e}处实例化，因此$\alpha$的因式分解实现如下：
 \begin{haskell}
 factorize :: Functor g => Alpha p f g -> f e -> g (p e)
 factorize alpha = sigma alpha . unit
 \end{haskell}
- \begin{exercise}
-Implement the \hask{Functor} instance for \hask{Lan}.
+\begin{exercise}
+实现\hask{Lan}的\hask{Functor}实例。
 \end{exercise}
 
-\subsection{Colimits as Kan extensions}
+\subsection{Colimits as Kan Extensions (作为Kan扩展的余极限)}
 
-Just like limits can be defined as right Kan extensions, colimits can be defined as left Kan extension. 
+就像极限可以定义为右Kan扩展一样，余极限可以定义为左Kan扩展。
 
-We start with an indexing category $\cat J$ that defines the shape of the colimit. The functor $D$ selects this shape in the target category $\cat C$. The apex of the cocone is selected by a functor from the terminal single-object category $\Cat 1$. The natural transformation defines a cocone from $D$ to $X$:
+我们从一个定义了余极限形状的索引范畴$\cat J$开始。函子$D$在目标范畴$\cat C$中选择了这个形状。圆锥的顶点由来自终端单对象范畴$\Cat 1$的函子选择。自然变换定义了从$D$到$X$的圆锥：
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat J
- \arrow[rr, "D", "" {name=ID, below} ]
- \arrow[d, bend right, "!"']
- && \cat C
- \\
- \Cat 1
-  \arrow[urr, bend right, "X"']
- \arrow[Rightarrow, "\gamma",  from=ID]
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat J
+\arrow[rr, "D", "" {name=ID, below} ]
+\arrow[d, bend right, "!"']
+&& \cat C
+\\
+\Cat 1
+\arrow[urr, bend right, "X"']
+\arrow[Rightarrow, "\gamma",  from=ID]
+\end{tikzcd}
 \]
 
-Here's an illustrative example of a simple shape consisting of three objects and three morphisms (not counting identities). The object $x$ is the image of the single object $*$ under the functor $X$:
+这里是一个由三个对象和三条态射（不包括身份态射）组成的简单形状的示例。对象$x$是单个对象$*$在函子$X$下的像：
 \[
- \begin{tikzcd}
-1 
+\begin{tikzcd}
+1
 \arrow[rr, red]
 \arrow[rd, red]
 && 2
@@ -998,10 +1005,10 @@ Here's an illustrative example of a simple shape consisting of three objects and
 \\
 \\
 & *
- \end{tikzcd}
- \qquad
- \begin{tikzcd}
-D 1 
+\end{tikzcd}
+\qquad
+\begin{tikzcd}
+D 1
 \arrow[rr, red]
 \arrow[rd, red]
 \arrow[dddr, "\gamma_1"']
@@ -1014,94 +1021,90 @@ D 1
 \\
 \\
 &x
- \end{tikzcd}
- \]
-The colimit is the universal cocone, which is given by the left Kan extension of $D$ along the functor $!$:
+\end{tikzcd}
+\]
+余极限是普遍圆锥，由沿函子$!$的$D$的左Kan扩展给出：
 \[ \text{Colim}\; D = \text{Lan}_! D \]
 
+\subsection{Right Adjoint as a Left Kan Extension (作为左Kan扩展的右伴随)}
 
-\subsection{Right adjoint as a left Kan extension}
-
-We've seen that, when we have an adjunction $L \vdash R$, the left adjoint is related to the right Kan extension. Dually, if the right adjoint exists, it can be expressed as the left Kan extension of the identity functor:
+我们已经看到，当我们有一个伴随$L \vdash R$时，左伴随与右Kan扩展有关。对偶地，如果存在右伴随，它可以表示为identity函子的左Kan扩展：
 \[ R \cong \text{Lan}_L \text{Id} \]
-Conversely, if the left Kan extension of identity exists and it preserves the functor $L$:
+反过来，如果存在identity的左Kan扩展并且它保持函子$L$：
 \[ L \circ \text{Lan}_L \text{Id} \cong \text{Lan}_L L \]
-than $\text{Lan}_L \text{Id}$ is the right adjoint of $L$. The left Kan extension of $L$ along itself is called the \index{density comonad} density comonad.
+那么$\text{Lan}_L \text{Id}$是$L$的右伴随。$L$沿其自身的左Kan扩展称为\index{density comonad}密度共模子（density comonad）。
 
-
-
-The unit of Kan extension is the same as the unit of the adjunction:
+Kan扩展的单位元与伴随的单位元相同：
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat C
- \arrow[rr, "\text{Id}", "" {name=ID, below} ]
- \arrow[d, bend right, "L"']
- && \cat C
- \\
- \cat D
-  \arrow[urr, bend right, "R"']
- \arrow[Rightarrow, "\eta",  from=ID]
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat C
+\arrow[rr, "\text{Id}", "" {name=ID, below} ]
+\arrow[d, bend right, "L"']
+&& \cat C
+\\
+\cat D
+\arrow[urr, bend right, "R"']
+\arrow[Rightarrow, "\eta",  from=ID]
+\end{tikzcd}
 \]
-The proof of universality is analogous to the one for the right Kan extension.
+普遍性的证明与右Kan扩展的证明类似。
 
 \begin{exercise}
-Implement the \hask{Comonad} instance for the density comonad:
+为密度共模子实现\hask{Comonad}实例：
 \begin{haskell}
 data Density f c where
-   D :: (f d -> c) -> f d -> Density f c
+D :: (f d -> c) -> f d -> Density f c
 \end{haskell}
 \end{exercise}
 
-\subsection{Day convolution as a Kan extension}
+\subsection{Day Convolution as a Kan Extension (Day卷积作为Kan扩展)}
 
-We've seen Day convolution defined as a tensor product in the category of co-presheaves over a monoidal category $\cat C$:
+我们已经看到Day卷积在单对象范畴$\cat C$上的co-presheaves的范畴中定义为张量积：
 \[ (F \star G) c = \int^{a, b} \cat C (a \otimes b, c) \times F a \times G b \]
-Co-presheaves, that is functors in $[\cat C, \Set]$, can also be tensored using an \index{external tensor product}\emph{external tensor product}. An external product of two objects, instead of producing an object in the same category, picks an object in a different category. In our case, the product of two functors ends up in the category of co-presheaves on $\cat C \times \cat C$:
+co-presheaves，即$[\cat C, \Set]$中的函子，也可以使用\index{external tensor product}外部张量积（external tensor product）进行张量。两个对象的外部积并不在同一个范畴中生成一个对象，而是在不同的范畴中选择一个对象。在我们的情况下，两个函子的积最终在$\cat C \times \cat C$上的co-presheaves的范畴中：
 \[ \bar{\otimes} \colon [\cat C, \Set] \times [\cat C, \Set] \to [\cat C \times \cat C, \Set] \]
-The product of two co-presheaves acting on a pair of objects in $\cat C \times \cat C$, is given by the formula:
+两个co-presheaves作用于$\cat C \times \cat C$中的一对对象，其公式为：
 \[ (F \bar{\otimes} G)\langle a, b \rangle = F a \times G b \]
 
-It turns out that Day convolution of two functors can be expressed as a left Kan extension of their external product along the tensor product in $\cat C$:
+事实证明，两个函子的Day卷积可以表示为沿$\cat C$中的张量积的外部积的左Kan扩展：
 \[ F \star G \cong \text{Lan}_{\otimes} (F \bar{ \otimes } G) \]
-Pictorially:
+图解如下：
 \[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat C \times \cat C
- \arrow[rr, "F \bar{\otimes} G", "" {name=ID, below} ]
- \arrow[d, bend right, "\otimes"']
- && \Set
- \\
- \cat C
-  \arrow[urr, bend right, "\text{Lan}_{\otimes} (F \bar{ \otimes } G)"']
- \end{tikzcd}
+\begin{tikzcd} [row sep=1cm, column sep=1cm]
+\cat C \times \cat C
+\arrow[rr, "F \bar{\otimes} G", "" {name=ID, below} ]
+\arrow[d, bend right, "\otimes"']
+&& \Set
+\\
+\cat C
+\arrow[urr, bend right, "\text{Lan}_{\otimes} (F \bar{ \otimes } G)"']
+\end{tikzcd}
 \]
 
-Indeed, using the coend formula for the left Kan extension we get:
+确实，使用左Kan扩展的共端公式我们得到：
 \[ (\text{Lan}_{\otimes} (F \bar{ \otimes } G)) c \cong \int^{\langle a, b\rangle} \cat C ( a \otimes b, c) \cdot (F \bar{ \otimes } G)\langle a, b\rangle\]
 
 \[ \cong \int^{\langle a, b\rangle} \cat C ( a \otimes b, c) \cdot (F a \times G  b) \]
-Since the two functors are $\Set$-valued, the co-power decays into the cartesian product:
+由于两个函子都是$\Set$值的，copower衰减为笛卡尔积：
 \[ \cong \int^{\langle a, b\rangle} \cat C ( a \otimes b, c) \times F a \times G  b \]
-and reproduces the formula for Day convolution.
+并重现了Day卷积的公式。
 
-\section{Useful Formulas}
+\section{Useful Formulas (有用的公式)}
 \begin{itemize}
-\item Co-power:
+\item Co-power (copower)：
 \[ \cat C (A \cdot b, c) \cong \Set \big( A, \cat C (b, c)\big) \]
-\item Power:
+\item Power (幂)：
 \[ \cat C (b, A \pitchfork c) \cong \Set  \big(A, \cat C(b, c)\big) \]
-\item Right Kan extension:
+\item Right Kan Extension (右Kan扩展)：
 \[ [\cat E, \cat C](G \circ P, F) \cong [\cat B, \cat C](G, \text{Ran}_P F) \]
- \[ (\text{Ran}_P F) b \cong \int_e \cat B (b, P e) \pitchfork F e \]
-\item Left Kan extension:
+\[ (\text{Ran}_P F) b \cong \int_e \cat B (b, P e) \pitchfork F e \]
+\item Left Kan Extension (左Kan扩展)：
 \[ [\cat B, \cat C](\text{Lan}_P F , G) \cong  [\cat E, \cat C] (F, G \circ P) \]
 \[ (\text{Lan}_P F)\, b \cong \int^{e} \cat B(P e, b) \cdot F e \]
-\item Right Kan extension in $\Set$:
-  \[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
-\item Left Kan extension in $\Set$:
+\item Right Kan Extension in $\Set$ ($\Set$中的右Kan扩展)：
+\[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
+\item Left Kan Extension in $\Set$ ($\Set$中的左Kan扩展)：
 \[ (\text{Lan}_P F) b \cong \int^{e} \cat B (P e, b) \times F e \]
-
 
 \end{itemize}
 
