@@ -1155,347 +1155,347 @@
 
  存在透镜的组合公式太复杂，以至于在实际操作中难以使用。在下一章中，我们将看到使用 Tambara 模块表示透镜的另一种表示法，其中组合只是函数的组合。
 
-\section{Lenses and Fibrations}
+ \section{透镜与纤维丛 (Lenses and Fibrations)}
 
-There is an alternative view of lenses using the language of fiber bundles. A projection $p$ that defines a fibration can be seen as ``decomposing'' the bundle $E$ into fibers. 
+ 透镜可以通过纤维丛的语言来理解。定义纤维化的投影 $p$ 可以被看作将丛 $E$ 分解为纤维的过程。
 
-In this view, $p$ plays the role of \hask{get}:
-\[ p \colon E \to B \]
-The base $B$ represents the type of the focus and $E$ represents the type of the composite from which that focus can be extracted.
+ 在这种观点下，$p$ 扮演了 \hask{get} 的角色：
+ \[ p \colon E \to B \]
+ 其中 $B$ 代表焦点的类型，而 $E$ 代表可以从中提取出焦点的复合类型。
 
-The other part of the lens, \hask{set}, is a mapping: 
-\[ q \colon E \times B \to E \]
-Let's see how we can interpret it using fibrations.
-\subsection{Transport law}
+ 透镜的另一部分 \hask{set} 是一个映射：
+ \[ q \colon E \times B \to E \]
+ 让我们看看如何使用纤维化解释它。
 
-We interpret $q$ as ``transporting'' an element of the bundle $E$ to a new fiber. The new fiber is specified by an element of $B$.
+ \subsection{传输定律 (Transport Law)}
 
-This property of the transport is expressed by the get/set lens law, or the \emph{transport} law, that says that ``you get what you set'':
-\begin{haskell}
-get (set s a) = a
-\end{haskell}
-We say that $q(s, a)$ transports $s$ to a new fiber over $a$:
+ 我们将 $q$ 解释为将丛 $E$ 的一个元素“传输”到新纤维的操作。新纤维由 $B$ 的一个元素指定。
 
-\[
-\begin{tikzpicture}
+ 传输的这种特性由 get/set 透镜定律，即\emph{传输}定律来表达，它说明“你得到的就是你设置的”：
+ \begin{haskell}
+  get (set s a) = a
+ \end{haskell}
+ 我们说 $q(s, a)$ 将 $s$ 传输到 $a$ 上的新纤维：
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.1}; % s
-\def\yfss{1.6}; % s'
-\def\yft{2.2}; % fiber top
+ \[
+  \begin{tikzpicture}
 
-\def\dx{0.9};
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.1}; % s
+   \def\yfss{1.6}; % s'
+   \def\yft{2.2}; % fiber top
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2*\dx};
-\def\xbr{\xbl + 4*\dx};
+   \def\dx{0.9};
+
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2*\dx};
+   \def\xbr{\xbl + 4*\dx};
 
 
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\draw (\xbl, \yb) -- (\xbr, \yb);
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
 
-\filldraw[black] (\xbm, \yfs) circle (1 pt);
-\node[left] at (\xbm, \yfs) {$s$};
-\draw[blue] (\xbm, \yfs) edge[->, bend left] (\xbmr, \yfss);
-\filldraw[black] (\xbmr, \yfss) circle (1 pt);
-\node[right] at (\xbmr, \yfss) {$q(s, a)$};
+   \filldraw[black] (\xbm, \yfs) circle (1 pt);
+   \node[left] at (\xbm, \yfs) {$s$};
+   \draw[blue] (\xbm, \yfs) edge[->, bend left] (\xbmr, \yfss);
+   \filldraw[black] (\xbmr, \yfss) circle (1 pt);
+   \node[right] at (\xbmr, \yfss) {$q(s, a)$};
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
 
-\end{tikzpicture}
-\]
+  \end{tikzpicture}
+ \]
 
-We can rewrite this law in terms of $p$ and $q$:
-\[ p \circ q = \pi_2 \]
-where $\pi_2$ is the second projection from the product.
+ 我们可以用 $p$ 和 $q$ 来重新表达这个定律：
+ \[ p \circ q = \pi_2 \]
+ 其中 $\pi_2$ 是从乘积到第二个分量的投影。
 
-Equivalently, we can represent it as a commuting diagram:
-\[
- \begin{tikzcd}
- E \times B
- \arrow[dd, "\varepsilon \times id"']
- \arrow[rd, "q"]
- \\
- & E
- \arrow[dl, "p"]
- \\
- B
+ 等价地，我们可以将其表示为一个交换图：
+ \[
+  \begin{tikzcd}
+   E \times B
+   \arrow[dd, "\varepsilon \times id"']
+   \arrow[rd, "q"]
+   \\
+   & E
+   \arrow[dl, "p"]
+   \\
+   B
   \end{tikzcd}
-\]
-Here, instead of using the projection $\pi_2$, I used a comonoidal counit $\varepsilon$:
-\[ \varepsilon \colon E \to 1 \]
-followed by the unit law for the product. Using a comonoid makes it easier to generalize this construction to a tensor product in a monoidal category. 
+ \]
+ 在这里，我使用了一个余单模余单元 $\varepsilon$ 而不是投影 $\pi_2$：
+ \[ \varepsilon \colon E \to 1 \]
+ 然后应用乘积的单位定律。使用余单模使得这个结构更容易推广到单模范畴中的张量积。
 
-\subsection{Identity law}
-Here's the set/get law or the \emph{identity} law. It says that ``nothing changes if you set what you get'':
-\begin{haskell}
-set s (get  s) = s
-\end{haskell}
-We can write it in terms of a comonoidal comultiplication:
-\[ \delta \colon E \to E \times E \]
-The set/get law requires the following composite to be an identity:
-\[ E \xrightarrow{\delta} E \times E \xrightarrow{id \times p} E \times B \xrightarrow{q} E \]
-Here's the illustration of this law in a bundle:
-\[
-\begin{tikzpicture}
+ \subsection{恒等定律 (Identity Law)}
+ 这是 set/get 定律或\emph{恒等}定律。它说明“如果你设置的是你得到的东西，那么不会发生任何变化”：
+ \begin{haskell}
+  set s (get  s) = s
+ \end{haskell}
+ 我们可以用一个余单模的余乘法来表达：
+ \[ \delta \colon E \to E \times E \]
+ set/get 定律要求以下组合是一个恒等映射：
+ \[ E \xrightarrow{\delta} E \times E \xrightarrow{id \times p} E \times B \xrightarrow{q} E \]
+ 下图展示了这个定律在丛中的体现：
+ \[
+  \begin{tikzpicture}
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.1}; % s
-\def\yfss{1.6}; % s'
-\def\yft{2.8}; % fiber top
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.1}; % s
+   \def\yfss{1.6}; % s'
+   \def\yft{2.8}; % fiber top
 
-\def\dx{0.9};
+   \def\dx{0.9};
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2*\dx};
-\def\xbr{\xbl + 4*\dx};
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2*\dx};
+   \def\xbr{\xbl + 4*\dx};
 
 
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\draw (\xbl, \yb) -- (\xbr, \yb);
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
 
-\node at (\xbmr, \yfss) (s) {};
-\draw[->,shorten <=6pt,shorten >=6pt, blue](s.west)arc(360:0:0.7);
-\filldraw[black] (\xbmr, \yfss) circle (1 pt);
-\node[left] at (\xbmr, \yfss) {$s = $};
-\node[right] at (\xbmr, \yfss) {$q(s, a)$};
+   \node at (\xbmr, \yfss) (s) {};
+   \draw[->,shorten <=6pt,shorten >=6pt, blue](s.west)arc(360:0:0.7);
+   \filldraw[black] (\xbmr, \yfss) circle (1 pt);
+   \node[left] at (\xbmr, \yfss) {$s = $};
+   \node[right] at (\xbmr, \yfss) {$q(s, a)$};
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
 
-\end{tikzpicture}
-\]
+  \end{tikzpicture}
+ \]
 
-\subsection{Composition law}
+ \subsection{组合定律 (Composition Law)}
 
-Finally, here's the set/set law, or the \emph{composition} law. It says that ``the last set wins'':
-\begin{haskell}
-set (set s a) a' = set s a'
-\end{haskell}
-and the corresponding commuting diagram:
-\[
- \begin{tikzcd}
- E \times B \times B
- \arrow[d, "id \times \varepsilon \times id"']
- \arrow[rd, "q \times id"]
- \\
- E \times B
- \arrow[d, "q"']
- & E \times B
- \arrow[dl, "q "]
- \\
- E
+ 最后，这是 set/set 定律或\emph{组合}定律。它说明“最后设置的值获胜”：
+ \begin{haskell}
+  set (set s a) a' = set s a'
+ \end{haskell}
+ 对应的交换图如下：
+ \[
+  \begin{tikzcd}
+   E \times B \times B
+   \arrow[d, "id \times \varepsilon \times id"']
+   \arrow[rd, "q \times id"]
+   \\
+   E \times B
+   \arrow[d, "q"']
+   & E \times B
+   \arrow[dl, "q "]
+   \\
+   E
   \end{tikzcd}
-\]
-Again, to get rid of the middle $B$, I used the counit rather than a projection from the product.
+ \]
+ 同样地，为了去除中间的 $B$，我使用了余单元而不是从乘积中的投影。
 
-This is what the set/set law looks like in a bundle:
-\[
-\begin{tikzpicture}
+ 这就是 set/set 定律在丛中的样子：
+ \[
+  \begin{tikzpicture}
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.3}; % s'
-\def\yfss{2.1}; % s''
-\def\yft{2.8}; % fiber top
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.3}; % s'
+   \def\yfss{2.1}; % s''
+   \def\yft{2.8}; % fiber top
 
-\def\dx{1};
+   \def\dx{1};
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2.5*\dx};
-\def\xbmrr{\xbl + 4*\dx};
-\def\xbr{\xbl + 7.2*\dx};
-
-
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
-
-\draw (\xbl, \yb) -- (\xbr, \yb);
-
-\draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
-\draw[dashed] (\xbmrr, \yfb) -- (\xbmrr, \yft); %fiber
-
-\filldraw[black] (\xbm, \yfss) circle (1 pt);
-\node[left] at (\xbm, \yfss) {$s$};
-
-\draw[red] (\xbm, \yfss)  edge[->, bend left]  (\xbmr, \yfs);
-
-\filldraw[black] (\xbmr, \yfs) circle (1 pt);
-\node[right] at (\xbmr, \yfs) {$q(s, a)$};
-\node[left] at (\xbmr, \yfs) {$s' =$};
-
-\draw[blue] (\xbmr, \yfs) edge[->, bend left] (\xbmrr, \yfss);
-
-\filldraw[black] (\xbmrr, \yfss) circle (1 pt);
-\node[right] at (\xbmrr, \yfss) {$q(a', s') = q(a', s)$};
-
-\draw (\xbm, \yfss) edge[->, bend left] (\xbmrr, \yfss);
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2.5*\dx};
+   \def\xbmrr{\xbl + 4*\dx};
+   \def\xbr{\xbl + 7.2*\dx};
 
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\filldraw[black] (\xbmrr, \yb) circle (1 pt);
-\node[below] at (\xbmrr, \yb) {$a'$};
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[above] at (\xbmrr, \yft) {$p^{-1} a'$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbmrr, \yfb) -- (\xbmrr, \yft); %fiber
 
-\end{tikzpicture}
-\]
+   \filldraw[black] (\xbm, \yfss) circle (1 pt);
+   \node[left] at (\xbm, \yfss) {$s$};
 
-\subsection{Type-changing lens}
+   \draw[red] (\xbm, \yfss)  edge[->, bend left]  (\xbmr, \yfs);
 
-A type-changing lens generalizes transport to act between bundles. We have to define a whole family of bundles. We start with a category $\cat A$ whose objects define the types that we will use for the foci of our lens. 
+   \filldraw[black] (\xbmr, \yfs) circle (1 pt);
+   \node[right] at (\xbmr, \yfs) {$q(s, a)$};
+   \node[left] at (\xbmr, \yfs) {$s' =$};
 
-We construct the set $B$ as the combined set of all elements of all focus types. $B$ is fibrated over $\cat A$---the projection $\pi$ sending an element of $B$ to its corresponding type. You may think of $B$ as the set of objects of the coslice category $1/ \cat A$.
+   \draw[blue] (\xbmr, \yfs) edge[->, bend left] (\xbmrr, \yfss);
 
-The bundle of bundles $E$ is a set that's fibered over $B$ with the projection $p$. Since $B$ itself is fibered over $\cat A$, $E$ is transitively fibered over $\cat A$, with the composite projection $\pi \circ p$. It's this coarser fibration that splits $E$ into a family of bundles. Each of these bundles corresponds to a different type of the composite for a given focus type. A type-changing lens will move between these bundles. 
+   \filldraw[black] (\xbmrr, \yfss) circle (1 pt);
+   \node[right] at (\xbmrr, \yfss) {$q(a', s') = q(a', s)$};
 
-\[
-\begin{tikzpicture}
-\def\xl{-3};
-\def\xr{0};
-\def\yb{0};
-\def\yt{2};
+   \draw (\xbm, \yfss) edge[->, bend left] (\xbmrr, \yfss);
 
-\def\dy{0.4};
-\def\dx{0.5};
 
-\def\a{(\xl, \yb)};
-\def\b{(\xr, \yb)};
-\def\c{(\xl, \yt)};
-\def\d {(\xr, \yt)};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
+
+   \filldraw[black] (\xbmrr, \yb) circle (1 pt);
+   \node[below] at (\xbmrr, \yb) {$a'$};
+
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[above] at (\xbmrr, \yft) {$p^{-1} a'$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
+
+  \end{tikzpicture}
+ \]
+
+ \subsection{类型转换透镜 (Type-changing Lens)}
+
+ 类型转换透镜将传输泛化为在丛之间操作。我们必须定义一整个丛的家族。我们从一个范畴 $\cat A$ 开始，其对象定义了我们将用于透镜焦点的类型。
+
+ 我们构造集合 $B$ 作为所有焦点类型的所有元素的联合集合。$B$ 在 $\cat A$ 上纤维化——投影 $\pi$ 将 $B$ 的一个元素发送到其对应的类型。你可以将 $B$ 视为余切范畴 $1/ \cat A$ 的对象集合。
+
+ 丛的丛 $E$ 是一个在 $B$ 上纤维化的集合，其投影为 $p$。由于 $B$ 本身在 $\cat A$ 上纤维化，$E$ 在 $\cat A$ 上传递地纤维化，投影为复合投影 $\pi \circ p$。正是这种更粗的纤维化将 $E$ 分解为一个丛的家族。每个丛对应于给定焦点类型的复合类型的不同类型。类型转换透镜将在这些丛之间移动。
+
+ \[
+  \begin{tikzpicture}
+   \def\xl{-3};
+   \def\xr{0};
+   \def\yb{0};
+   \def\yt{2};
+
+   \def\dy{0.4};
+   \def\dx{0.5};
+
+   \def\a{(\xl, \yb)};
+   \def\b{(\xr, \yb)};
+   \def\c{(\xl, \yt)};
+   \def\d {(\xr, \yt)};
 
 % _a second plane
-\def\aa{(\xl + \dx, \yb + \dy)};
-\def\ba{(\xr + \dx, \yb + \dy)};
-\def\ca{(\xl + \dx, \yt + \dy)};
-\def\da{(\xr + \dx, \yt + \dy)};
+   \def\aa{(\xl + \dx, \yb + \dy)};
+   \def\ba{(\xr + \dx, \yb + \dy)};
+   \def\ca{(\xl + \dx, \yt + \dy)};
+   \def\da{(\xr + \dx, \yt + \dy)};
 
 % _b third plane
-\def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
-\def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
-\def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
-\def\db{(\xr + 2*\dx, \yt + 2*\dy)};
+   \def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
+   \def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
+   \def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
+   \def\db{(\xr + 2*\dx, \yt + 2*\dy)};
 
 % shifted walls
-\def\yshift{-1.5};
-\def\xshift{1.5};
+   \def\yshift{-1.5};
+   \def\xshift{1.5};
 
 % E
-\draw \a rectangle \d;
-\draw[draw=black!40!green] \aa rectangle \da;
-\draw \ab rectangle \db;
+   \draw \a rectangle \d;
+   \draw[draw=black!40!green] \aa rectangle \da;
+   \draw \ab rectangle \db;
 
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
+   \draw \a -- \ab;
+   \draw \b -- \bb;
+   \draw \d -- \db;
+   \draw \c -- \cb;
 
-\node[above] at \cb {$E$};
+   \node[above] at \cb {$E$};
 
 % B
 % rebase yb (bottom)
-\def\yb{\yshift}
+   \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{0};
+   \def\xr{0};
 
-\draw \a -- \b;
-\draw \ab -- \bb;
-\draw[red] \aa -- \ba;
+   \draw \a -- \b;
+   \draw \ab -- \bb;
+   \draw[red] \aa -- \ba;
 % diagonal
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
-\node[above] at \ab {$B$};
+   \draw \a -- \ab;
+   \draw \b -- \bb;
+   \draw \d -- \db;
+   \draw \c -- \cb;
+   \node[above] at \ab {$B$};
 
 
 % A
 % rebase yb (bottom)
-\def\yb{\yshift}
+   \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{\xshift};
+   \def\xr{\xshift};
 
-\draw \b -- \bb;
-\node[right] at \bb {$\cat A$};
-\filldraw[black] \ba circle (1 pt);
+   \draw \b -- \bb;
+   \node[right] at \bb {$\cat A$};
+   \filldraw[black] \ba circle (1 pt);
 
 %projections
 
-\draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$\pi$} (\xshift +\dx, \yshift + \dy);
+   \draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$\pi$} (\xshift +\dx, \yshift + \dy);
 
-\draw[draw=black!40!green, shorten >=0.1cm, ->] (0 - \dx, 0 + 3 * \dy) -- node[below right]{$p$} (0 - \dx, \yshift + \dy);
+   \draw[draw=black!40!green, shorten >=0.1cm, ->] (0 - \dx, 0 + 3 * \dy) -- node[below right]{$p$} (0 - \dx, \yshift + \dy);
 
-\node[right] at (0 - \dx, 0 + 3 * \dy) {$s$};
-\filldraw[black] (0 - \dx, 0 + 3 * \dy) circle (1 pt);
-
-
-\end{tikzpicture}
-\]
-
-The projection $p$ takes an element $s \in E$ and produces an element $b \in B$ whose type is given by $\pi b$. This is the generalization of \hask{get}. 
-
-The transport $q$, which corresponds to \hask{set}, takes an element $s \in E$ and an element $b \in B$ and produces a new element $t \in E$. The important observation is that $s$ and $t$ may belong to different sub-bundles of $E$.
+   \node[right] at (0 - \dx, 0 + 3 * \dy) {$s$};
+   \filldraw[black] (0 - \dx, 0 + 3 * \dy) circle (1 pt);
 
 
-The transport satisfies the following laws:
+  \end{tikzpicture}
+ \]
 
-The get/set law (transport):
+ 投影 $p$ 将元素 $s \in E$ 转换为一个元素 $b \in B$，其类型由 $\pi b$ 给出。这是 \hask{get} 的推广。
 
-\[ p (q (b, s)) = b \]
+ 对应于 \hask{set} 的传输 $q$ 接收一个元素 $s \in E$ 和一个元素 $b \in B$，并生成一个新元素 $t \in E$。重要的是要注意，$s$ 和 $t$ 可以属于 $E$ 的不同子丛。
 
-The set/get law (identity):
+ 传输满足以下定律：
 
-\[ q ( p (s), s) = s \]
+ get/set 定律（传输）：
 
-The set/set law (composition):
+ \[ p (q (b, s)) = b \]
 
-\[ q (c, q (b, s)) = q (c, s) \]
+ set/get 定律（恒等）：
 
-\section{Important Formulas}
-This is a handy (co-)end calculus cheat-sheet.
-\begin{itemize}
-\item Continuity of the hom-functor:
-\[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D \left(d, P\langle a, a \rangle \right) \]
-\item Co-continuity of the hom-functor:
-\[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D \left( P\langle a, a \rangle, d \right) \]
-\item Ninja Yoneda:
-\[ \int_{x} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
-\item Ninja co-Yoneda:
-\[ \int^{x} \mathcal{C}(x, a) \times F x \cong F a \]
-\item Ninja Yoneda for contravariant functors (presheaves):
-\[ \int_{x} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
-\item Ninja co-Yoneda for contravariant functors:
-\[ \int^{x} \mathcal{C}(a, x) \times G x \cong G a \]
-\item Day convolution:
-\[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+ \[ q ( p (s), s) = s \]
 
-\end{itemize}
+ set/set 定律（组合）：
+
+ \[ q (c, q (b, s)) = q (c, s) \]
+
+ \section{重要公式 (Important Formulas)}
+ 这是一个便捷的（共）端计算速查表。
+ \begin{itemize}
+  \item Hom-函子连续性 (Continuity of the hom-functor):
+  \[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D \left(d, P\langle a, a \rangle \right) \]
+  \item Hom-函子共连续性 (Co-continuity of the hom-functor):
+  \[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D \left( P\langle a, a \rangle, d \right) \]
+  \item 忍者 Yoneda (Ninja Yoneda):
+  \[ \int_{x} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
+  \item 忍者 Co-Yoneda (Ninja co-Yoneda):
+  \[ \int^{x} \mathcal{C}(x, a) \times F x \cong F a \]
+  \item 反变函子（预层）的忍者 Yoneda (Ninja Yoneda for contravariant functors):
+  \[ \int_{x} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
+  \item 反变函子（预层）的忍者 Co-Yoneda (Ninja co-Yoneda for contravariant functors):
+  \[ \int^{x} \mathcal{C}(a, x) \times G x \cong G a \]
+  \item Day 卷积 (Day Convolution):
+  \[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+
+ \end{itemize}
 
 
 \end{document}
