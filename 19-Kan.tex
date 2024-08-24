@@ -1,421 +1,417 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{18}
+ \setcounter{chapter}{18}
 
-\chapter{Kan Extensions}
+ \chapter{Kan Extensions（Kan扩展）}
 
-If category theory keeps raising levels of abstraction it's because it's all about discovering patterns. Once patterns are discovered, it's time to study patterns formed by these patterns, and so on. 
+ 如果说范畴论不断提高抽象层次，是因为它的核心在于发现模式。一旦发现了模式，接下来就是研究这些模式所形成的更高层次的模式，依此类推。
 
-We've seen the same recurring concepts described more and more tersely at higher and higher levels of abstraction. 
+ 我们已经看到相同的概念在更高的抽象层次上以越来越简洁的方式重复出现。
 
-For instance, we first defined the product using a universal construction. Then we saw that the spans in the definition of the product were natural transformations. That led to the interpretation of the product as a limit. Then we saw that we could define it using adjunctions. We were able to combine it with the coproduct in one terse formula:
-\[ (+) \dashv \Delta \dashv (\times) \]
-Lao Tzu said: ``If you want to shrink something, you must first allow it to expand."
+ 例如，我们最初使用泛范构造（universal construction）定义了积（product）。然后我们看到在积的定义中涉及的跨度（span）实际上是自然变换（natural transformations）。这引导我们将积解释为极限（limit）。接着我们又看到，可以用伴随（adjunctions）来定义它。我们最终能够用一个简洁的公式将积与余积（coproduct）结合起来：
+ \[ (+) \dashv \Delta \dashv (\times) \]
+ 老子说过：“将欲取之，必先与之。”
 
-Kan extensions raise the level of abstraction even higher. Mac Lane said: ``All concepts are Kan extensions.''
+ Kan扩展进一步提高了抽象的层次。Mac Lane 曾说：“所有的概念都是 Kan 扩展。”
 
-\section{Closed Monoidal Categories}
+ \section{Closed Monoidal Categories（闭单态范畴）}
 
-We've seen how a function object can be defined as the right adjoint to the categorical product:
-\[ \cat C (a \times b, c) \cong \cat C (a, [b, c]) \]
-Here I used the alternative notation $[b, c]$ for the internal hom---the exponential $c^b$. 
+ 我们已经看到，如何将一个函数对象定义为范畴积（categorical product）的右伴随（right adjoint）：
+ \[ \cat C (a \times b, c) \cong \cat C (a, [b, c]) \]
+ 这里我使用了一个替代符号 $[b, c]$ 来表示内部同态（internal hom），即指数（exponential）$c^b$。
 
-An adjunction between two functors can be thought of as one being the pseudo-inverse of the other. They don't compose to identity, but their composition \emph{is} related to the identity functor through unit and counit. For instance, if you squint hard enough, the counit of the currying adjunction:
-\[ \varepsilon_{b c} \colon [b, c] \times b \to c \]
-suggests that $[b, c]$ embodies, in a sense, the inverse of multiplication. It plays a similar role as $c/b$ in:
-\[ c/b \times b = c \]
+ 两个函子的伴随关系可以被认为是其中一个函子的伪逆（pseudo-inverse）。它们的组合并不形成恒等映射，但它们的组合通过单位（unit）和余单位（counit）与恒等函子相关联。例如，如果你仔细观察，柯里化（currying）伴随的余单位：
+ \[ \varepsilon_{b c} \colon [b, c] \times b \to c \]
+ 表明$[b, c]$在某种意义上体现了乘法的逆。它的作用类似于除法中的$c/b$：
+ \[ c/b \times b = c \]
 
-In a typical categorical manner, we may ask the question: What if we replace the product with something else? The obvious thing, replacing it with a coproduct, doesn't work (thus we have no analog of subtraction). But maybe there are other well-behaved binary operations that have a right adjoint.
+ 以典型的范畴论方式，我们可能会问：如果我们将积替换为其他东西会怎样？显而易见，将它替换为余积（coproduct）是行不通的（因此我们没有减法的类比）。但也许还有其他行为良好的二元运算可以有一个右伴随。
 
-A natural setting for generalizing a product is a monoidal category with a tensor product $\otimes$ and a unit object $I$. If we have an adjunction:
-\[ \cat C (a \otimes b, c) \cong \cat C (a, [b, c]) \]
-we'll call the category \emph{closed monoidal}. In a typical categorical abuse of notation, unless it leads to confusion, we'll use the same symbol (a pair of square brackets)  for the monoidal internal hom as we did for the cartesian hom. There is an alternative \index{lollipop}lollipop notation for the right adjoint to the tensor product:
-\[ \cat C (a \otimes b, c) \cong \cat C (a, b \multimap c) \]
-It is often used in the context of \index{linear types}linear types.
+ 一种自然的推广积的方式是使用具有张量积（tensor product）$\otimes$ 和单位对象 $I$ 的单态范畴（monoidal category）。如果存在一个伴随关系：
+ \[ \cat C (a \otimes b, c) \cong \cat C (a, [b, c]) \]
+ 我们将该范畴称为闭单态（closed monoidal）范畴。除非引起混淆，典型的范畴论中滥用符号，我们将继续使用相同的符号（方括号）来表示单态内部同态（monoidal internal hom），就像我们在笛卡尔积（cartesian hom）中所做的那样。还有一种替代的符号表示法，称为棒棒糖（lollipop）符号，用来表示张量积的右伴随：
+ \[ \cat C (a \otimes b, c) \cong \cat C (a, b \multimap c) \]
+ 它通常在\emph{线性类型}（linear types）的上下文中使用。
 
-The definition of the internal hom works well for a symmetric monoidal category. If the tensor product is not symmetric, the adjunction defines a \emph{left closed} monoidal category. The left internal hom is adjoint to the ``post-multiplication'' functor $(- \otimes b)$. The right-closed structure is defined as the right adjoint to the ``pre-multiplication'' functor $(b \otimes -)$. If both are defined than the category is called \index{bi-closed monoidal category}\emph{bi-closed}.
+ 内部同态的定义适用于对称单态范畴（symmetric monoidal category）。如果张量积不是对称的，伴随关系定义了\emph{左闭单态}范畴。左内部同态（left internal hom）是“后乘法”函子$(- \otimes b)$的右伴随。右闭结构则定义为“前乘法”函子$(b \otimes -)$的右伴随。如果两者都定义了，那么该范畴称为\emph{双闭单态范畴}（bi-closed monoidal category）。
 
+ \subsection{Internal Hom for Day Convolution（Day 卷积的内部同态）}
 
-\subsection{Internal hom for Day convolution}
+ 作为一个例子，考虑具有Day卷积（Day convolution）的协预层（co-presheaves）范畴中的对称单态结构：
+ \[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+ 我们正在寻找伴随关系：
+ \[ [\cat C, \Set] (F \star G, H) \cong  [\cat C, \Set] (F, [G, H]_{\text{Day}}) \]
+ 左边的自然变换可以写成$x$上的一个末端（end）：
+ \[ \int_x \Set \big( \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b, H x \big) \]
+ 我们可以利用共连续性（co-continuity）将共末端（coend）提取出来：
+ \[ \int_{x, a, b} \Set \big( \cat C (a \otimes b, x) \times F a \times G b, H x \big) \]
+ 接下来我们使用$\Set$中的柯里化伴随（currying adjunction）：
+ \[ \int_{x, a, b} \Set \big( F a, [\cat C (a \otimes b, x)  \times G b, H x] \big) \]
+ 最后，我们使用同态集的连续性（continuity of the hom-set）将两个末端移到同态集（hom-set）的内部：
+ \[ \int_{a} \Set \big( F a, \int_{x, b} [\cat C (a \otimes b, x)  \times G b, H x] \big) \]
+ 我们发现Day卷积的右伴随由以下给出：
+ \[ \big([G, H]_{\text{Day}}\big) a = \int_{x, b} \big[\cat C(a \otimes b, x), [G b, H x]\big] \cong \int_b [G b, H (a \otimes b)] \]
+ 最后的转换是应用$\Set$中的Yoneda引理（Yoneda lemma）。
 
-As an example, consider the symmetric monoidal structure in the category of co-presheaves with Day convolution:
-\[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
-We are looking for the adjunction:
-\[ [\cat C, \Set] (F \star G, H) \cong  [\cat C, \Set] (F, [G, H]_{\text{Day}}) \]
-The natural transformation on the left-hand side can be written as an end over $x$:
-\[ \int_x \Set \big( \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b, H x \big) \]
-We can use co-continuity to pull out the coends:
-\[ \int_{x, a, b} \Set \big( \cat C (a \otimes b, x) \times F a \times G b, H x \big) \]
-We can then use the currying adjunction in $\Set$ (the square brackets stand for the internal hom in $\Set$):
-\[ \int_{x, a, b} \Set \big( F a, [\cat C (a \otimes b, x)  \times G b, H x] \big) \]
-Finally, we use the continuity of the hom-set to move the two ends inside the hom-set:
-\[ \int_{a} \Set \big( F a, \int_{x, b} [\cat C (a \otimes b, x)  \times G b, H x] \big) \]
-We discover that the right adjoint to Day convolution is given by:
-\[ \big([G, H]_{\text{Day}}\big) a = \int_{x, b} \big[\cat C(a \otimes b, x), [G b, H x]\big] \cong \int_b [G b, H (a \otimes b)]\]
-The last transformation is the application of the Yoneda lemma in $\Set$.
-\begin{exercise}
-Implement the internal hom for Day convolution in Haskell. Hint: Use a type alias.
-\end{exercise}
-\begin{exercise}
-Implement witnesses to the adjunction:
-\begin{haskell}
-ltor :: (forall a. Day f g a -> h a) -> (forall a. f a -> DayHom g h a)
-rtol :: Functor h => 
-  (forall a. f a -> DayHom g h a) -> (forall a. Day f g a -> h a)
-\end{haskell}
-\end{exercise}
+ \begin{exercise}
+  实现Day卷积的内部同态在Haskell中的实现。提示：使用类型别名。
+ \end{exercise}
 
-\subsection{Powering and co-powering}
+ \begin{exercise}
+  实现以下伴随关系的见证：
+  \begin{haskell}
+   ltor :: (forall a. Day f g a -> h a) -> (forall a. f a -> DayHom g h a)
+   rtol :: Functor h =>
+   (forall a. f a -> DayHom g h a) -> (forall a. Day f g a -> h a)
+  \end{haskell}
+ \end{exercise}
 
-In the category of sets, the internal hom (the function object, or the exponential) is isomorphic to the external hom (the set of morphisms between two objects):
-\[ C^B \cong Set(B, C) \]
-We can therefore rewrite the currying adjunction that defines the internal hom in $\Set$ as:
-\[ \Set (A \times B, C)  \cong \Set \big(A, \Set (B, C)\big) \]
-We can generalize this adjunction to the case where $B$ and $C$ are not sets but objects in some category $\cat C$. The external hom in any category is always a set. But the left-hand side is no longer defined by a product. Instead it defines the action of a set $A$ on an object $b$:
-\[ \cat C (A \cdot b, c) \cong \Set \big( A, \cat C (b, c)\big) \]
-that is called a \emph{co-power}.
+ \subsection{Powering and Co-powering（冪对象与余冪对象）}
 
-You may think of this action as adding together (taking a coproduct of) $A$ copies of $b$. For instance, if $A$ is a two-element set $\mathbf 2$, we get:
-\[ \cat C (\mathbf 2 \cdot b, c) \cong \Set \big( \mathbf 2, \cat C (b, c)\big) \cong \cat C(b, c) \times \cat C(b, c) \cong \cat C(b + b, c) \]
-In other words, 
-\[ \mathbf 2 \cdot b \cong b + b \]
-In this sense a co-power defines multiplication in terms of iterated addition, the way we learned it in school. 
+ 在集合范畴（Set）中，内部同态（function object）等价于外部同态（external hom），即两个对象之间的态射集：
+ \[ C^B \cong Set(B, C) \]
+ 因此我们可以将定义集合范畴中内部同态的柯里化伴随关系改写为：
+ \[ \Set (A \times B, C)  \cong \Set \big(A, \Set (B, C)\big) \]
+ 我们可以将此伴随关系推广到$B$和$C$不再是集合，而是一些范畴$\cat C$中的对象的情况。任何范畴中的外部同态总是一个集合。然而，左边不再由积定义。相反，它定义了一个集合$A$作用于对象$b$上的行为：
+ \[ \cat C (A \cdot b, c) \cong \Set \big( A, \cat C (b, c)\big) \]
+ 这被称为\emph{余冪}（co-power）。
 
-If we multiply $b$ by the hom-set $\cat C (b, c)$ and take the coend over $b$'s, the result is isomorphic to $c$:
-\[ \cat \int^b C(b, c) \cdot b \cong c \]
-Indeed, the mappings to an arbitrary $x$ from both sides are isomorphic due to the Yoneda lemma:
-\[ \cat C \big( \int^b \cat C(b, c) \cdot b, x\big) \cong \int_b \Set \big( \cat C(b, c), \cat C (b, x)\big) \cong \cat C (c, x)\]
+ 你可以将这种行为理解为将$A$个$b$相加在一起（取它们的余积）。例如，如果$A$是一个包含两个元素的集合$\mathbf 2$，我们得到：
+ \[ \cat C (\mathbf 2 \cdot b, c) \cong \Set \big( \mathbf 2, \cat C (b, c)\big) \cong \cat C(b, c) \times \cat C(b, c) \cong \cat C(b + b, c) \]
+ 换句话说，
+ \[ \mathbf 2 \cdot b \cong b + b \]
+ 从这个意义上说，余冪定义了迭代加法形式的乘法，就像我们在学校里学到的一样。
 
+ 如果我们将$b$乘以同态集$\cat C (b, c)$并对所有$b$取共末端，结果同构于$c$：
+ \[ \cat \int^b C(b, c) \cdot b \cong c \]
+ 实际上，由于Yoneda引理，两边到任意$x$的映射是同构的：
+ \[ \cat C \big( \int^b \cat C(b, c) \cdot b, x\big) \cong \int_b \Set \big( \cat C(b, c), \cat C (b, x)\big) \cong \cat C (c, x)\]
 
+ 正如预期的那样，在集合范畴中，余冪简化为笛卡尔积（cartesian product）。
+ \[ \Set (A \cdot B, C) \cong \Set \big( A, \Set(B, C)\big) \cong \Set (A \times B, C) \]
 
-As expected, in $\Set$, the co-power decays to the cartesian product.
-\[ \Set (A \cdot B, C) \cong \Set \big( A, \Set(B, C)\big) \cong \Set (A \times B, C) \]
+ 类似地，我们可以将冪对象（power）表达为迭代乘法。我们使用相同的右侧，但这次我们用映射来定义\emph{冪}：
+ \[ \cat C (b, A \pitchfork c) \cong \Set  \big(A, \cat C(b, c)\big) \]
+ 你可以将冪理解为将$A$个$c$相乘在一起。实际上，将$A$替换为$\mathbf 2$的结果是：
+ \[ \cat C (b, \mathbf 2 \pitchfork c) \cong \Set  \big(\mathbf 2, \cat C(b, c)\big) \cong \cat C(b, c) \times \cat C(b, c) \cong \cat C (b, c \times c)\]
+ 换句话说：
+ \[ \mathbf 2 \pitchfork c \cong c \times c \]
+ 这是一种表示$c^2$的花式写法。
 
-Similarly, we can express powering as iterated multiplication. We use the same right-hand side, but this time we use the mapping-in to define the \emph{power}:
-\[ \cat C (b, A \pitchfork c) \cong \Set  \big(A, \cat C(b, c)\big) \]
-You may think of the power as multiplying together $A$ copies of $c$. Indeed, replacing $A$ with $\mathbf 2$ results in:
-\[ \cat C (b, \mathbf 2 \pitchfork c) \cong \Set  \big(\mathbf 2, \cat C(b, c)\big) \cong \cat C(b, c) \times \cat C(b, c) \cong \cat C (b, c \times c)\]
-In other words:
-\[ \mathbf 2 \pitchfork c \cong c \times c \]
-which is a fancy way of writing $c^2$.
+ 如果我们将$c$乘以同态集$\cat C(c', c)$并对所有$c$取末端，结果同构于$c'$：
+ \[ \int_c \cat C (c', c) \pitchfork c \cong c' \]
+ 这可以从Yoneda引理中得出。实际上，从$x$到两边的映射是同构的：
+ \[ \cat C \big(x, \int_c \cat C (c', c) \pitchfork c\big) \cong \int_c \Set \big( \cat C(c', c), \cat C(x, c)\big)  \cong \cat C (x, c') \]
 
-If we power $c$ by the hom-set $\cat C(c', c)$ and take the end over all $c$'s, the result is isomorphic to $c'$:
-\[ \int_c \cat C (c', c) \pitchfork c \cong c' \]
-This follows from the Yoneda lemma. Indeed the mappings from any $x$ to both sides are isomorphic:
-\[ \cat C \big(x, \int_c \cat C (c', c) \pitchfork c\big) \cong \int_c \Set \big( \cat C(c', c), \cat C(x, c)\big)  \cong \cat C (x, c') \]
+ 在集合范畴中，冪简化为指数（exponential），它与同态集是同构的：
+ \[ A \pitchfork C \cong C^A \cong \Set (A, C) \]
+ 这是因为乘法的对称性所致。
+ \[ \Set(B, A \pitchfork C) \cong \Set (A, \Set(B, C)) \cong \Set (A \times B, C) \]
+ \[ \cong \Set (B \times A, C) \cong \Set (B, \Set (A, C))\]
 
+ \section{Inverting a Functor（反转一个函子）}
 
-In $\Set$, the power decays to the exponential, which is isomorphic to the hom-set:
-\[ A \pitchfork C \cong C^A \cong \Set (A, C) \]
-This is the consequence of the symmetry of the product.
-\[ \Set(B, A \pitchfork C) \cong \Set (A, \Set(B, C)) \cong \Set (A \times B, C) \]
-\[ \cong \Set (B \times A, C) \cong \Set (B, \Set (A, C))\]
+ 范畴论的一个方面是通过执行有损转换丢弃信息；另一个方面是恢复丢失的信息。我们已经看到用自由函子（free functors）补偿丢失数据的例子——这是遗忘函子（forgetful functors）的伴随函子。Kan扩展是另一个例子。两者都弥补了那些不可逆函子丢失的数据。
 
-\section{Inverting a functor}
+ 一个函子可能不可逆的原因有两个。一个是它可能将多个对象或箭头映射到单个对象或箭头上。换句话说，它在对象或箭头上不是单射的（injective）。另一个原因是它的像可能无法覆盖整个目标范畴。换句话说，它在对象或箭头上不是满射的（surjective）。
 
-One aspect of category theory is to discard information by performing lossy transformations; the other is recovering the lost information. We've seen examples of making up for lost data with free functors---the adjoints to forgetful functors. Kan extensions are another example. Both make up for data that is lost by a functor that is not invertible.
-
-There are two reasons why a functor might not be invertible. One is that it may map multiple objects or arrows into a single object or arrow. In other words, it's not injective on objects or arrows. The other reason is that its image may not cover the whole target category. In other words, it's not surjective on objects or arrows.
-
-Consider for instance an adjunction $L \dashv R$. Suppose that $R$ is not injective, and it collapses two object $c$ and $c'$ into a single object $d$
-\begin{align*}
-R c &= d \\
-R c' &= d
-\end{align*}
-$L$ has no chance of undoing it. It can't map $d$ to both $c$ and $c'$ at the same time. The best it can do is to map $d$ to a ``more general'' object $L d$ that has arrows to both $c$ and $c'$. These arrows are needed to define the components of the counit of the adjunction:
-\begin{align*}
-\varepsilon_c &\colon L d \to c
-\\
-\varepsilon_{c'} &\colon L d \to c'
-\end{align*}
-where $L d$ is both $L (R c)$ and $L (R c')$
-\[
- \begin{tikzcd} [row sep=0.5cm, column sep=1cm]
- L d
- \arrow[d, "\varepsilon_c"]
- \arrow[dd, bend right, "\varepsilon_{c'}"']
- \\
- c
- \arrow[rr, red, dashed, ""]
- && d
- \arrow[ull, blue, bend right, dashed, "L"']
- \\
- c'
- \arrow[urr, red, bend right, dashed, "R"]
+ 例如，考虑一个伴随$L \dashv R$。假设$R$不是单射的，它将两个对象$c$和$c'$合并为一个对象$d$
+ \begin{align*}
+  R c &= d \\
+  R c' &= d
+ \end{align*}
+ $L$无力逆转这种操作。它无法同时将$d$映射到$c$和$c'$。它最多只能将$d$映射到一个“更一般”的对象$L d$，该对象有箭头指向$c$和$c'$。这些箭头用于定义伴随的余单位的分量：
+ \begin{align*}
+  \varepsilon_c &\colon L d \to c
+  \\
+  \varepsilon_{c'} &\colon L d \to c'
+ \end{align*}
+ 其中$L d$既是$L (R c)$也是$L (R c')$
+ \[
+  \begin{tikzcd} [row sep=0.5cm, column sep=1cm]
+   L d
+   \arrow[d, "\varepsilon_c"]
+   \arrow[dd, bend right, "\varepsilon_{c'}"']
+   \\
+   c
+   \arrow[rr, red, dashed, ""]
+   && d
+   \arrow[ull, blue, bend right, dashed, "L"']
+   \\
+   c'
+   \arrow[urr, red, bend right, dashed, "R"]
   \end{tikzcd}
-\]
+ \]
 
+ 此外，如果$R$在对象上不是满射的，函子$L$必须以某种方式在$R$的像之外的$\cat D$对象上进行定义。同样，单位和余单位的自然性会限制可能的选择，只要这些对象与$R$的像有箭头连接。
 
-Moreover, if $R$ is not surjective on objects, the functor $L$ must somehow be defined on those objects of $\cat D$ that are not in the image of $R$. Again, naturality of the unit and counit will constrain possible choices, as long as there are arrows connecting these objects to the image of $R$. 
+ 显然，所有这些限制意味着伴随只能在非常特殊的情况下定义。
 
-Obviously, all these constraints mean that an adjunction can only be defined in very special cases. 
+ Kan扩展甚至比伴随还要弱。
 
-Kan extensions are even weaker than adjunctions. 
+ 如果伴随函子像逆一样工作，Kan扩展就像分数一样工作。
 
-If adjoint functors work like inverses, Kan extensions work like fractions. 
+ 这在我们重绘定义伴随的余单位和单位的图表时看得最清楚。在第一个图中，$L$似乎扮演了$1/R$的角色。在第二个图中，$R$则假装自己是$1/L$。
 
-This is best seen if we redraw the diagrams defining the counit and the unit of an adjunction. In the first diagram, $L$ seems to play the role of $1/R$. In the second diagram $R$ pretends to be $1/L$.
-
-\[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat C
- \arrow[rr, "\text{Id}", "" {name=ID, below} ]
- \arrow[d, bend right, "R"']
- && \cat C
- \\
- \cat D
-  \arrow[urr, bend right, "L"']
- \arrow[Rightarrow, "\varepsilon",  to=ID]
- \end{tikzcd}
- \qquad
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat D
- \arrow[rr, "\text{Id}", "" {name=ID, below} ]
- \arrow[d, bend right, "L"']
- && \cat D
- \\
- \cat C
-  \arrow[urr, bend right, "R"']
- \arrow[Rightarrow, "\eta",  from=ID]
- \end{tikzcd}
-\]
-
-The right Kan extension $\text{Ran}_P F$ and the left Kan extension $\text{Lan}_P F$ generalize these by replacing the identity functor with some functor $F \colon \cat E \to \cat C$. The Kan extensions then play the role of fractions $F/P$. Conceptually, they undo the action of $P$ and follow it with the action of $F$.
-
-\[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, bend right, "\text{Ran}_P F"']
- \arrow[Rightarrow, "\varepsilon",  to=ID]
- \end{tikzcd}
- \qquad
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, bend right, "\text{Lan}_P F"']
- \arrow[Rightarrow, "\eta",  from=ID]
- \end{tikzcd}
-\]
-
-Just like with adjunctions, the ``undoing'' is not complete. The composition $\text{Ran}_P F \circ P$ doesn't reproduce $F$; instead it's related to it through the natural transformation $\varepsilon$ called the counit. Similarly, the composition $\text{Lan}_P F \circ P$ is related to $F$ through the unit $\eta$.
-
-Notice that the more information $F$ discards, the easier it is for Kan extensions to ``invert'' the functor $P$. In as sense, it only has to invert $P$ ``modulo $F$''.
-
-Here's the intuition behind Kan extensions. We start with a functor $F$:
-\[
- \begin{tikzcd} \cat E
- \arrow[r, "F"]
- & \cat C
+ \[
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat C
+   \arrow[rr, "\text{Id}", "" {name=ID, below} ]
+   \arrow[d, bend right, "R"']
+   && \cat C
+   \\
+   \cat D
+   \arrow[urr, bend right, "L"']
+   \arrow[Rightarrow, "\varepsilon",  to=ID]
   \end{tikzcd}
-\]
-There is a second functor $P$ that squishes $\cat E$ in another category $\cat B$. This may be an embedding that is lossy and non-surjective. Our task is to somehow \emph{extend} the definition of $F$ to cover the whole of $\cat B$. 
-
-In the ideal world we would like the following diagram to commute:
-\[
- \begin{tikzcd} \cat E
- \arrow[r, "F"]
- \arrow[d, "P"']
- & \cat C
- \\
- \cat B
-\arrow[ur, "Kan_P F"']
+  \qquad
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat D
+   \arrow[rr, "\text{Id}", "" {name=ID, below} ]
+   \arrow[d, bend right, "L"']
+   && \cat D
+   \\
+   \cat C
+   \arrow[urr, bend right, "R"']
+   \arrow[Rightarrow, "\eta",  from=ID]
   \end{tikzcd}
-\]
-But that would involve equality of functors, which is something we try to avoid at all cost. 
+ \]
 
-The next best thing would be to ask for a natural isomorphism between the two paths through this diagram. But even that seems like asking too much. So we finally settle down on demanding that one path be deformable into another, meaning there is a one-way natural transformation between them. The direction of this transformation distinguishes between right and left Kan extensions.
+ 右Kan扩展$\text{Ran}_P F$和左Kan扩展$\text{Lan}_P F$通过将恒等函子替换为某个函子$F \colon \cat E \to \cat C$来推广这些概念。Kan扩展扮演的角色类似于分数$F/P$。从概念上讲，它们“逆转”$P$的作用，并跟随它执行$F$的作用。
 
-\section{Right Kan extension}
+ \[
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat E
+   \arrow[rr, "F", "" {name=ID, below} ]
+   \arrow[d, bend right, "P"']
+   && \cat C
+   \\
+   \cat B
+   \arrow[urr, bend right, "\text{Ran}_P F"']
+   \arrow[Rightarrow, "\varepsilon",  to=ID]
+  \end{tikzcd}
+  \qquad
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat E
+   \arrow[rr, "F", "" {name=ID, below} ]
+   \arrow[d, bend right, "P"']
+   && \cat C
+   \\
+   \cat B
+   \arrow[urr, bend right, "\text{Lan}_P F"']
+   \arrow[Rightarrow, "\eta",  from=ID]
+  \end{tikzcd}
+ \]
 
-The right Kan extension is a functor $\text{Ran}_P F$ equipped with a natural transformation $\varepsilon$, called the counit of the Kan extension, defined as:
-\[ \varepsilon \colon (\text{Ran}_P F) \circ P \to F\]
-\[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, blue, bend right, "\text{Ran}_P F"']
- \arrow[Rightarrow, blue, "\varepsilon",  to=ID]
- \end{tikzcd}
-\]
+ 正如伴随的情况一样，“逆转”并不完全。组合$\text{Ran}_P F \circ P$并不能还原$F$；相反，它通过一个称为余单位（counit）的自然变换$\varepsilon$与它相关联。同样，组合$\text{Lan}_P F \circ P$通过单位（unit）$\eta$与$F$相关联。
 
-The pair $(\text{Ran}_P F, \varepsilon)$ is universal among such pairs $(G, \alpha)$, where $G$ is a functor $G \colon \cat B \to \cat C$ and $\alpha$ is a natural transformation:
-\[ \alpha \colon G \circ P \to F \]
-\[
- \begin{tikzcd} [row sep=1cm, column sep=1cm]
- \cat E
- \arrow[rr, "F", "" {name=ID, below} ]
- \arrow[d, bend right, "P"']
- && \cat C
- \\
- \cat B
-  \arrow[urr, red, bend right, "G"']
- \arrow[Rightarrow, red, "\alpha",  to=ID]
- \end{tikzcd}
-\]
+ 请注意，$F$丢弃的信息越多，Kan扩展“逆转”函子$P$就越容易。在某种意义上，它只需“模$F$”逆转$P$即可。
 
-Universality means that for any such $(G, \alpha)$ there is a unique natural transformation $\sigma \colon G \to \text{Ran}_P F$
-\[
-\begin{tikzcd}[row sep=2cm, column sep=2cm]
-\cat E  \ar[d, bend right, "P"', "" {name=P}]
-            \ar[r, "F", ""  {name=F, below, near start, bend right}]
-&
-\cat C
-\\
-\cat B
-    \ar[ur, red, bend left, "G", "" {name=G, below}]
-    \ar[ur, blue, bend right, "\text{Ran}_P F"', "" {name=Ran}]
-\arrow[Rightarrow, "\sigma", from=G, to=Ran]
-\end{tikzcd}
-\]
- which factorizes $\alpha$, that is:
-\[ \alpha = \varepsilon \cdot (\sigma \circ P) \]
-This is a combination of vertical and horizontal compositions of natural transformations in which $\sigma \circ P$ is the whiskering of $\sigma$. Here's the same equation drawn in terms of string diagrams:
+ 以下是关于Kan扩展的直觉。我们从一个函子$F$开始：
+ \[
+  \begin{tikzcd} \cat E
+  \arrow[r, "F"]
+  & \cat C
+  \end{tikzcd}
+ \]
+ 有一个第二个函子$P$，它将$\cat E$压缩到另一个范畴$\cat B$中。这可能是一个嵌入，它是有损且非满射的。我们的任务是以某种方式\emph{扩展} $F$的定义，以涵盖整个$\cat B$。
 
-\[
-\begin{tikzpicture}
-\def \dx {0.7}
-\def \dy {0.7}
+ 在理想情况下，我们希望以下图表能够交换：
+ \[
+  \begin{tikzcd} \cat E
+  \arrow[r, "F"]
+  \arrow[d, "P"']
+  & \cat C
+  \\
+  \cat B
+  \arrow[ur, "Kan_P F"']
+  \end{tikzcd}
+ \]
+ 但这会涉及函子之间的相等，这是我们尽量避免的。
 
-\def \xa{-3 * \dx};
-\def \xb{-2 * \dx};
-\def \xc{-1 * \dx};
-\def \xd{0};
-\def \xe{1 * \dx};
+ 下一个最好的选择是要求在这个图中两条路径之间存在一个自然同构。但是即使这样看起来也要求过高。因此，我们最终决定要求一条路径能够变形为另一条路径，这意味着它们之间存在一个单向的自然变换。这种变换的方向区分了右Kan扩展和左Kan扩展。
 
-\def \ya{0};
-\def \yb{1 * \dy};
-\def \yc{2 * \dy};
-\def \yd{3 * \dy};
-\def \ye{4 * \dy};
+ \section{Right Kan Extension（右Kan扩展）}
+
+ 右Kan扩展是一个函子$\text{Ran}_P F$，配备了一个自然变换$\varepsilon$，称为Kan扩展的余单位，定义为：
+ \[ \varepsilon \colon (\text{Ran}_P F) \circ P \to F\]
+ \[
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat E
+   \arrow[rr, "F", "" {name=ID, below} ]
+   \arrow[d, bend right, "P"']
+   && \cat C
+   \\
+   \cat B
+   \arrow[urr, blue, bend right, "\text{Ran}_P F"']
+   \arrow[Rightarrow, blue, "\varepsilon",  to=ID]
+  \end{tikzcd}
+ \]
+
+ 对$\text{Ran}_P F$的要求是，$(\text{Ran}_P F, \varepsilon)$在所有类似对$(G, \alpha)$中是泛化的，其中$G$是一个函子$G \colon \cat B \to \cat C$，而$\alpha$是一个自然变换：
+ \[ \alpha \colon G \circ P \to F \]
+ \[
+  \begin{tikzcd} [row sep=1cm, column sep=1cm]
+   \cat E
+   \arrow[rr, "F", "" {name=ID, below} ]
+   \arrow[d, bend right, "P"']
+   && \cat C
+   \\
+   \cat B
+   \arrow[urr, red, bend right, "G"']
+   \arrow[Rightarrow, red, "\alpha",  to=ID]
+  \end{tikzcd}
+ \]
+
+ 泛化意味着对于任何这样的$(G, \alpha)$，都存在唯一的自然变换$\sigma \colon G \to \text{Ran}_P F$，
+ \[
+  \begin{tikzcd}[row sep=2cm, column sep=2cm]
+   \cat E  \ar[d, bend right, "P"', "" {name=P}]
+   \ar[r, "F", ""  {name=F, below, near start, bend right}]
+   &
+   \cat C
+   \\
+   \cat B
+   \ar[ur, red, bend left, "G", "" {name=G, below}]
+   \ar[ur, blue, bend right, "\text{Ran}_P F"', "" {name=Ran}]
+   \arrow[Rightarrow, "\sigma", from=G, to=Ran]
+  \end{tikzcd}
+ \]
+ 它使得$\alpha$可以分解为：
+ \[ \alpha = \varepsilon \cdot (\sigma \circ P) \]
+ 这是一个在自然变换的垂直和水平组合中，其中$\sigma \circ P$是$\sigma$的卷须（whiskering）。以下是相同的方程式，用线图的方式绘制：
+
+ \[
+  \begin{tikzpicture}
+   \def \dx {0.7}
+   \def \dy {0.7}
+
+   \def \xa{-3 * \dx};
+   \def \xb{-2 * \dx};
+   \def \xc{-1 * \dx};
+   \def \xd{0};
+   \def \xe{1 * \dx};
+
+   \def \ya{0};
+   \def \yb{1 * \dy};
+   \def \yc{2 * \dy};
+   \def \yd{3 * \dy};
+   \def \ye{4 * \dy};
 
 % left background
-\filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xc, \ya);
+   \filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xc, \ya);
 % right background
-\filldraw[fill=orange!30, draw=white] (\xc, \ye) rectangle (\xe, \ya);
+   \filldraw[fill=orange!30, draw=white] (\xc, \ye) rectangle (\xe, \ya);
 % fill shape\yb
-\path [fill=orange!10, draw=white]  (\xb, \ya) to (\xb, \yb) to [out=90, in=180]  (\xc, \yc) to  [out=0, in=90] (\xd, \yb) to (\xd, \ya);
+   \path [fill=orange!10, draw=white]  (\xb, \ya) to (\xb, \yb) to [out=90, in=180]  (\xc, \yc) to  [out=0, in=90] (\xd, \yb) to (\xd, \ya);
 
 % cup
-\draw (\xb, \ya) to (\xb, \yb) to [out=90, in=180]  (\xc, \yc) to  [out=0, in=90] (\xd, \yb) to (\xd, \ya);
-\draw (\xc, \yc) -- (\xc, \ye);
+   \draw (\xb, \ya) to (\xb, \yb) to [out=90, in=180]  (\xc, \yc) to  [out=0, in=90] (\xd, \yb) to (\xd, \ya);
+   \draw (\xc, \yc) -- (\xc, \ye);
 
 % natural transformations
-\filldraw[black] (\xc, \yc) circle (1 pt);
-\node [below] at (\xc, \yc) {$\alpha$};
+   \filldraw[black] (\xc, \yc) circle (1 pt);
+   \node [below] at (\xc, \yc) {$\alpha$};
 
 % categories
-\node[right] at (\xa, \ye - 0.3) {$\cat E$};
-\node[left] at (\xe, \ye - 0.3) {$\cat C$};
-\node[above] at (\xc, \ya) {$\cat B$};
+   \node[right] at (\xa, \ye - 0.3) {$\cat E$};
+   \node[left] at (\xe, \ye - 0.3) {$\cat C$};
+   \node[above] at (\xc, \ya) {$\cat B$};
 % functors
-\node [below] at (\xb, \ya) {$P$};
-\node [below] at (\xd, \ya) {$G$};
-\node [above] at (\xc, \ye) {$F$};
+   \node [below] at (\xb, \ya) {$P$};
+   \node [below] at (\xd, \ya) {$G$};
+   \node [above] at (\xc, \ye) {$F$};
 
 %-----------------
-\node (eq) at (3 * \dx, \yc) {$=$};
+   \node (eq) at (3 * \dx, \yc) {$=$};
 % right diagram
 
-\def \xa{5 * \dx};
-\def \xb{6 * \dx};
-\def \xc{7 * \dx};
-\def \xd{8 * \dx};
-\def \xe{9 * \dx + 0.3};
+   \def \xa{5 * \dx};
+   \def \xb{6 * \dx};
+   \def \xc{7 * \dx};
+   \def \xd{8 * \dx};
+   \def \xe{9 * \dx + 0.3};
 
 % left background
-\filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xc, \ya);
+   \filldraw[fill=blue!50!green!20, draw=white] (\xa, \ye) rectangle (\xc, \ya);
 % right background
-\filldraw[fill=orange!30, draw=white] (\xc, \ye) rectangle (\xe, \ya);
+   \filldraw[fill=orange!30, draw=white] (\xc, \ye) rectangle (\xe, \ya);
 % fill shape
-\path [fill=orange!10, draw=white]  (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to (\xd, \ya);
+   \path [fill=orange!10, draw=white]  (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to (\xd, \ya);
 
 % cup
-\draw (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to (\xd, \ya);
-\draw (\xc, \yd) -- (\xc, \ye);
+   \draw (\xb, \ya) to (\xb, \yc) to [out=90, in=180]  (\xc, \yd) to  [out=0, in=90] (\xd, \yc) to (\xd, \ya);
+   \draw (\xc, \yd) -- (\xc, \ye);
 
 % natural transformations
-\filldraw[black] (\xc, \yd) circle (1 pt);
-\node [below] at (\xc, \yd) {$\varepsilon$};
+   \filldraw[black] (\xc, \yd) circle (1 pt);
+   \node [below] at (\xc, \yd) {$\varepsilon$};
 
-\filldraw[black] (\xd, \yb) circle (1 pt);
-\node [right] at (\xd, \yb) {$\sigma$};
+   \filldraw[black] (\xd, \yb) circle (1 pt);
+   \node [right] at (\xd, \yb) {$\sigma$};
 
 % categories
-\node[right] at (\xa, \ye - 0.3) {$\cat E$};
-\node[left] at (\xe, \ye - 0.3) {$\cat C$};
-\node[above] at (\xc, \ya) {$\cat B$};
+   \node[right] at (\xa, \ye - 0.3) {$\cat E$};
+   \node[left] at (\xe, \ye - 0.3) {$\cat C$};
+   \node[above] at (\xc, \ya) {$\cat B$};
 % functors
-\node [below] at (\xb, \ya) {$P$};
-\node [below] at (\xd, \ya) {$G$};
-\node [above] at (\xc, \ye) {$F$};
-\node [right] at (\xd, \yc) {$\text{Ran}$};
+   \node [below] at (\xb, \ya) {$P$};
+   \node [below] at (\xd, \ya) {$G$};
+   \node [above] at (\xc, \ye) {$F$};
+   \node [right] at (\xd, \yc) {$\text{Ran}$};
 
-\end{tikzpicture}
-\]
+  \end{tikzpicture}
+ \]
 
+ 如果沿$P$的右Kan扩展对每个函子$F$都定义了，那么这个泛范构造可以推广到一个伴随关系——这次它是在两个函子范畴之间的伴随关系：
+ \[ [\cat E, \cat C](G \circ P, F) \cong [\cat B, \cat C](G, \text{Ran}_P F) \]
+ 对于任何$\alpha$（左侧的元素），都存在唯一的$\sigma$（右侧的元素）。
 
+ 换句话说，如果右Kan扩展对每个$F$都存在，那么它就是函子前组合的右伴随：
+ \[ (- \circ P) \dashv \text{Ran}_P \]
+ 这个伴随关系的余单位在$F$的成分就是$\varepsilon$。
 
-If the right Kan extension along $P$ is defined for every functor $F$, then the universal construction can be generalized to an adjunction---this time it's an adjunction between two functor categories:
-\[ [\cat E, \cat C](G \circ P, F) \cong [\cat B, \cat C](G, \text{Ran}_P F) \]
-For every $\alpha$ that is an element of the left-hand side, there is a unique $\sigma$ that is an element of the right-hand side.
+ 这在某种程度上类似于柯里化伴随：
+ \[ \cat E (a \times b, c) \cong \cat E (a, [b, c]) \]
+ 其中积被函子组合取代。（这个类比并不完美，因为组合只能在自函子范畴中被认为是张量积。）
 
-In other words, the right Kan extension, if it exists for every $F$, is the right adjoint to functor pre-composition:
-\[ (- \circ P) \dashv \text{Ran}_P \]
-The component of the counit of this adjunction at $F$ is $\varepsilon$.
+ \subsection{Right Kan Extension as an End（作为末端的右Kan扩展）}
 
-This is somewhat reminiscent of the currying adjunction:
-\[ \cat E (a \times b, c) \cong \cat E (a, [b, c]) \]
-in which the product is replaced by functor composition. (The analogy is not perfect, since composition can be considered a tensor product only in the category of endofunctors.)
+ 回顾一下忍者Yoneda引理：
+ \[ F b \cong \int_{e} \mathbf{Set} (\cat B(b, e), F e) \]
+ 这里，$F$是一个协预层，即从$\cat B$到$\Set$的函子。沿$P$的$F$的右Kan扩展推广了这个公式：
+ \[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
 
-\subsection{Right Kan extension as an end}
-
-Recall the ninja Yoneda lemma:
-\[ F b \cong \int_{e} \mathbf{Set} (\cat B(b, e), F e) \]
-Here, $F$ is a co-presheaf, that is a functor from $\cat B$ to $\Set$. The right Kan extensions of $F$ along $P$ generalizes this formula:
-\[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
-
-This works for a co-presheaf. In general we are interested in $F \colon \cat E \to \cat C$, so we need to replace the hom-set in $\Set$ by a \index{power}power. Thus he right Kan extension is given by the following end (if it exists):
+ 这适用于协预层。通常我们关心的是$F \colon \cat E \to \cat C$，因此我们需要将$\Set$中的同态集替换为\emph{冪}（power）。因此，右Kan扩展由以下末端给出（如果它存在的话）：
  \[ (\text{Ran}_P F) b \cong \int_e \cat B (b, P e) \pitchfork F e \]
- 
- The proof essentially writes itself: at every step there is only one thing to do. We start with the adjunction:
-  \[ [\cat E, \cat C](G \circ P, F) \cong [\cat B, \cat C](G, \text{Ran}_P F) \]
-and rewrite it using ends:
+
+ 证明基本上是自然而然的：在每一步中只有一种操作可以执行。我们从伴随开始：
+ \[ [\cat E, \cat C](G \circ P, F) \cong [\cat B, \cat C](G, \text{Ran}_P F) \]
+ 并使用末端重新书写它：
  \[ \int_e \cat C \big(G ( P e), F e\big) \cong \int_b \cat C\big(G b, (\text{Ran}_P F) b\big) \]
-We plug in our formula to get:
+ 我们将我们的公式代入得到：
  \[ \cong  \int_b \cat C\big(G b,\int_e \cat B (b, P e) \pitchfork F e \big)\]
-We use the continuity of the hom-functor to pull the end to the front:
-\[  \cong  \int_b \int_e \cat C\big(G b, \cat B (b, P e) \pitchfork F e \big) \]
-Then we use the definition of power:
-\[ \int_b \int_e \Set \big(  \cat B (b, P e), \cat C (G b, F e) \big) \]
-and apply the Yoneda lemma:
-\[ \int_e  \cat C \big(G (P e), F e\big) \]
-This result is indeed the left-hand side of the adjunction.
- 
-If $F$ is a co-presheaf, the power in the formula for the right Kan extension decays to the exponential/hom-set:
-  \[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
- 
- Notice also that, if $P$ has a left adjoint, let's call it $P^{-1}$, that is:
+ 我们使用同态函子的连续性将末端推到前面：
+ \[  \cong  \int_b \int_e \cat C\big(G b, \cat B (b, P e) \pitchfork F e \big) \]
+ 然后我们使用冪的定义：
+ \[ \int_b \int_e \Set \big(  \cat B (b, P e), \cat C (G b, F e) \big) \]
+ 并应用Yoneda引理：
+ \[ \int_e  \cat C \big(G (P e), F e\big) \]
+ 这个结果确实是伴随关系的左侧。
+
+ 如果$F$是一个协预层，右Kan扩展公式中的冪简化为指数/同态集：
+ \[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \]
+
+ 还要注意的是，如果$P$有一个左伴随，我们称之为$P^{-1}$，即：
  \[ \cat B(b, P e) \cong \cat E(P^{-1} b, e) \]
- we could use the ninja Yoneda lemma to evaluate the end in:
+ 我们可以使用忍者Yoneda引理来计算末端：
  \[ (\text{Ran}_P F) b \cong \int_e \Set \big( \cat B (b, P e), F e\big) \cong \int_e \Set(\cat E(P^{-1} b, e), F e) \cong F(P^{-1} b)\]
-to get:
+ 得到：
  \[  \text{Ran}_P F \cong F \circ P^{-1} \]
- Since the adjunction is a weakening of the idea of an inverse, this result is in agreement with the intuition that the Kan extension ``inverts'' $P$ and follows it with $F$.
+ 由于伴随关系是逆的弱化，这个结果与Kan扩展“逆转”$P$并跟随$F$的直觉是一致的。
  
- \subsection{Right Kan extension in Haskell}
+
+\subsection{Right Kan extension in Haskell}
 The end formula for the right Kan extension can be immediately translated to Haskell:
  \begin{haskell}
 newtype Ran p f b = Ran (forall e. (b -> p e) -> f e)

@@ -344,277 +344,275 @@
  请记住，在 optics 的推导中，我们将 $a$ 和 $s$ 替换为 $\cat C^{op} \times \cat C$ 中的对象对 $\langle a, b \rangle$ 和 $\langle s, t \rangle$。在这种情况下，我们的函子将变为 profunctor。
 \end{document}
 
+\section{Profunctor Lenses （函子透镜）}
 
-
-\section{Profunctor Lenses}
-
-Our goal is to find a functor representation for optics. We've seen before that, for instance, type-changing lenses can be seen as hom-sets in the $\mathbf{Lens}$ category. The objects in $\mathbf{Lens}$ are pairs of objects from some category $\cat C$, and a hom-set from one such pair $\langle s, t \rangle$ to another  $\langle a, b \rangle$ is given by the coend formula:
+我们的目标是为光学器件（optics）找到一个函子（functor）的表示方法。我们之前已经看到，例如，类型转换透镜（type-changing lenses）可以看作是$\mathbf{Lens}$范畴中的态射集（hom-sets）。$\mathbf{Lens}$中的对象是某个范畴$\cat C$中的对象对，而从一对$\langle s, t \rangle$到另一对$\langle a, b \rangle$的态射集由下列余端（coend）公式给出：
 \[ \mathcal{L}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times b, t) \]
-Notice that the pair of hom-sets in this formula can be seen as a single hom-set in the product category $\cat C^{op} \times \cat C$:
+注意，在这个公式中的态射对可以视为乘积范畴$\cat C^{op} \times \cat C$中的一个态射集：
 \[  \mathcal{L}\langle s, t\rangle \langle a, b \rangle =  \int^{c} (\cat C^{op} \times \cat C )(c \bullet \langle a, b \rangle, \langle s, t \rangle)  \]
-where we define the action of $c$ on a pair $\langle a, b \rangle$ as:
+我们定义$c$对对$\langle a, b \rangle$的作用为：
 \[ c \bullet \langle a, b \rangle = \langle c \times a, c \times b \rangle \]
-This is a shorthand notation for the diagonal part of a more general action of $\cat C^{op} \times \cat C$ on itself given by:
- \[ \langle c, c' \rangle \bullet \langle a, b \rangle = \langle c \times a, c' \times b \rangle \]
+这是范畴$\cat C^{op} \times \cat C$对其自身更一般作用的对角部分的简写：
+\[ \langle c, c' \rangle \bullet \langle a, b \rangle = \langle c \times a, c' \times b \rangle \]
 
+这表明，为了表示这样的光学器件，我们应该研究范畴$\cat C^{op} \times \cat C$上的余预层（co-presheaves），即我们应该考虑profunctor表示。
 
-This suggests that, to represent such optics, we should be looking at co-presheaves on the category $\cat C^{op} \times \cat C$, that is, we should be considering profunctor representations. 
+\subsection{Iso（同构）}
 
-\subsection{Iso}
-As a quick check of this idea, let's apply our reconstruction formula to the simple case of $\cat T = [\cat C^{op} \times \cat C, \Set]$ with no additional structure. In that case we don't need to use the forgetful functors, or the monad $\Phi$, and we just get the straightforward application of Tannakian reconstruction:
+为了快速验证这个想法，让我们将我们的重建公式应用于一个简单的情形，即$\cat T = [\cat C^{op} \times \cat C, \Set]$，没有额外的结构。在这种情况下，我们不需要使用遗忘函子（forgetful functors）或单子（monad）$\Phi$，我们只得到Tannakian重建的直接应用：
 \[  \mathcal{O}\langle s, t\rangle \langle a, b \rangle =\int_{P \colon \cat T} \Set \big(P \langle a, b\rangle, P \langle s, t\rangle \big) \cong \big( (\cat C^{op} \times \cat C) (\langle a, b\rangle ,-) \big) \langle s, t\rangle \]
-The right hand side evaluates to:
+右边的结果为：
 \[ (\cat C^{op} \times \cat C) (\langle a, b\rangle , \langle s, t\rangle) = \cat C (s, a) \times \cat C (b, t) \]
 
-This optic is known in Haskell as \hask{Iso} (or an adapter):
+这个光学器件在Haskell中被称为\hask{Iso}（或适配器）：
 \begin{haskell}
-type Iso s t a b = (s -> a, b -> t)
+ type Iso s t a b = (s -> a, b -> t)
 \end{haskell}
-and it, indeed, has a profunctor representation corresponding to the following end:
+它确实有一个profunctor表示，对应于以下的余端（end）：
 \begin{haskell}
-type IsoP s t a b = forall p. Profunctor p => p a b -> p s t
+ type IsoP s t a b = forall p. Profunctor p => p a b -> p s t
 \end{haskell}
 
-Given a pair of functions it's easy to construct this profunctor-polymorphic function:
+给定一对函数，可以很容易地构造这个profunctor多态函数：
 \begin{haskell}
-toIsoP :: (s -> a, b -> t) -> IsoP s t a b
-toIsoP (f, g) = dimap f g
+ toIsoP :: (s -> a, b -> t) -> IsoP s t a b
+ toIsoP (f, g) = dimap f g
 \end{haskell}
-This is simply saying that any profunctor can be used to lift a pair of functions. 
+这仅仅表示任何profunctor都可以用来提升一对函数。
 
-Conversely, we may ask the question: How can a single polymorphic function map the set $P \langle a, b \rangle$ to the set $P \langle s, t \rangle$ for \emph{every} profunctor imaginable? The only thing this function knows about the profunctor is that it can lift a pair of functions. Therefore it must be a closure that either contains or is able to produce a pair of functions \hask{(s -> a, b -> t)}. 
+反过来，我们可以问一个问题：如何能用一个多态函数为\emph{每个}想象的profunctor将集合$P \langle a, b \rangle$映射到集合$P \langle s, t \rangle$？这个函数对profunctor唯一知道的是它能够提升一对函数。因此它一定是一个包含或能够产生一对函数$（s -> a, b -> t）$的闭包。
 
 \begin{exercise}
-Implement the function:
-\begin{haskell}
-fromIsoP :: IsoP s t a b -> (s -> a, b -> t)
-\end{haskell}
-Hint: Use the fact that a pair of identity functions can be used to construct the following profunctor:
-\begin{haskell}
-data Adapter a b s t = Ad (s -> a, b -> t)
-\end{haskell}
+ 实现以下函数：
+ \begin{haskell}
+  fromIsoP :: IsoP s t a b -> (s -> a, b -> t)
+ \end{haskell}
+ 提示：利用一对恒等函数可以用来构造以下profunctor：
+ \begin{haskell}
+  data Adapter a b s t = Ad (s -> a, b -> t)
+ \end{haskell}
 \end{exercise}
 
-\subsection{Profunctors and lenses}
+\subsection{Profunctors and Lenses （函子与透镜）}
 
-Let's try to apply the same logic to lenses. We have to find a class of profunctors to plug into our profunctor representation. Let's assume that the forgetful functor $U$ only forgets additional structure but doesn't change the sets, so the set $P \langle a, b \rangle$ is the same as the set $(U P) \langle a, b \rangle$. 
+让我们尝试将相同的逻辑应用于透镜。我们必须找到一个profunctor类，将其插入到我们的profunctor表示中。假设遗忘函子$U$只遗忘额外的结构但不改变集合，因此集合$P \langle a, b \rangle$与集合$(U P) \langle a, b \rangle$是相同的。
 
-Let's start with the existential representation. We have at our disposal an object $c$ and a pair of functions:
+让我们从存在性表示开始。我们手头有一个对象$c$和一对函数：
 \[  \langle f, g \rangle \colon \cat C(s, c \times a) \times \cat C(c \times b, t) \]
-We want to build a profunctor representation, so we have to be able to map the set $P \langle a, b \rangle$ to the set $P \langle s, t \rangle$. We could get $P \langle s, t \rangle$ by lifting these two functions, but only if start from $P \langle c \times a, c \times b \rangle$. Indeed:
+我们希望构建一个profunctor表示，因此我们必须能够将集合$P \langle a, b \rangle$映射到集合$P \langle s, t \rangle$。我们可以通过提升这两个函数来获得$P \langle s, t \rangle$，但前提是从$P \langle c \times a, c \times b \rangle$开始。确实：
 \[ P \langle f, g \rangle \colon P \langle c \times a, c \times b \rangle \to P \langle s, t \rangle \]
-What we are missing is the mapping:
+我们所缺少的是映射：
 \[ P \langle a, b \rangle \to P \langle c \times a, c \times b \rangle \]
-And this is exactly the additional structure we shall demand from our profunctor class. 
+这正是我们对profunctor类应当要求的额外结构。
 
-\subsection{Tambara module}
+\subsection{Tambara Module（Tambara 模块）}
 
-A profunctor $P$ equipped with the family of transformations:
+一个profunctor $P$配备了以下转换族：
 \[ \alpha_{\langle a, b\rangle, c} \colon P \langle a, b \rangle \to P \langle c \times a, c \times b \rangle \]
-is called a \emph{Tambara module}. 
+称为\emph{Tambara模块}。
 
-We want this family to be natural in $a$ and $b$, but what should we demand from $c$? The problem with $c$ is that it appears twice, once in the contravariant, and once in the covariant position. So, if we want to interact nicely with arrows like $h \colon c \to c'$, we have to modify the naturality condition. We may consider a more general profunctor $P \langle c' \times a, c \times b \rangle$ and treat $\alpha$ as producing its diagonal elements, ones in which $c'$ is the same as $c$. 
+我们希望这个族在$a$和$b$中是自然的（natural），但我们应该对$c$要求什么呢？问题在于$c$出现在反变（contravariant）和协变（covariant）的位置上。因此，如果我们想要与像$h \colon c \to c'$这样的箭相互作用，我们必须修改自然性条件。我们可以考虑更一般的profunctor $P \langle c' \times a, c \times b \rangle$，并将$\alpha$视为产生其对角元素的映射，其中$c'$与$c$相同。
 
-A transformation $\alpha$ between diagonal parts of two profunctors $P$ and $Q$ is called a \index{dinatural transformation}\emph{dinatural transformation} (\emph{di}-agonally natural) if the following diagram commutes for any $f \colon c \to c'$:
+一个在两个profunctor$P$和$Q$对角部分之间的转换$\alpha$称为\index{dinatural transformation} \emph{二重自然转换}（dinatural transformation）（对角自然），如果对于任何箭$f \colon c \to c'$，下图交换：
 
 \[
  \begin{tikzcd}
- & P \langle c', c \rangle
- \arrow[dl, "{P \langle f, c \rangle}"']
- \arrow[dr, "{P \langle c', f \rangle}"]
- \\
- P \langle c, c \rangle 
+  & P \langle c', c \rangle
+  \arrow[dl, "{P \langle f, c \rangle}"']
+  \arrow[dr, "{P \langle c', f \rangle}"]
+  \\
+  P \langle c, c \rangle
   \arrow[d, "\alpha_c"']
- && P \langle c', c' \rangle
- \arrow[d, "\alpha_{c'}"]
- \\
- Q \langle c, c \rangle
-   \arrow[dr, "{P \langle c, f \rangle}"']
- &&  Q \langle c', c' \rangle
- \arrow[dl,"{P \langle f, c \rangle}"]
-\\
-&Q \langle c, c' \rangle
+  && P \langle c', c' \rangle
+  \arrow[d, "\alpha_{c'}"]
+  \\
+  Q \langle c, c \rangle
+  \arrow[dr, "{P \langle c, f \rangle}"']
+  &&  Q \langle c', c' \rangle
+  \arrow[dl,"{P \langle f, c \rangle}"]
+  \\
+  &Q \langle c, c' \rangle
  \end{tikzcd}
 \]
-(I used the common shorthand $P \langle f, c \rangle$, reminiscent of whiskering, for $P \langle f, id_c \rangle$.)
+（我使用了常见的简写$P \langle f, c \rangle$，类似于whiskering，表示$P \langle f, id_c \rangle$。）
 
-In our case, the dinaturality condition simplifies to:
+在我们的例子中，二重自然性条件简化为：
 \[
  \begin{tikzcd}
- & P \langle a, b \rangle
- \arrow[dl, "{\alpha_{\langle a, b \rangle, c}}"']
- \arrow[dr, "{\alpha_{\langle a, b \rangle, c'}}"]
- \\
- P \langle c \times a, c \times b \rangle
-   \arrow[dr, "{P \langle c \times a, f \times b \rangle}"']
- &&  P \langle c' \times a, c'  \times b\rangle
- \arrow[dl,"{P \langle f \times b, c \times b \rangle}"]
-\\
-&P \langle c \times a, c' \times b \rangle
+  & P \langle a, b \rangle
+  \arrow[dl, "{\alpha_{\langle a, b \rangle, c}}"']
+  \arrow[dr, "{\alpha_{\langle a, b \rangle, c'}}"]
+  \\
+  P \langle c \times a, c \times b \rangle
+  \arrow[dr, "{P \langle c \times a, f \times b \rangle}"']
+  &&  P \langle c' \times a, c'  \times b\rangle
+  \arrow[dl,"{P \langle f \times b, c \times b \rangle}"]
+  \\
+  &P \langle c \times a, c' \times b \rangle
  \end{tikzcd}
 \]
-(Here, again $P \langle f \times b, c \times b \rangle$ stands for $P \langle f \times id_b, id_{c \times b} \rangle$.)
+（这里再次使用了简写$P \langle f \times b, c \times b \rangle$表示$P \langle f \times id_b, id_{c \times b} \rangle$。）
 
-There is one more consistency condition on Tambara modules: they must preserve the monoidal structure. The action of multiplying by $c$ makes sense in a cartesian category: we have to have a product for any pair of objects, and we want to have the terminal object to serve as the unit of multiplication. Tambara modules have to respect unit and preserve multiplication. For the unit (terminal object), we impose the following condition:
+Tambara模块有一个一致性条件：它们必须保留单元结构。乘法作用对于笛卡尔范畴有意义：我们必须为任意对象对有乘积，并且我们希望有终端对象作为乘法的单位。Tambara模块必须尊重单位并保留乘法。对于单位（终端对象），我们强加以下条件：
 \[ \alpha_{\langle a, b \rangle, 1} = id _{P \langle a, b \rangle}\]
-For multiplication, we have:
+对于乘法，我们有：
 \[ \alpha_{\langle a, b \rangle, c' \times c} \cong  \alpha_{\langle c \times a, c \times b \rangle, c'} \circ  \alpha_{\langle a, b \rangle, c}\]
-or, pictorially:
-\[
- \begin{tikzcd}
- P \langle a, b \rangle
- \arrow[rr, "{\alpha_{\langle a, b \rangle, c' \times c } }"]
- \arrow[rdd, "{ \alpha_{\langle a, b \rangle, c}}"']
- &&
- P \langle c' \times c \times a, c' \times c \times b \rangle
- \\
- \\
- & P \langle c \times a, c \times b \rangle
-  \arrow[ruu, "{\alpha_{\langle c \times a, c \times b \rangle, c'}}"']
-\end{tikzcd}
-\]
-(Notice that the product is associative up to isomorphism, so there is a hidden associator in this diagram.)
-
-Since we want Tambara modules to form a category, we have to define morphisms between them. These are natural transformations that preserve the additional structure. Let's say we have a natural transformation $\rho$ between two Tambara modules $\rho \colon (P, \alpha) \to (Q, \beta) $. We can either apply $\alpha$ and then $\rho$, or do $\rho$ first and then  $\beta$. We want the result to be the same:
+或者，图示如下：
 \[
  \begin{tikzcd}
   P \langle a, b \rangle
- \arrow[d, "{ \rho_{\langle a, b \rangle}}"']
- \arrow[r, "{ \alpha_{\langle a, b \rangle, c}}"]
-  &  P \langle c \times a, c \times b \rangle
-  \arrow[d, "{ \rho_{\langle c \times a, c \times b \rangle}}"]
-\\
-   Q \langle a, b \rangle
- \arrow[r, "{ \beta_{\langle a, b \rangle, c}}"]
- &  Q \langle c \times a, c \times b \rangle
+  \arrow[rr, "{\alpha_{\langle a, b \rangle, c' \times c } }"]
+  \arrow[rdd, "{ \alpha_{\langle a, b \rangle, c}}"']
+  &&
+  P \langle c' \times c \times a, c' \times c \times b \rangle
+  \\
+  \\
+  & P \langle c \times a, c \times b \rangle
+  \arrow[ruu, "{\alpha_{\langle c \times a, c \times b \rangle, c'}}"']
  \end{tikzcd}
 \]
-Keep in mind that the structure of the Tambara category is encoded in these natural transformations. They will determine, through the wedge condition, the shape of the ends that enter the definition of profunctor lenses.
+（注意乘积至多同构性上的结合律，因此图中隐藏了一个结合器（associator）。）
 
-\subsection{Profunctor lenses}
+由于我们希望Tambara模块形成一个范畴，因此我们必须定义它们之间的态射。这些是保持附加结构的自然转换。假设我们有一个自然转换$\rho$，它在两个Tambara模块之间，即$\rho \colon (P, \alpha) \to (Q, \beta) $。我们可以先应用$\alpha$再应用$\rho$，或者先执行$\rho$然后执行$\beta$。我们希望结果相同：
+\[
+ \begin{tikzcd}
+  P \langle a, b \rangle
+  \arrow[d, "{ \rho_{\langle a, b \rangle}}"']
+  \arrow[r, "{ \alpha_{\langle a, b \rangle, c}}"]
+  &  P \langle c \times a, c \times b \rangle
+  \arrow[d, "{ \rho_{\langle c \times a, c \times b \rangle}}"]
+  \\
+  Q \langle a, b \rangle
+  \arrow[r, "{ \beta_{\langle a, b \rangle, c}}"]
+  &  Q \langle c \times a, c \times b \rangle
+ \end{tikzcd}
+\]
+请记住，Tambara范畴的结构在这些自然转换中被编码。它们将通过楔条件决定进入profunctor透镜定义的端的形状。
 
-Now that we have some intuition about how Tambara modules are related to lenses, let's go back to our main formula:
+\subsection{Profunctor Lenses（函子透镜）}
+
+现在我们对Tambara模块与透镜之间的关系有了一些直观认识，让我们回到我们的主要公式：
 \[  \mathcal{L}\langle s, t\rangle \langle a, b \rangle =\int_{P \colon \cat T} \Set \big((U P) \langle a, b\rangle, (U P) \langle s, t\rangle \big) \cong \big( \Phi (\cat C^{op} \times \cat C) (\langle a, b\rangle ,-) \big) \langle s, t\rangle \]
-This time we're taking the end over the Tambara category. The only missing part is the monad $\Phi = U \circ F$ or the functor $F$ that freely generates Tambara modules.
+这次我们在Tambara范畴上取端。唯一缺少的部分是单子$\Phi = U \circ F$或自由生成Tambara模块的函子$F$。
 
-It turns out that, instead of guessing the monad, it's easier to guess the comonad. There is a comonad in the category of profunctors that takes a profunctor $P$ and produces another profunctor $\Theta P$. Here's the formula:
+事实证明，与其猜测单子，不如猜测伴随函子（adjoint functor）。在profunctor范畴中有一个共单子（comonad），它将profunctor $P$映射到另一个profunctor $\Theta P$。公式如下：
 \[(\Theta P) \langle a, b \rangle = \int_c P \langle c \times a, c \times b \rangle \]
-You can check that this is indeed a comonad by implementing $\varepsilon$ and $\delta$ (\hask{extract} and \hask{duplicate}). For instance, $\varepsilon$ maps $\Theta P \to P$ using the projection $\pi_1$ for the terminal object (the unit of cartesian product).
+你可以通过实现$\varepsilon$和$\delta$（\hask{extract}和\hask{duplicate}）来检查这是否确实是一个共单子。例如，$\varepsilon$使用单位（乘法的单位）的投影$\pi_1$将$\Theta P$映射到$P$。
 
-What's interesting about this comonad is that its coalgebras are Tambara modules. Again, these are coalgebras that map profunctors to profunctors. They are natural transformations $P \to \Theta P$. We can write such a natural transformation as an element of the end:
+关于这个共单子有趣的一点是它的煤代数（coalgebra）是Tambara模块。同样，这些是将profunctor映射到profunctor的煤代数。它们是profunctor上的自然转换$P \to \Theta P$。我们可以将这样的自然转换表示为端的元素：
 \[\int_{a, b} \Set \big (P \langle a, b \rangle, (\Theta P) \langle a, b \rangle \big) = \int_{a, b} \int_c \Set \big( P\langle a, b \rangle , P \langle c \times a, c \times b \rangle \big) \]
-I used the continuity of the hom-functor to pull out the end over $c$. The resulting end encodes a set of natural (dinatural in $c$) transformations that define a Tambara module:
+我使用了同构函子（hom-functor）的连续性将$c$上的端拉出。结果端编码了一组定义Tambara模块的自然（对$c$而言是二重自然）转换：
 \[ \alpha_{\langle a, b\rangle, c} \colon P \langle a, b \rangle \to P \langle c \times a, c \times b \rangle \]
-In fact, these coalgebras are \emph{comonad} coalgebras, that is they are compatible with the comonad $\Theta$. In other words, Tambara modules form the Eilenberg-Moore category of coalgebras for the comonad $\Theta$.
+事实上，这些煤代数是\emph{共单子}煤代数，即它们与共单子$\Theta$兼容。换句话说，Tambara模块构成了共单子$\Theta$的Eilenberg-Moore范畴。
 
-The left adjoint to $\Theta$ is a monad $\Phi$ given by the formula:
+$\Theta$的左伴随函子是一个单子$\Phi$，公式如下：
 \[(\Phi P)  \langle s, t \rangle = \int^{u, v, c} (\cat C^{op} \times \cat C) \big(c \bullet \langle u, v\rangle , \langle s, t \rangle\big) \times P \langle u, v \rangle \]
-where I used the shorthand notation:
+在这里，我使用了简写符号：
 \[ (\cat C^{op} \times \cat C) \big(c \bullet \langle u, v\rangle , \langle s, t \rangle\big) = \cat C(s, c \times u) \times \cat C(c \times v, t) \]
 
-This adjunction can be easily verified using some end/coend manipulations: The mapping out of $\Phi P$ to some profunctor $Q$ can be written as an end. The coends in $\Phi$ can then be taken out using co-continuity of the hom-functor. Finally, applying the ninja-Yoneda lemma produces the mapping into $\Theta Q$. We get:
+可以通过一些端/余端（coend）操作验证这个伴随关系：从$\Phi P$映射到某个profunctor $Q$的映射可以表示为端。然后可以使用同构函子的余连续性将$\Phi$中的余端取出。最后，应用忍者-Yoneda引理将映射简化为$\Theta Q$。我们得到：
 \[ [(\cat C^{op} \times \cat C, \Set] (P \Phi, Q) \cong [(\cat C^{op} \times \cat C, \Set] (P, \Theta Q) \]
 
-Replacing $Q$ with $P$ we immediately see that the set of algebras for $\Phi$ is isomorphic to the set of coalgebras for $\Theta$. In fact they are monad algebras for $\Phi$. This means that the Eilenberg-Moore category for the monad $\Phi$ is the same as the Tambara category.
+将$Q$替换为$P$，我们立即看到$\Phi$的代数集与$\Theta$的煤代数集同构。实际上，它们是$\Phi$的单子代数。这意味着$\Phi$的Eilenberg-Moore范畴与Tambara范畴相同。
 
-Recall that the Eilenberg-Moore construction factorizes a monad into a free/forgetful adjunction. This is exactly the adjunction we were looking for when deriving the formula for profunctor optics. 
+请记住，Eilenberg-Moore构造将单子分解为自由/遗忘伴随函子。这正是我们在推导profunctor光学时寻找的伴随函子。
 
-What remains is to evaluate the action of $\Phi$ on the representable functor:
+剩下的就是计算$\Phi$在可表函子上的作用：
 \[ \big( \Phi (\cat C^{op} \times \cat C) (\langle a, b\rangle ,-) \big) \langle s, t\rangle = \int^{u, v, c} (\cat C^{op} \times \cat C) \big(c \bullet \langle u, v\rangle , \langle s, t \rangle \big) \times  (\cat C^{op} \times \cat C) \big(\langle a, b\rangle , \langle u, v\rangle \big)\]
-Applying the co-Yoneda lemma, we get:
+应用co-Yoneda引理，我们得到：
 \[ \int^c (\cat C^{op} \times \cat C) \big(c \bullet \langle a, b\rangle , \langle s, t \rangle\big) = \int^c \cat C(s, c \times a) \times \cat C (c \times b, t)\]
-which is exactly the existential representation of the lens.
+这正是透镜的存在性表示。
 
-\subsection{Profunctor lenses in Haskell}
+\subsection{Profunctor Lenses in Haskell （Haskell 中的函子透镜）}
 
-To define profunctor representation in Haskell we introduce a class of profunctors that are Tambara modules with respect to cartesian product (we'll see more general Tambara modules later). In the Haskell library this class is called \hask{Strong}. It also appears in the literature as \hask{Cartesian}:
+为了在Haskell中定义profunctor表示，我们引入了一类关于笛卡尔积（cartesian product）的Tambara模块（稍后我们将看到更一般的Tambara模块）。在Haskell库中，这个类被称为\hask{Strong}。它在文献中也被称为\hask{Cartesian}：
 \begin{haskell}
-class Profunctor p => Cartesian p where
-  alpha :: p a b -> p (c, a) (c, b)
+ class Profunctor p => Cartesian p where
+ alpha :: p a b -> p (c, a) (c, b)
 \end{haskell}
-The polymorphic function \hask{alpha} has all the relevant naturality properties guaranteed by parametric polymorphism. 
+多态函数\hask{alpha}的所有相关自然性都由参数多态性保证。
 
-The profunctor lens is just a type synonym for a function type that is polymorphic in \hask{Cartesian} profunctors:
+profunctor透镜只是在\hask{Cartesian} profunctor中多态的函数类型的同义词：
 \begin{haskell}
-type LensP s t a b = forall p. Cartesian p => p a b -> p s t
-\end{haskell}
-
-The easiest way to implement such a function is to start from the existential representation of a lens and apply \hask{alpha} followed by \hask{dimap} to the profunctor argument:
-\begin{haskell}
-toLensP :: LensE s t a b -> LensP s t a b
-toLensP (LensE from to) = dimap from to . alpha
+ type LensP s t a b = forall p. Cartesian p => p a b -> p s t
 \end{haskell}
 
-Because profunctor lenses are just functions, we can compose them as such:
+实现这种函数的最简单方法是从透镜的存在性表示开始，然后对profunctor参数应用\hask{alpha}和\hask{dimap}：
 \begin{haskell}
-lens1 :: LensP s t x y 
--- p s t -> p x y
-lens2 :: LensP x y a b 
--- p x y -> p a b
-lens3 :: LensP s t a b 
--- p s t -> p a b
-lens3 = lens2 . lens1
+ toLensP :: LensE s t a b -> LensP s t a b
+ toLensP (LensE from to) = dimap from to . alpha
 \end{haskell}
 
-The converse mapping from a profunctor representation to the set/get representation of the lens is also possible. For that we need to guess the profunctor that we can feed into \hask{LensP}. It turns out that the get/set representation of the lens is such a profunctor, when we fix the pair of types \hask{a} and \hask{b}. We define:
+由于profunctor透镜只是函数，我们可以将它们作为函数进行组合：
 \begin{haskell}
-data FlipLens a b s t = FlipLens (s -> a) (s -> b -> t)
-\end{haskell}
-It's easy to show that it's indeed a profunctor:
-\begin{haskell}
-instance Profunctor (FlipLens a b) where
-  dimap f g (FlipLens get set) = FlipLens (get . f) (fmap g . set . f)
-\end{haskell}
-Not only that---it is also a \hask{Cartesian} profunctor:
-\begin{haskell}
-instance Cartesian (FlipLens a b) where
-  alpha(FlipLens get set) = FlipLens get' set'
-    where get' = get . snd
-          set' = \(x, s) b -> (x, set s b)
-\end{haskell}
-We can now initialize \hask{FlipLens} with a trivial pair of a getter and a setter and feed it to our profunctor representation:
-\begin{haskell}
-fromLensP :: LensP s t a b -> (s -> a, s -> b -> t)
-fromLensP pp = (get', set')
-  where FlipLens get' set' = pp (FlipLens id (\s b -> b))
+ lens1 :: LensP s t x y
+ -- p s t -> p x y
+ lens2 :: LensP x y a b
+ -- p x y -> p a b
+ lens3 :: LensP s t a b
+ -- p s t -> p a b
+ lens3 = lens2 . lens1
 \end{haskell}
 
-\section{General Optics}
-Tambara modules were originally defined for an arbitrary monoidal category\footnote{In fact, Tambara modules were originally defined for a category enriched over vector spaces} with a tensor product $\otimes$ and a unit object $I$. Their structure maps have the form:
+从profunctor表示到透镜的集合/获取表示的转换也是可能的。为此，我们需要猜测一个可以输入到\hask{LensP}中的profunctor。事实证明，透镜的获取/设置表示是一个profunctor，当我们固定类型对\hask{a}和\hask{b}时。我们定义：
+\begin{haskell}
+ data FlipLens a b s t = FlipLens (s -> a) (s -> b -> t)
+\end{haskell}
+很容易证明它确实是一个profunctor：
+\begin{haskell}
+ instance Profunctor (FlipLens a b) where
+ dimap f g (FlipLens get set) = FlipLens (get . f) (fmap g . set . f)
+\end{haskell}
+不仅如此——它还是一个\hask{Cartesian} profunctor：
+\begin{haskell}
+ instance Cartesian (FlipLens a b) where
+ alpha(FlipLens get set) = FlipLens get' set'
+ where get' = get . snd
+ set' = \(x, s) b -> (x, set s b)
+\end{haskell}
+我们现在可以用一个简单的getter和setter对来初始化\hask{FlipLens}，并将其输入到我们的profunctor表示中：
+\begin{haskell}
+ fromLensP :: LensP s t a b -> (s -> a, s -> b -> t)
+ fromLensP pp = (get', set')
+ where FlipLens get' set' = pp (FlipLens id (\s b -> b))
+\end{haskell}
+
+\section{General Optics（通用光学器件）}
+Tambara模块最初是为一个带有张量积$\otimes$和单位对象$I$的任意单态范畴（monoidal category）\footnote{事实上，Tambara模块最初是在向量空间上丰富的范畴中定义的}定义的。它们的结构映射形式如下：
 \[ \alpha_{\langle a, b\rangle, c} \colon P \langle a, b \rangle \to P \langle c \otimes a, c \otimes b \rangle \]
-You can easily convince yourself that all coherency laws translate directly to this case, and the derivation of profunctor optics works without a change.
+你可以很容易地相信所有的协调律在这个情形下都可以直接翻译，profunctor光学器件的推导也不会有任何变化。
 
-\subsection{Prisms}
+\subsection{Prisms（棱镜）}
 
-From the programming point of view there are two obvious monoidal structures to explore: the product and the sum. We've seen that the product gives rise to lenses. The sum, or the coproduct, gives rise to prisms. 
+从编程的角度来看，有两种显而易见的单态结构值得探索：积和和。我们已经看到积引出了透镜。和或余积引出了棱镜。
 
-We get the existential representation simply by replacing the product by the sum in the definition of a lens:
+通过在透镜定义中将积替换为和，可以得到存在性表示：
 \[ \mathcal{P}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c + a) \times  \mathcal{C}(c + b, t) \]
-To simplify this, notice that the mapping out of a sum is equivalent to the product of mappings:
+为了简化这个，我们注意到从一个和中映射出等价于映射的乘积：
 \[ \int^{c} \mathcal{C}(s, c + a) \times  \mathcal{C}(c + b, t) \cong  \int^{c} \mathcal{C}(s, c + a) \times  \mathcal{C}(c, t) \times  \mathcal{C}(b, t) \]
-Using the co-Yoneda lemma, we can get rid of the coend to get:
+利用co-Yoneda引理，我们可以消除余端，得到：
 \[ \mathcal{C}(s, t + a) \times  \mathcal{C}(b, t) \]
 
-In Haskell, this defines a pair of functions:
+在Haskell中，这定义了一对函数：
 \begin{haskell}
 match :: s -> Either t a
 build :: b -> t
 \end{haskell}
 
-To understand this, let's first translate the existential form of the prism:
+为了理解这一点，让我们首先翻译棱镜的存在形式：
 \begin{haskell}
 data Prism s t a b where
-  Prism :: (s -> Either c a) -> (Either c b -> t) -> Prism s t a b
+Prism :: (s -> Either c a) -> (Either c b -> t) -> Prism s t a b
 \end{haskell}
-Here \hask{s} either contains the focus \hask{a} or the residue \hask{c}. Conversely, \hask{t} can be built either from the new focus \hask{b}, or from the residue \hask{c}. 
+这里\hask{s}要么包含焦点\hask{a}，要么包含残余\hask{c}。相反，\hask{t}可以通过新焦点\hask{b}或残余\hask{c}来构建。
 
-This logic is reflected in the conversion functions:
+这种逻辑反映在转换函数中：
 \begin{haskell}
 toMatch :: Prism s t a b -> (s -> Either t a)
 toMatch (Prism from to) s =
-  case from s of
-    Left  c -> Left (to (Left c))
-    Right a -> Right a
+case from s of
+Left  c -> Left (to (Left c))
+Right a -> Right a
 \end{haskell}
 
 \begin{haskell}
@@ -625,107 +623,109 @@ toBuild (Prism from to) b = to (Right b)
 \begin{haskell}
 toPrism :: (s -> Either t a) -> (b -> t) -> Prism s t a b
 toPrism match build = Prism from to
-  where
-    from = match
-    to (Left  c) = c
-    to (Right b) = build b
+where
+from = match
+to (Left  c) = c
+to (Right b) = build b
 \end{haskell}
 
-The profunctor representation of the prism is almost identical to that of the lens, except for swapping the product for the sum. 
+棱镜的profunctor表示几乎与透镜相同，只是将积替换为和。
 
-The class of Tambara modules for the sum type is called \hask{Choice} in the Haskell library, or \hask{Cocartesian} in the literature:
+为和类型定义的Tambara模块类在Haskell库中被称为\hask{Choice}，在文献中被称为\hask{Cocartesian}：
 \begin{haskell}
 class Profunctor p => Cocartesian p where
-  alpha' :: p a b -> p (Either c a) (Either c b)
+alpha' :: p a b -> p (Either c a) (Either c b)
 \end{haskell}
-The profunctor representation is a polymorphic function type:
+棱镜的profunctor表示是一个多态函数类型：
 \begin{haskell}
 type PrismP s t a b = forall p. Cocartesian p => p a b -> p s t
 \end{haskell}
 
-The conversion from the existential prism is virtually identical to that of the lens:
+从存在棱镜到profunctor表示的转换几乎与透镜相同：
 \begin{haskell}
 toPrismP :: Prism s t a b -> PrismP s t a b
 toPrismP (Prism from to) = dimap from to . alpha'
 \end{haskell}
 
-Again, profunctor prisms compose using function composition.
-\subsection{Traversals}
-A traversal is a type of optic that focuses on multiple foci at once. Imagine, for instance, that you have a tree that can have zero or more leaves of type \hask{a}. A traversal should be able to get you a list of those nodes. It should also let you replace these nodes with a new list. And here's the problem: the length of the list that delivers the replacements must match the number of nodes, otherwise bad things happen. 
+同样，profunctor棱镜可以通过函数组合来组合。
 
-A type-safe implementation of a traversal would require us to keep track of the sizes of lists. In other words, it would require dependent types.
+\subsection{Traversals（遍历）}
+遍历是一种同时聚焦多个焦点的光学器件。想象一下，你有一棵树，它可能有零个或多个类型为\hask{a}的叶子。遍历应该能够为你提供这些节点的列表。它还应该让你用一个新的列表替换这些节点。而问题在于：提供替换的列表长度必须与节点的数量相匹配，否则会发生错误。
 
-In Haskell, a (non-type-safe) traversal is often written as:
+一种类型安全的遍历实现需要我们跟踪列表的大小。换句话说，它需要依赖类型。
+
+在Haskell中，遍历通常写成：
 \begin{haskell}
 type Traversal s t a b = s -> ([b] -> t, [a])
 \end{haskell}
-with the understanding that the sizes of the two lists are determined by \hask{s} and must be the same. 
+理解是，两个列表的大小由\hask{s}确定，且必须相同。
 
-When translating traversals to categorical language, we'll express this condition using a sum over the sizes of the list. A counted list of size $n$ is an $n$-tuple, or an element of $a^n$, so we can write:
+将遍历翻译为范畴语言时，我们将使用对列表大小的求和来表示这一条件。大小为$n$的计数列表是一个$n$元组，或$a^n$的一个元素，因此我们可以写成：
 \[ \mathbf{Tr} \langle s, t\rangle \langle a, b \rangle = \Set \big( s, \sum_n (\Set (b^n, t) \times a^n) \big) \]
-We interpret a traversal as a function that, given a source $s$ produces an existential type that is hiding an $n$. It says that there exists an $n$ and a pair consisting of a function $b^n \to t$ and an $n$-tuple $a^n$. 
+我们将遍历解释为一个函数，该函数给定一个源$s$，产生一个存在类型，该类型隐藏了一个$n$。它表示存在一个$n$和一对函数组成的元组$(b^n \to t)$和$n$元组$a^n$。
 
-The existential form of a traversal must take into account the fact that the residues for different $n$'s will have, in principle, different types. For instance, you can decompose a tree into an n-tuple of leaves $a^n$ and the residue $c_n$ with $n$ holes. So the correct existential representation for a traversal must involve a coend over all sequences $c_n$ that are indexed by natural numbers:
+遍历的存在形式必须考虑到不同$n$的残余（residue）在原则上将具有不同的类型。例如，你可以将一棵树分解为一个叶子$a^n$的n元组和一个带有$n$个孔的残余$c_n$。因此，遍历的正确存在表示必须涉及所有由自然数索引的序列$c_n$上的余端：
 \[ \mathbf{Tr} \langle s, t\rangle \langle a, b \rangle = \int^{c_n} \cat C (s, \sum_m c_m \times a^m) \times \cat C (\sum_k c_k \times b^k, t) \]
-The sums here are coproducts in $\cat C$.
+这里的和是$\cat C$中的余积。
 
-One way to look at sequences $c_n$ is to interpret them as fibrations. For instance, in $\Set$ we would start with a set $C$ and a projection $p \colon C \to \mathbb N$, where $\mathbb N$ is a set of natural numbers. Similarly $a^n$ could be interpreted as a fibration of the free monoid on $a$ (the set of lists of $a$'s) with the projection that extracts the length of the list.
+序列$c_n$的一种看法是将它们解释为纤维化（fibrations）。例如，在$\Set$中，我们将从一个集合$C$和一个投影$p \colon C \to \mathbb N$开始，其中$\mathbb N$是自然数的集合。类似地，$a^n$可以解释为$a$的自由幺半群（monoid）的纤维化（自由幺半群是$a$的列表的集合），投影用于提取列表的长度。
 
-Or we can look at $c_n$'s as mappings from the set of natural numbers to $\cat C$. In fact, we can treat natural numbers as a discrete category $\cat N$, in which case $c_n$'s are functors $\cat N \to \cat C$.
+或者我们可以将$c_n$视为从自然数到$\cat C$的映射。事实上，我们可以将自然数视为一个离散范畴$\cat N$，在这种情况下，$c_n$是从$\cat N$到$\cat C$的函子。
 
 \[ \mathbf{Tr} \langle s, t\rangle \langle a, b \rangle = \int^{c \colon [\cat N, \cat C]} \cat C (s, \sum_m c_m \times a^m) \times \cat C (\sum_k c_k \times b^k, t) \]
 
-To show the equivalence of the two representations, we first rewrite the mapping out of a sum as a product of mappings:
+为了证明这两种表示的等价性，我们首先将从和的映射重写为映射的乘积：
 \[\int^{c \colon [\cat N, \cat C]} \cat C (s, \sum_m c_m \times a^m) \times \prod_k \cat C (c_k \times b^k, t) \]
-and then use the currying adjunction:
+然后使用柯里化的伴随：
 \[\int^{c \colon [\cat N, \cat C]} \cat C (s, \sum_m c_m \times a^m) \times \prod_k \cat C (c_k,  [b^k, t]) \]
-Here, $[b^k, t]$ is the internal hom, which is an alternative notation for the exponential object $t^{b^k}$.
+这里，$[b^k, t]$是内部同构（internal hom），它是指数对象$t^{b^k}$的另一种表示。
 
-The next step is to recognize that a product in this formula represents a set of natural transformations in $[\cat N, \cat C]$. Indeed, we could write it as an end:
- \[ \prod_k \cat C (c_k,  [b^k, t] \cong \int_{k : \cat N} C (c_k,  [b^k, t]) \]
-This is because an end over a discrete category is just a product. Alternatively, we could write it as a hom-set in the functor category:
+下一步是认识到在这个公式中的乘积表示的是$[\cat N, \cat C]$中的自然转换集。实际上，我们可以将其写为一个端：
+\[ \prod_k \cat C (c_k,  [b^k, t] \cong \int_{k : \cat N} C (c_k,  [b^k, t]) \]
+这是因为离散范畴上的端只是一个乘积。或者，我们可以将其写为函子范畴中的同态集：
 \[ [\cat N, \cat C](c_{-}, [b^{-}, t]) \]
-with placeholders replacing the arguments to the two functors in question:
+占位符替换为两个函子的参数：
 \[ k \mapsto c_k \]
 \[ k \mapsto [b^k, t] \]
 
-We can now use the co-Yoneda lemma in the functor category $[\cat N, \cat C]$:
+现在我们可以在函子范畴$[\cat N, \cat C]$中使用co-Yoneda引理：
 \[\int^{c \colon [\cat N, \cat C]} \cat C (s, \sum_m c_m \times a^m) \times  [\cat N, \cat C]\big(c_{-}, [b^{-}, t]\big) \cong \cat C(s, \sum_m [b^m, t] \times a^m)\]
-This result is more general than our original formula, but it turns into it when restricted to the category of sets.
+这个结果比我们最初的公式更一般，但在限制到集合范畴时会变为我们原来的公式。
 
-To derive a profunctor representation for traversals, we should look more closely at the kind of transformations that are involved. We define the action of a functor $c \colon [\cat N, \cat C]$ on $a$ as:
+为了推导遍历的profunctor表示，我们应该更仔细地观察所涉及的转换类型。我们将函子$c \colon [\cat N, \cat C]$在$a$上的作用定义为：
 \[ c \bullet a = \sum_m c_m \times a^m \]
-These actions can be composed by expanding the formula using distributivity laws:
+这些作用可以通过使用分配律展开公式进行组合：
 \[ c \bullet (c' \bullet a) = \sum_m c_m \times (\sum_n c'_n \times a^n)^m \]
-If the target category is $\Set$, this is equivalent to the following Day convolution (for non-$\Set$ categories, one could use the enriched version of the Day convolution):
+如果目标范畴是$\Set$，这等价于以下的Day卷积（对于非$\Set$范畴，可以使用Day卷积的丰富版本）：
 \[ (c \star c')_k = \int^{m, n} \cat N (m + n, k) \times c_m \times c'_n \]
-This gives monoidal structure to the category $[\cat N, \cat C]$. 
+这给$[\cat N, \cat C]$范畴提供了单态结构。
 
-The existential representation of traversals can be written is terms of the action of this monoidal category on $\cat C$:
+遍历的存在表示可以写成这个单态范畴在$\cat C$上的作用的术语：
 \[ \mathbf{Tr} \langle s, t\rangle \langle a, b \rangle = \int^{c \colon [\cat N, \cat C]} \cat C (s, c \bullet a) \times \cat C (c \bullet b, t) \]
 
-To derive the profunctor representation of traversals, we have to generalize Tambara modules to the action of a monoidal category:
+为了推导遍历的profunctor表示，我们必须将Tambara模块推广到单态范畴的作用：
 \[ \alpha_{\langle a, b\rangle, c} \colon P \langle a, b \rangle \to P \langle c \bullet a, c \bullet b \rangle \]
-It turns out that the original derivation of profunctor optics still works for these generalized Tambara modules, and traversals can be written as polymorphic functions:
-\[  \mathbf{Tr}\langle s, t \rangle \langle a, b \rangle 
- =\int_{P \colon \cat T} \Set \big((U P) \langle a, b\rangle, (U P) \langle s, t\rangle \big) \]
-where the end is taken over a generalized Tambara module.
+事实证明，profunctor光学器件的推导对于这些推广的Tambara模块仍然有效，遍历可以表示为多态函数：
+\[  \mathbf{Tr}\langle s, t \rangle \langle a, b \rangle
+=\int_{P \colon \cat T} \Set \big((U P) \langle a, b\rangle, (U P) \langle s, t\rangle \big) \]
+其中的端是取在推广的Tambara模块上。
 
-\section{Mixed Optics}
+\section{Mixed Optics（混合光学器件）}
 
-Whenever we have an action of a monoidal category $\cat M$ on $\cat C$ we can define the corresponding optic. A category with such an action is called an \index{actegory}\emph{actegory}. We can go even further by considering two separate actions. Suppose that $\cat M$ can act on both $\cat C$ and $\cat D$. We'll use the same notation for both actions:
+每当我们有一个单态范畴$\cat M$在$\cat C$上的作用时，我们可以定义相应的光学器件。一个具有这种作用的范畴称为\index{actegory} \emph{actegory}。我们可以更进一步考虑两个独立的作用。假设$\cat M$可以同时作用在$\cat C$和$\cat D$上。我们将对这两种作用使用相同的符号：
 \[ \bullet \colon \cat M \times \cat C \to \cat C \]
 \[ \bullet \colon \cat M \times \cat D \to \cat D \]
-We can then define the \index{mixed optics}\emph{mixed optics} as:
+然后我们可以定义\index{mixed optics} \emph{混合光学器件}为：
 \[ \mathcal{O} \langle s, t \rangle \langle a, b \rangle = \int^{m \colon \cat M} \cat C(s, m \bullet a) \times \cat D(m \bullet b, t) \]
-These mixed optics have profunctor representations in terms of profunctors:
+这些混合光学器件具有基于以下profunctors的profunctor表示：
 \[ P \colon \cat C ^{op} \times \cat D \to \Set \]
-and the corresponding Tambara modules that use two separate actions:
+以及相应的使用两种独立作用的Tambara模块：
 \[ \alpha_{\langle a, b\rangle, m} \colon P \langle a, b \rangle \to P \langle m \bullet a, m \bullet b \rangle \]
-with $a$ an object of $\cat C$, $b$ and object of $\cat D$, and $m$ and object of $\cat M$.
+其中$a$是$\cat C$的一个对象，$b$是$\cat D$的一个对象，$m$是$\cat M$的一个对象。
 
 \begin{exercise}
-What are the mixed optics for the action of the cartesian product when one of the categories is the terminal category? What if the first category is $\cat C^{op} \times \cat C$ and the second is terminal?
+对于当一个范畴是终范畴时，积的作用，混合光学器件是什么？如果第一个范畴是$\cat C^{op} \times \cat C$而第二个是终范畴，又是什么？
 \end{exercise}
+
 
 \end{document}
