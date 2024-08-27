@@ -1,1501 +1,1501 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{16}
+ \setcounter{chapter}{16}
 
-\chapter{Ends and Coends}
+ \chapter{Ends and Coends（极限与余极限）}
 
-\section{Profunctors}
+ \section{Profunctors（泛函）}
 
-In the rarified air of category theory we encounter patterns that are so far removed from their origins that we have problems visualizing them. It doesn't help that the more abstract a pattern gets the more dissimilar the concrete examples of it are. 
+ 在范畴论的高度抽象中，我们会遇到一些模式，这些模式离其起源如此遥远，以至于我们难以将其具象化。更为抽象的模式通常与其具体实例的相似度更低，这使得我们理解起来更加困难。
 
-An arrow from $a$ to $b$ is relatively easy to visualize. We have a very familiar model for it: a function that consumes elements of $a$ and produces elements of $b$. A hom-set is a collection of such arrows. 
+ 从$a$到$b$的箭头（arrow）相对容易理解。我们对它有一个非常熟悉的模型：一个函数，它消耗$a$的元素并生成$b$的元素。态射集（hom-set）是一组这样的箭头的集合。
 
-A functor is an arrow between categories. It consumes objects and arrows from one category and produces objects and arrows from another. We can think of it a recipe for building such objects (and arrows) from materials provided by the source category. In particular, we  often think of an endofunctor as a container of building materials.
+ 函子（functor）是范畴之间的箭头。它消耗来自一个范畴的对象和箭头，并生成另一个范畴中的对象和箭头。我们可以将其视为一种使用源范畴提供的材料来构建这些对象（和箭头）的配方。尤其是，我们通常将自函子（endofunctor）视为构建材料的容器。
 
-A profunctor maps a pair of objects $\langle a, b \rangle$ to a set $P\langle a, b \rangle$ and a pair of arrows:
-\[ \langle f \colon s \to a, g \colon b \to t \rangle \]
-to a function:
-\[ P\langle f, g \rangle \colon P\langle a, b \rangle \to P\langle s, t \rangle\]
+ 泛函（profunctor）将一对对象$\langle a, b \rangle$映射到一个集合$P\langle a, b \rangle$，并将一对箭头
+ \[ \langle f \colon s \to a, g \colon b \to t \rangle \]
+ 映射到一个函数：
+ \[ P\langle f, g \rangle \colon P\langle a, b \rangle \to P\langle s, t \rangle \]
 
-A profunctor is an abstraction that combines elements of many other abstractions. Since it's a functor $ \mathcal{C}^{op} \times  \mathcal{C} \to \mathbf{Set}$, we can think of it as constructing a set from a pair of objects, and a function from a pair of arrows (one of them going in the opposite direction). This doesn't help our imagination though.
+ 泛函是结合了许多其他抽象元素的抽象。因为它是一个从$ \mathcal{C}^{op} \times  \mathcal{C}$到$\mathbf{Set}$的函子，我们可以将其视为从一对对象中构造一个集合，并从一对箭头（其中一个箭头的方向相反）中构造一个函数。然而，这并不有助于我们进行想象。
 
-Fortunately, we have a good model for a profunctor: the hom-functor. The set of arrows between two objects behaves like a profunctor when you vary the objects. It also makes sense that there is a difference between varying the source and the target of the hom-set. 
+ 幸运的是，我们有一个关于泛函的良好模型：同态函子（hom-functor）。在变动对象时，两者之间的箭头集表现得像一个泛函。并且明显的是，改变源对象和目标对象的同态集（hom-set）之间存在区别。
 
-We can, therefore, think of an arbitrary profunctor as generalizing the hom-functor. A profunctor provides additional bridges between objects, on top of hom-sets that are already there. 
+ 因此，我们可以将任意泛函视为同态函子的泛化。泛函在已有的同态集基础上，为对象之间提供了额外的桥梁。
 
-There is, however one big difference between an element of the hom-set $ \mathcal{C}(a, b)$ and an element of the set $P\langle a, b \rangle$. Elements of hom-sets are arrows, and arrows can be composed. It's not immediately obvious how to compose profunctors. 
+ 然而，泛函$ \mathcal{C}(a, b)$的元素与集合$P\langle a, b \rangle$的元素之间有一个很大的区别。前者的元素是箭头，而箭头可以组合（compose）。对于泛函如何组合，并没有一目了然的方法。
 
-Granted, the lifting of arrows by a profunctor can be seen as generalizing composition---just not between profuctors, but between hom-sets and profunctors. For instance, we can ``precompose'' $P \langle a, b \rangle$ with an arrow $f \colon s \to a$ to obtain $P \langle s, b \rangle$:
-\[ P\langle f, id_b \rangle \colon P \langle a, b \rangle \to P \langle s, b \rangle \]
-Similarly, we can ``postcompose'' it with $g \colon b \to t$:
-\[ P \langle id_a, g \rangle \colon P \langle a, b \rangle \to P \langle a, t \rangle \]
-This kind of heterogenous composition takes a composable pair consisting of an arrow and an element of a profunctor and produces an element of a profunctor.
+ 当然，可以认为泛函通过提升箭头（lifting of arrows）来泛化组合——不过不是在泛函之间，而是在同态集与泛函之间。例如，我们可以用箭头$f \colon s \to a$来“预组合”$P \langle a, b \rangle$，以得到$P \langle s, b \rangle$：
+ \[ P\langle f, id_b \rangle \colon P \langle a, b \rangle \to P \langle s, b \rangle \]
+ 类似地，我们可以用$g \colon b \to t$“后组合”它：
+ \[ P \langle id_a, g \rangle \colon P \langle a, b \rangle \to P \langle a, t \rangle \]
+ 这种异质的组合方式，接受由一个箭头和一个泛函元素组成的可组合对，并生成一个泛函的元素。
 
-A profunctor can be extended this way on both sides by lifting a pair of arrows:
+ 泛函可以通过提升一对箭头在两侧进行扩展：
 
-\[
- \begin{tikzcd}
-  & s
-  \arrow[r, bend left, dashed, blue, "f"]
- & a
- \arrow[r, bend right, "P"]
- & b
-  \arrow[r, bend left, dashed, blue, "g"]
- &  t
+ \[
+  \begin{tikzcd}
+   & s
+   \arrow[r, bend left, dashed, blue, "f"]
+   & a
+   \arrow[r, bend right, "P"]
+   & b
+   \arrow[r, bend left, dashed, blue, "g"]
+   &  t
   \end{tikzcd}
-\]
+ \]
 
-\subsection{Collages}
+ \subsection{Collages（拼接）}
 
-There is no reason to restrict a profunctor to a single category. We can easily define a profunctor between two categories as a functor $ P \colon \mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$. Such a profunctor can be used to glue two categories together by generating the missing hom-sets from the objects in $\mathcal{C}$ to the objects in $\mathcal{D}$. 
+ 没有理由将泛函限制在单一范畴上。我们可以轻松定义一个在两个范畴之间的泛函，例如$ P \colon \mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$。这样的泛函可以通过生成从$\mathcal{C}$中的对象到$\mathcal{D}$中的对象的同态集（hom-set）来将两个范畴连接在一起。
 
-A collage (or a \index{cograph}cograph) of two categories $\mathcal{C}$ and $\mathcal{D}$ is a category whose objects are objects from both categories (a disjoint union). A hom-set between two objects $x$ and $y$ is either a hom-set in $\mathcal{C}$, if both objects are in $\mathcal{C}$; a hom-set in $\mathcal{D}$, if both are in $\mathcal{D}$; or the set $P \langle x, y\rangle$ if $x$ is in $\mathcal{C}$ and $y$ is in $\mathcal{D}$. Otherwise the hom-set is empty. 
+ 两个范畴$\mathcal{C}$和$\mathcal{D}$的拼接（collage）是一个范畴，其对象是来自两个范畴的对象（不相交的并集）。对于两个对象$x$和$y$之间的同态集，要么是$\mathcal{C}$中的同态集（如果两个对象都在$\mathcal{C}$中）；要么是$\mathcal{D}$中的同态集（如果两个对象都在$\mathcal{D}$中）；要么是集合$P \langle x, y\rangle$（如果$x$在$\mathcal{C}$中，$y$在$\mathcal{D}$中）。否则，同态集是空的。
 
-Composition of morphisms is the usual composition, except if one of the morphisms is an element of $P \langle x, y \rangle$. In that case we lift the morphism we're trying to pre- or post-compose. 
+ 态射的组合是通常的组合方式，除非其中一个态射是$P \langle x, y \rangle$的元素。这种情况下，我们需要提升我们尝试进行前组合或后组合的态射。
 
-It's easy to see that a collage is indeed a category. The new morphisms that go between the two sides of the collage are sometimes called \index{heteromorphism}heteromorphisms. They can only go from $\mathcal{C}$ to $\mathcal{D}$, never the other way around. 
+ 很容易看出，拼接确实是一个范畴。新的态射跨越了拼接的两边，有时被称为异态射（heteromorphisms）。它们只能从$\mathcal{C}$到$\mathcal{D}$，而不能反向进行。
 
-Seen this way, a profunctor $ \mathcal{C}^{op} \times  \mathcal{C} \to \mathbf{Set}$ should really be called an \emph{endo}-profunctor. It defines a collage of $\mathcal{C}$ with itself.
+ 从这个角度看，一个从$ \mathcal{C}^{op} \times  \mathcal{C}$到$\mathbf{Set}$的泛函应该真正被称为一个\emph{内}泛函（endo-profunctor）。它定义了$\mathcal{C}$与其自身的拼接。
 
-\begin{exercise}
-Show that there is a functor from a collage of two categories to a stick-figure ``walking arrow'' category that has two objects and one arrow between them (and two identity arrows).
-\end{exercise}
-\begin{exercise}
-Show that, if there is a functor from $\mathcal{C}$ to the walking arrow category then $\mathcal{C}$ can be split into a collage of two categories. 
-\end{exercise}
+ \begin{exercise}
+  证明从两个范畴的拼接到一个有两个对象和一个箭头（以及两个恒等箭头）的“步行箭头”范畴（walking arrow category）之间存在一个函子。
+ \end{exercise}
 
-\subsection{Profunctors as relations}
+ \begin{exercise}
+  证明，如果从$\mathcal{C}$到步行箭头范畴存在一个函子，那么$\mathcal{C}$可以分解成两个范畴的拼接。
+ \end{exercise}
 
-Under a microscope, a profunctor looks like a hom-functor, and the elements of the set $P \langle a, b \rangle$ look like individual arrows. But when we zoom out, we can view a profunctor as a relation between objects. These are not the usual relations; they are \index{proof-relevant relation}\emph{proof-relevant} relations.
+ \subsection{Profunctors as relations（作为关系的泛函）}
 
-To understand this concept better, let's consider a regular functor $F \colon \mathcal{C} \to \mathbf{Set}$ (in other words, a co-presheaf). One way to interpret it is to say that it defines a \index{proof-relevant subset} subset of objects of $\mathcal{C}$, namely those objects that are mapped to non-empty sets. Every element of $F a$ is then treated as a proof that $a$ is a member of this subset. If, on the other hand, $F a$ is an empty set, then $a$ is not a member of the subset.
+ 在微观层面上，泛函看起来像一个同态函子，并且集合$P \langle a, b \rangle$的元素看起来像个别箭头。但是，当我们放大观察时，可以将泛函视为对象之间的关系。这些关系不是普通的关系；它们是\emph{证明相关关系}（proof-relevant relations）。
 
-We can apply the same interpretation to profunctors. If the set $P \langle a, b \rangle$ is empty, we say that $b$ is not related to $a$. If it's not empty, we say that each element of the set $P \langle a, b \rangle$ represents a proof that $b$ is related to $a$. We can then treat a profunctor as a proof-relevant relation. 
+ 为了更好地理解这一概念，让我们考虑一个普通的函子$F \colon \mathcal{C} \to \mathbf{Set}$（换句话说，一个余预层（co-presheaf））。可以将其解释为，它定义了$\mathcal{C}$对象的一个\emph{证明相关子集}（proof-relevant subset），即映射到非空集合的那些对象。$F a$中的每个元素都被视为$a$是此子集成员的证明。另一方面，如果$F a$是一个空集合，则$a$不是该子集的成员。
 
-Notice that we don't assume anything about this relation. It doesn't have to be reflexive, as it's possible for $P \langle a, a \rangle$ to be empty (in fact, $P \langle a, a \rangle$ makes sense only for endo-profunctors). It doesn't have to be symmetric either.
+ 我们可以对泛函应用相同的解释。如果集合$P \langle a, b \rangle$为空，我们说$b$与$a$不相关。如果它非空，我们说该集合中的每个元素代表了$b$与$a$相关的一个证明。然后，我们可以将泛函视为一种证明相关的关系。
 
-Since the hom-functor is an example of an (endo-) profunctor, this interpretation lets us view the hom-functor in a new light: as a built-in proof-relevant relation between objects in a category. If there's an arrow between two objects, they are related. Notice that this relation is reflexive, since $\mathcal{C}(a, a)$ is never empty: at the very least, it contains the identity morphism. 
+ 请注意，我们对这种关系没有做任何假设。它不必是自反的，因为$P \langle a, a \rangle$可能为空（实际上，$P \langle a, a \rangle$仅对内泛函有意义）。它也不必是对称的。
 
-Moreover, as we've seen before, hom-functors interact with profunctors. If $a$ is related to $b$ through $P$, and the hom-sets $\mathcal{C}(s, a)$ and $\mathcal{D}(b, t)$ are non-empty, then automatically $s$ is related to $t$ through $P$. Profunctors are therefore proof-relevant relations that are compatible with the structure of the categories in which they operate.
+ 由于同态函子是（内）泛函的一个例子，这种解释使我们可以从新的角度看待同态函子：作为范畴中对象之间的一种内建的证明相关关系。如果两个对象之间有箭头，它们是相关的。请注意，这种关系是自反的，因为$\mathcal{C}(a, a)$从不为空：至少它包含恒等态射。
 
-We know how to compose a profunctor with hom-functors, but how would we compose two profunctors? We can get a clue from the composition of relations. 
+ 此外，正如我们之前所见，同态函子与泛函相互作用。如果$a$通过$P$与$b$相关，并且同态集$\mathcal{C}(s, a)$和$\mathcal{D}(b, t)$是非空的，那么$s$与$t$通过$P$自动相关。因此，泛函是与它们所操作的范畴结构兼容的证明相关关系。
 
-Suppose that you want to charge your cellphone, but you don't have a charger. In order to connect you to a charger it's enough that you have a friend who owns a charger. Any friend will do. You compose the relation of having a friend with the relation of a person having a charger to get a relation of being able to charge your phone. The proof that you can charge your phone is a pair of proofs, one of friendship and one of the possession of a charger. 
+ 我们知道如何将同态函子与泛函组合在一起，但我们如何组合两个泛函呢？我们可以从关系的组合中得到线索。
 
-In general, we say that two objects are related by the composite relation if there exists an object in the middle that is related to both of them. 
+ 假设你想为手机充电，但你没有充电器。要将你连接到充电器，你只需有一个拥有充电器的朋友。任何朋友都可以。你将拥有朋友的关系与拥有充电器的关系组合在一起，以获得可以为手机充电的关系。你能够为手机充电的证明是一对证明：一个是友情的证明，一个是拥有充电器的证明。
 
-\subsection{Profunctor composition in Haskell}
+ 一般而言，我们说，如果存在一个中间对象与两者都相关，那么两个对象通过组合关系相关。
 
-Composition of relations can be translated to profunctor composition in Haskell. Let's first recall the definition of a profunctor:
-\begin{haskell}
-class Profunctor p where
+ \subsection{Profunctor composition in Haskell（Haskell中的泛函组合）}
+
+ 关系的组合可以翻译为Haskell中的泛函组合。首先回顾泛函的定义：
+ \begin{haskell}
+  class Profunctor p where
   dimap :: (s -> a) -> (b -> t) -> (p a b -> p s t)
-\end{haskell}
+ \end{haskell}
 
-The key to understanding profunctor composition is that it requires the \emph{existence} of the object in the middle. For object $b$ to be related to object $a$ through the composite $P \diamond Q$ there has to exist an object $x$ that bridges the gap:
-\[
- \begin{tikzcd}
-  & a
-  \arrow[r, bend left, blue, "Q"]
- & x
-  \arrow[r, bend left, red, "P"]
- & b
+ 理解泛函组合的关键在于它需要中间对象的\emph{存在}。对于对象$b$通过组合$P \diamond Q$与对象$a$相关，必须存在一个对象$x$来弥合这个差距：
+ \[
+  \begin{tikzcd}
+   & a
+   \arrow[r, bend left, blue, "Q"]
+   & x
+   \arrow[r, bend left, red, "P"]
+   & b
   \end{tikzcd}
-\]
+ \]
 
-This can be encoded in Haskell using an existential type. Given two profunctors \hask{p} and \hask{q}, their composition is a new profunctor \hask{Procompose p q}:
-\begin{haskell}
-data Procompose p q a b where
+ 这可以在Haskell中使用存在类型进行编码。给定两个泛函\hask{p}和\hask{q}，它们的组合是一个新的泛函\hask{Procompose p q}：
+ \begin{haskell}
+  data Procompose p q a b where
   Procompose ::  q a x -> p x b -> Procompose p q a b
-\end{haskell}
-We are using a \hask{GADT} to express the existential nature of the object \hask{x}. The two arguments to the data constructor can be seen as a pair of proofs: one proves that \hask{x} is related to \hask{a}, and the other that \hask{b} is related to \hask{x}. This pair then constitutes the proof that \hask{b} is related to \hask{a}.
+ \end{haskell}
+ 我们使用\hask{GADT}来表达对象\hask{x}的存在性。数据构造函数的两个参数可以看作是一对证明：一个证明\hask{x}与\hask{a}相关，另一个证明\hask{b}与\hask{x}相关。然后，这对证明构成了\hask{b}与\hask{a}相关的证明。
 
-An existential type can be seen as a generalization of a sum type. We are summing over all possible types \hask{x}. Just like a finite sum can be constructed by injecting one of the alternatives (think of the two constructors of \hask{Either}), the existential type can be constructed by picking one particular type for \hask{x} and injecting it into the definition of \hask{Procompose}. 
+ 存在类型可以被视为和类型的推广。我们正在对所有可能的类型\hask{x}进行求和。就像有限求和可以通过注入其中一个备选项来构造（想想\hask{Either}的两个构造函数），存在类型可以通过为\hask{x}选择一个特定类型并将其注入\hask{Procompose}的定义中来构造。
 
-Just as mapping out from a sum type requires a pair of function, one per each alternative; a mapping out from an existential type requires a family of functions, one per every type. The mapping out from \hask{Procompose}, for instance, is given by a polymorphic function:
-\begin{haskell}
-mapOut :: Procompose p q a b -> (forall x. q a x -> p x b -> c) -> c
-mapOut (Procompose qax pxb) f = (f qax pxb)
-\end{haskell}
+ 就像从和类型映射出需要一对函数，每个备选项一个；从存在类型映射出需要一个函数族，每个类型一个。比如，从\hask{Procompose}映射出的函数由一个多态函数定义：
+ \begin{haskell}
+  mapOut :: Procompose p q a b -> (forall x. q a x -> p x b -> c) -> c
+  mapOut (Procompose qax pxb) f = (f qax pxb)
+ \end{haskell}
 
-The composition of profunctors is again a profunctor, as can be seen from this instance:
-\begin{haskell}
-instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) 
+ 泛函的组合本身也是一个泛函，如以下实例所示：
+ \begin{haskell}
+  instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q)
   where
-    dimap l r (Procompose qax pxb) = 
-               Procompose (dimap l id qax) (dimap id r pxb)
-\end{haskell}
-This is just saying that you can extend the composite profunctor by extending the first one to the left and the second one to the right.
+  dimap l r (Procompose qax pxb) =
+  Procompose (dimap l id qax) (dimap id r pxb)
+ \end{haskell}
+ 这只是说你可以通过将第一个泛函扩展到左边，将第二个泛函扩展到右边来扩展组合泛函。
 
-The fact that this definition of profunctor composition happens to work in Haskell is due to parametricity. The language constraints the types of profunctors in a way that makes this work. In general, though, taking a simple sum over intermediate objects would result in over-counting, so in category theory we have to compensate for that.
+ 在Haskell中这个泛函组合定义之所以能正常工作，是由于参数多态性。语言通过类型限制了泛函，使其能够正常工作。然而，一般来说，如果仅对中间对象进行简单求和，会导致过度计数，因此在范畴论中我们必须对此进行补偿。
 
-\section{Coends}
+ \section{Coends（余极限）}
 
-The over-counting in the naive definition of profunctor composition happens when two candidates for the object in the middle are connected by a morphism:
-\[
- \begin{tikzcd}
-  & a
-  \arrow[r, bend left, blue, "Q"]
-  &x
-  \arrow[r, dashed, "f"]
- & y
-  \arrow[r, bend left, red, "P"]
- & b
+ 在泛函组合的简单定义中，过度计数发生在两个候选中间对象之间通过一个态射连接时：
+ \[
+  \begin{tikzcd}
+   & a
+   \arrow[r, bend left, blue, "Q"]
+   &x
+   \arrow[r, dashed, "f"]
+   & y
+   \arrow[r, bend left, red, "P"]
+   & b
   \end{tikzcd}
-\]
-We can either extend $Q$ on the right, by lifting $Q \langle id, f \rangle$, and use $y$ as the middle object; or we can extend $P$ on the left, by lifting $P \langle f, id \rangle$, and use $x$ as the intermediary.
+ \]
+ 我们可以在右边扩展$Q$，通过提升$Q \langle id, f \rangle$，并使用$y$作为中间对象；或者我们可以在左边扩展$P$，通过提升$P \langle f, id \rangle$，并使用$x$作为中介。
 
-In order to avoid the double-counting, we have to tweak our definition of a sum type when applied to profunctors. The resulting construction is called a coend. 
+ 为了避免双重计数，我们必须在应用于泛函时调整我们的和类型定义。得到的构造被称为余极限（coend）。
 
-First, let's re-formulate the problem. We are trying to sum over all objects $x$ in the product:
-\[ P \langle a, x \rangle \times Q \langle x, b \rangle \]
-The double-counting happens because we can open up the gap between the two profunctors, as long as there is a morphism that we can fit between them. So we are really looking at a more general product:
-\[ P \langle a, x \rangle \times Q \langle y, b \rangle \]
-The important observation is that, if we fix the endpoints $a$ and $b$, this product is a profunctor in $\langle y, x \rangle$. This is easily seen after a little rearrangement (up to isomorphism):
-\[ Q \langle y, b \rangle \times P \langle a, x \rangle \]
-We are interested in the sum of the diagonal parts of this profunctor, that is when $x$ is equal to $y$. 
+ 首先，让我们重新表述问题。我们试图对所有对象$x$在乘积上求和：
+ \[ P \langle a, x \rangle \times Q \langle x, b \rangle \]
+ 双重计数发生是因为我们可以在两个泛函之间打开一个间隙，只要有一个态射可以填充其中。因此，我们真正关注的是一个更通用的乘积：
+ \[ P \langle a, x \rangle \times Q \langle y, b \rangle \]
+ 重要的是，如果我们固定端点$a$和$b$，这个乘积是$\langle y, x \rangle$中的一个泛函。这可以通过一些排列（同构）轻松看出：
+ \[ Q \langle y, b \rangle \times P \langle a, x \rangle \]
+ 我们感兴趣的是这个泛函的对角部分的和，也就是说，当$x$等于$y$时。
 
-So let's see how we would go about defining the sum of all diagonal entries of a general profunctor $P$. In fact, this construction works for any functor $P \colon \cat C^{op} \times \cat C \to D$, not just for $\Set$-valued profunctors. 
+ 因此，让我们看看如何定义一个泛函$P$的对角项的和。实际上，这种构造适用于任何函子$P \colon \cat C^{op} \times \cat C \to D$，而不仅仅是$\Set$值的泛函。
 
-The sum of the diagonal objects is defined by injections; in this case, one per every object in $\cat C$. Here we show just two of them and the dashed line representing all the rest:
-\[
- \begin{tikzcd}
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[rr, dash, dashed]
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- & d
- \end{tikzcd}
-\]
+ 对角项的和由注入定义；在这种情况下，每个对象$\cat C$有一个注入。这里我们只展示其中的两个，虚线代表所有其他的注入：
+ \[
+  \begin{tikzcd}
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[rr, dash, dashed]
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   & d
+  \end{tikzcd}
+ \]
 
-If we were defining a sum, we'd make it a universal object equipped with such injections. But because we are dealing with functors of two variables, we want to identify the injections that are related by ``extending'' some common ancestor---here, $P \langle y, x \rangle$. We want the following diagram to commute, whenever there is a connecting morphism $f\colon x \to y$:
+ 如果我们在定义一个和，我们会使其成为一个带有这些注入的泛函对象。但由于我们处理的是两个变量的函子，我们希望识别那些通过“扩展”一些公共祖先（这里是$P \langle y, x \rangle$）而相关的注入。我们希望下图在存在连接态射$f \colon x \to y$时交换：
 
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-This diagram is called a \index{co-wedge}co-wedge, and its commuting condition is called the co-wedge condition. For every $f \colon x \to y$, we demand that:
-\[ i_x \circ P \langle f, id_y \rangle = i_y \circ P \langle id_x, f \rangle \]
-The \emph{universal} co-wedge is called a coend.
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 这个图被称为\emph{余楔形图}（co-wedge），其交换条件称为余楔条件。对于每个$f \colon x \to y$，我们要求：
+ \[ i_x \circ P \langle f, id_y \rangle = i_y \circ P \langle id_x, f \rangle \]
+ \emph{通用}余楔被称为余极限（coend）。
 
-Since a coend generalizes the sum to a potentially infinite domain, we write it using the integral sign, with the ``integration variable'' at the top:
-\[ \int^{x\colon \mathcal{C}} P \langle x, x \rangle \]
-Universality means that, whenever there is an object $d$ in $\cat D$ equipped with a family of arrows $g_x \colon P \langle x, x \rangle \to d$ satisfying the co-wedge condition, there is a unique mapping out from the coend:
-\[ h \colon \int^{x\colon \mathcal{C}} P \langle x, x \rangle \to d \]
-that factorizes every $g_x$ through the injection $i_x$:
-\[ g_x = h \circ i_x \]
-Pictorially, we have:
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[ddr, bend right,  "g_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \arrow[ddl, bend left,  "g_x"]
- \\
- &\int^x P \langle x, x \rangle
- \arrow[d, dashed, "h"]
- \\
- &d
- \end{tikzcd}
-\]
+ 由于余极限将和推广到可能的无限域，我们用积分符号表示它，上方标出“积分变量”：
+ \[ \int^{x\colon \mathcal{C}} P \langle x, x \rangle \]
+ 通用性意味着，任何配备了满足余楔条件的箭头族$g_x \colon P \langle x, x \rangle \to d$的对象$d$，都会有一个唯一的从余极限映射出的映射：
+ \[ h \colon \int^{x\colon \mathcal{C}} P \langle x, x \rangle \to d \]
+ 可以通过注入$i_x$因式分解所有的$g_x$：
+ \[ g_x = h \circ i_x \]
+ 如图所示：
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[ddr, bend right,  "g_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \arrow[ddl, bend left,  "g_x"]
+   \\
+   &\int^x P \langle x, x \rangle
+   \arrow[d, dashed, "h"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
 
-Compare this with the definition of a sum of two objects:
+ 将其与两个对象之和的定义进行比较：
 
-\[
- \begin{tikzcd}
- a
- \arrow[dr, "\text{Left}"]
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, "\text{Right}"']
- \arrow[ddl, bend left, "g"]
- \\
-&a + b
-\arrow[d, dashed, "h"]
-\\
-& d
- \end{tikzcd}
-\]
-Just like the sum was defined as a universal cospan, a coend is defined as a universal co-wedge. 
+ \[
+  \begin{tikzcd}
+   a
+   \arrow[dr, "\text{Left}"]
+   \arrow[ddr, bend right, "f"']
+   && b
+   \arrow[dl, "\text{Right}"']
+   \arrow[ddl, bend left, "g"]
+   \\
+   &a + b
+   \arrow[d, dashed, "h"]
+   \\
+   & d
+  \end{tikzcd}
+ \]
+ 正如和被定义为通用的余图形（cospan），余极限被定义为通用的余楔形图。
 
-In particular, if you were to construct a coend of a $\Set$-valued profunctor, you would start with a sum (a discriminated union) of all the sets $P \langle x, x \rangle$. Then you would identify all the elements of this sum that satisfy the co-wedge condition. You'd identify the element $a \in P \langle x, x \rangle$ with the element $b \in P \langle y, y \rangle$ whenever there is an element $c  \in P \langle y, x \rangle$ and a morphism $f \colon x \to y$, such that:
-\[ P \langle id, f \rangle (c) = b\]
-and
-\[ P \langle f, id \rangle (c) = a\]
+ 特别是，如果你要构造一个$\Set$值泛函的余极限，你会从所有集合$P \langle x, x \rangle$的和（带鉴别的并集）开始。然后你会识别出所有满足余楔条件的和元素。你会将$P \langle x, x \rangle$中的元素$a$与$P \langle y, y \rangle$中的元素$b$相识别，每当存在$P \langle y, x \rangle$中的元素$c$和态射$f \colon x \to y$，使得：
+ \[ P \langle id, f \rangle (c) = b\]
+ 且
+ \[ P \langle f, id \rangle (c) = a\]
 
-Notice that, in a discrete category (which is just a set of objects with no arrows between them) the co-wedge condition is trivial (there are no $f$'s other than identities), so a coend is just a straightforward sum (coproduct) of the diagonal objects $P \langle x, x \rangle$.
+ 请注意，在离散范畴中（它只是一个对象集，不存在它们之间的箭头），余楔条件是平凡的（除了恒等箭头外没有其他$f$），所以余极限只是对角对象$P \langle x, x \rangle$的直接和（余并）。
 
-\subsection{Extranatural transformations}
+ \subsection{Extranatural transformations（超自然变换）}
 
-A family of arrows in the target category parameterized by the objects of the source category can often be combined into a single natural transformation between two functors. 
+ 在目标范畴中由源范畴的对象参数化的箭头族通常可以合并为两个函子之间的单一自然变换。
 
-The injections in our definition of a cowedge form a family of functions that is parameterized by objects, but they don't neatly fit into a definition of a natural transformation.
-\[
- \begin{tikzcd}
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- \arrow[rr, dash, dashed]
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-The problem is that the functor $P \colon \cat C^{op} \times \cat C \to \cat D$ is contravariant in the first argument and covariant in the second; so its diagonal part, which on objects is defined as $x \mapsto P \langle x, x \rangle$, is neither.
+ 在余楔的定义中，注入构成了一个由对象参数化的函数族，但它们不能很好的契合自然变换的定义。
+ \[
+  \begin{tikzcd}
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   \arrow[rr, dash, dashed]
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 问题在于函子$P \colon \cat C^{op} \times \cat C \to \cat D$在第一个参数中是反变的，在第二个参数中是协变的；因此，其对角部分在对象上定义为$x \mapsto P \langle x, x \rangle$，但它并非自然变换。
 
-The closest analog of naturality at our disposal is the cowedge condition:
-\[
- \begin{tikzcd}
- &P \langle y, x \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
- P \langle y, y \rangle
- \arrow[dr, "i_y"']
- &&P \langle x, x \rangle
- \arrow[dl, "i_x"]
- \\
- &d
- \end{tikzcd}
-\]
-Indeed, as is the case with the naturality square, it involves the interaction between the lifting of a morphism $f \colon x \to y$ (here, in two different ways) and the components of the transformation $i$. 
+ 我们可以利用的最接近的自然性（naturality）是余楔条件：
+ \[
+  \begin{tikzcd}
+   &P \langle y, x \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle y, y \rangle
+   \arrow[dr, "i_y"']
+   &&P \langle x, x \rangle
+   \arrow[dl, "i_x"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 的确，与自然性方块一样，它涉及的是态射$f \colon x \to y$的提升（这里有两种不同的方式）与变换$i$的分量之间的交互。
 
-Granted, the standard naturality condition deals with pairs of functors. Here, the target of the transformation is a fixed object $d$. But we can always reinterpret it as the output of a constant profunctor $\Delta_d \colon \cat C^{op} \times \cat C \to \cat D$. Thus to generalize naturality, we replace $\Delta_d$ with an arbitrary profunctor $Q$.
+ 当然，标准的自然性条件涉及的是函子对。在这里，变换的目标是一个固定的对象$d$。但我们总是可以将其重新解释为常量泛函$\Delta_d \colon \cat C^{op} \times \cat C \to \cat D$的输出。因此，为了推广自然性，我们将$\Delta_d$替换为任意泛函$Q$。
 
-We reinterpret the cowedge condition as a special case of the more general \index{extranatural transformation}\emph{extranatural} transformation. An extranatural transformation is a family of arrows:
-\[ \alpha_{c d} \colon P \langle c, c \rangle \to Q \langle d, d \rangle \]
-between two functors of the form:
-\[ P \colon \cat C^{op} \times \cat C \to \cat E \]
-\[ Q \colon \cat D^{op} \times \cat D \to \cat E \]
-Extranaturality in $c$ means that the following diagram commutes for any morphism $f \colon c \to c'$:
-\[
- \begin{tikzcd}
- &P \langle c', c \rangle
- \arrow[ld, "{P \langle id, f \rangle}"']
- \arrow[rd, "{P \langle f, id \rangle}"]
- \\
-      P \langle c', c' \rangle
- \arrow[dr, "\alpha_{c' d}"']
- &&P \langle c, c \rangle
- \arrow[dl, "\alpha_{c d}"]
- \\
- & Q \langle d, d \rangle
- \end{tikzcd}
-\]
-Extranaturality in $d$ means that the following diagram commutes for any morphism $g \colon d \to d'$:
-\[
- \begin{tikzcd}
- &P \langle c, c \rangle
- \arrow[ld, "\alpha_{c d}"']
- \arrow[rd, "\alpha_{c d'}"]
- \\
-      Q \langle d, d \rangle
- \arrow[dr, "{Q \langle id, g\rangle}"']
- &&Q \langle d', d' \rangle
- \arrow[dl, "{Q \langle g,  id\rangle}"]
- \\
- & Q \langle d, d' \rangle
- \end{tikzcd}
-\]
+ 我们将余楔条件重新解释为更一般的\emph{超自然变换}（extranatural transformation）的特例。超自然变换是一个箭头族：
+ \[ \alpha_{c d} \colon P \langle c, c \rangle \to Q \langle d, d \rangle \]
+ 在两个函子之间：
+ \[ P \colon \cat C^{op} \times \cat C \to \cat E \]
+ \[ Q \colon \cat D^{op} \times \cat D \to \cat E \]
+ 在$c$中的超自然性意味着，对于任何态射$f \colon c \to c'$，以下图表交换：
+ \[
+  \begin{tikzcd}
+   &P \langle c', c \rangle
+   \arrow[ld, "{P \langle id, f \rangle}"']
+   \arrow[rd, "{P \langle f, id \rangle}"]
+   \\
+   P \langle c', c' \rangle
+   \arrow[dr, "\alpha_{c' d}"']
+   &&P \langle c, c \rangle
+   \arrow[dl, "\alpha_{c d}"]
+   \\
+   & Q \langle d, d \rangle
+  \end{tikzcd}
+ \]
+ 在$d$中的超自然性意味着，对于任何态射$g \colon d \to d'$，以下图表交换：
+ \[
+  \begin{tikzcd}
+   &P \langle c, c \rangle
+   \arrow[ld, "\alpha_{c d}"']
+   \arrow[rd, "\alpha_{c d'}"]
+   \\
+   Q \langle d, d \rangle
+   \arrow[dr, "{Q \langle id, g\rangle}"']
+   &&Q \langle d', d' \rangle
+   \arrow[dl, "{Q \langle g,  id\rangle}"]
+   \\
+   & Q \langle d, d' \rangle
+  \end{tikzcd}
+ \]
 
-Given this definition, we get our cowedge condition as the extranaturality of the mapping between the profunctor $P$ and the constant profunctor $\Delta_d$. 
+ 基于此定义，我们可以将余楔条件重新解释为从泛函$P$到常量泛函$\Delta_d$的映射的超自然性。
 
-We can now reformulate the definition of the coend as a pair $(c, i)$ where $c$ is the object equipped with the extranatural transformation  $i \colon P \to \Delta_c$ that is universal among such pairs.
+ 现在我们可以将余极限定义为对$(c, i)$的配对，其中$c$是配备了从$P$到$\Delta_c$的超自然变换$i$的对象，并且在此类对中是通用的。
 
-Universality means that for any object $d$ equipped with the extranatural transformation $\alpha \colon P \to \Delta_d$ there is a unique morphism $h \colon c \to d$ that factorizes all the components of $\alpha$ through the components of $i$:
-\[ \alpha_x = h \circ i_x \]
-We call this object $c$ the coend, and write it as:
-\[ c = \int^x P\langle x, x \rangle \]
+ 通用性意味着，对于任何配备了从$P$到$\Delta_d$的超自然变换$\alpha$的对象$d$，存在一个唯一的态射$h \colon c \to d$，它通过$i$的所有分量对$\alpha$的所有分量进行因式分解：
+ \[ \alpha_x = h \circ i_x \]
+ 我们将这个对象$c$称为余极限，并将其写为：
+ \[ c = \int^x P\langle x, x \rangle \]
 
-\begin{exercise}
-Verify that that, for the extranatural transformation $P \to \Delta_d$, the first extranaturality diamond is equivalent to the cowedge condition, and the second is trivially satisfied.
-\end{exercise}
+ \begin{exercise}
+  验证对于从$P$到$\Delta_d$的超自然变换，第一个超自然性菱形等价于余楔条件，第二个条件是平凡的。
+ \end{exercise}
 
-\subsection{Profunctor composition using coends}
+ \subsection{Profunctor composition using coends（使用余极限的泛函组合）}
 
-Equipped with the definition of a coend we can now formally define the composition of two profunctors:
+ 有了余极限的定义，我们现在可以正式定义两个泛函的组合：
 
-\[ (P \diamond Q)\langle a, b \rangle = \int^{x\colon \mathcal{C}} Q \langle a, x \rangle \times P \langle x, b \rangle\]
-Compare this with:
-\begin{haskell}
-data Procompose p q a b where
+ \[ (P \diamond Q)\langle a, b \rangle = \int^{x\colon \mathcal{C}} Q \langle a, x \rangle \times P \langle x, b \rangle\]
+ 将其与以下内容进行比较：
+ \begin{haskell}
+  data Procompose p q a b where
   Procompose ::  q a x -> p x b -> Procompose p q a b
-\end{haskell}
+ \end{haskell}
 
-The reason why in Haskell we don't have to worry about the co-wedge condition is analogous to the reason why all parametrically polymorphic functions automatically satisfy naturality condition. A coend is defined using a family of injections; in Haskell all these injections are defined by a \emph{single} polymorphic function:
-\begin{haskell}
-data Coend p where
+ 在Haskell中我们不需要担心余楔条件的原因类似于所有参数多态函数自动满足自然性条件的原因。余极限是使用箭头族定义的；在Haskell中，所有这些注入都是由\emph{单个}多态函数定义的：
+ \begin{haskell}
+  data Coend p where
   Coend ::  p x x -> Coend p
-\end{haskell}
-\index{parametricity}Parametricity then enforces the co-wedge condition.
+ \end{haskell}
+ \emph{参数多态性}（parametricity）然后强制执行余楔条件。
 
-Coends introduce a new level of abstraction in dealing with profunctors. Calculations using coends usually take advantage of their mapping-out property. To define a mapping out of a coend to some object $d$:
-\[ \int^x P \langle x, x \rangle \to d \]
- it's enough to define a family of functions from the diagonal entries of the functor to $d$:
+ 余极限在处理泛函时引入了一个新的抽象层次。使用余极限进行计算通常利用其映射出属性。要定义从余极限到某个对象$d$的映射：
+ \[ \int^x P \langle x, x \rangle \to d \]
+ 只需定义从函子的对角项到$d$的一族函数：
  \[ g_x \colon P \langle x, x \rangle \to d \]
- satisfying the cowedge condition. You can get a lot of mileage from this trick, especially when combined with the Yoneda lemma. We'll see examples of this in what follows.
-
-\begin{exercise}
-Define a \hask{Profunctor} instance for the pair of profunctors:
-\begin{haskell}
-newtype ProPair q p a b x y = ProPair (q a y, p x b)
-\end{haskell}
-Hint: Keep the first four parameters fixed:
-\begin{haskell}
-instance (Profunctor p, Profunctor q) => Profunctor (ProPair q p a b)
-\end{haskell}
-\end{exercise}
-
-\begin{exercise}
-Profunctor composition can be expressed using a coend:
-\begin{haskell}
-newtype CoEndCompose p q a b = CoEndCompose (Coend (ProPair q p a b))
-\end{haskell}
-Define a \hask{Profunctor} instance for \hask{CoEndCompose}.
-\end{exercise}
-
-\subsection{Colimits as coends}
-A function of two variables that ignores one of its arguments is equivalent to a function of one variable. Similarly, a profunctor that ignores one of its arguments is equivalent to a functor. Conversely, given a functor $F$, we can construct a trivial profunctor. Its action on objects is given by:
-\[P \langle x, y \rangle = F y \]
-Its action on a pair of arrows ignores one of the arrows:
-\[P \langle f, g \rangle = F g \]
-
-For any   $f \colon x \to y$, our definition of a coend for such a profunctor reduces to the following diagram:
-\[
- \begin{tikzcd}
- & F x
- \arrow[ld, "F f"']
- \arrow[rd, dashed, "id_{F x}"]
- \\
- F y
- \arrow[dr, "i_y"']
- \arrow[ddr, bend right,  "g_y"']
- && F x
- \arrow[dl, "i_x"]
- \arrow[ddl, bend left,  "g_x"]
- \\
- &\int^x F x
- \arrow[d, dashed, "h"]
- \\
- &d
- \end{tikzcd}
-\]
-After shrinking the identity arrows, the original co-wedge becomes a co-cone, and the universal condition turns into the definition of a colimit. This justifies the use the coend notation for colimits:
-\[ \int^x F x = \text{colim} F \]
-The functor $F$ defines a diagram in the target category. The pattern is the whole source category.
-
-We can gain useful intuition if we consider a discrete category, in which a profunctor is a (possibly infinite) matrix and a coend is the sum (coproduct) if its diagonal elements. A profunctor that is constant along one axis corresponds to a matrix whose rows are identical (each given by a ``vector'' $F x$). The sum of the diagonal elements of such a matrix is equal to the sum of all components of the vector $F x$.
-\[
-\begin{pmatrix}
-\color{red} F a & F b & F c & ... \\
-F a & \color{red}F b & F c & ...\\
-F a & F b &\color{red}F c & ...\\
-... & ... & ... & ...
-\end{pmatrix}
-\]
-In a non-discrete category, this sum generalizes to a colimit.
-\section{Ends}
-
-Just like a coend generalizes the sum of the diagonal elements of a profunctor---its dual, an end, generalizes the product. A product is defined by its projections, and so is an end. 
-
-The generalization of a span that we used in the definition of a product would be an object $d$ with a family of projections, one per every object $x$:
-\[ \pi_x \colon d \to P \langle x, x \rangle \]
-The dual to a co-wedge is called a \index{wedge}wedge:
-\[
- \begin{tikzcd}
- &d
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- P \langle x, x \rangle
- \arrow[dr, "{P \langle id, f \rangle}"']
- &&P \langle y, y \rangle
- \arrow[dl, "{P \langle f, id \rangle}"]
- \\
- & P \langle x, y \rangle
- \end{tikzcd}
-\]
-For every arrow $f \colon x \to y$ we demand that:
-\[ P \langle f, id_y \rangle \circ \pi_y = P \langle id_x, f \rangle \circ \pi_x \]
-
-The end is a universal wedge. We use the integral sign for it too, this time with the ``integration variable'' at the bottom. 
-\[ \int_{x \colon \cat C} P \langle x, x \rangle \]
-
-You might be wondering why, in calculus, integrals based on multiplication rather than summation are rarely used. That's because we can always use a logarithm to replace multiplication with addition. We don't have this luxury in category theory, so ends and coends are equally important.
-
-To summarize, an end is an object equipped with a family of morphisms (projections):
-\[ \pi_a \colon \left( \int_x P \langle x, x \rangle \right) \to P \langle a, a \rangle \]
-satisfying the wedge condition. 
-
-It is universal among such objects; that is, for any other object $d$ equipped with a family of arrows $g_x$ satisfying the wedge condition, there is a unique morphism $h$ that factorizes the family $g_x$ through the family $\pi_x$:
-\[ g_x = \pi_x \circ h \]
-Pictorially, we have:
-\[
- \begin{tikzcd}
- &d
- \arrow[ddl, bend right, "g_x"']
- \arrow[ddr, bend left, "g_y"]
- \arrow[d, dashed, "h"]
- \\
- & \int_x P \langle x, x \rangle
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- P \langle x, x \rangle
- \arrow[dr, "{P \langle id, f \rangle}"']
- &&P \langle y, y \rangle
- \arrow[dl, "{P \langle f, id \rangle}"]
- \\
- & P \langle x, y \rangle
- \end{tikzcd}
-\]
-
-Equivalently, we can say that the end is a pair $(e, \pi)$ consisting of an object $e = \int_x P\langle x, x\rangle$ and an  \index{extranatural transformation}extranatural transformation $\pi \colon \Delta_d \to e$ that is universal among such pairs. The wedge condition turns out to be a special case of extranaturality condition.
-
-If you were to construct an end of a $\Set$-valued profunctor, you'd start with a giant product of all $P \langle x, x \rangle$ for all objects in the category $\cat C$, and then prune the tuples that don't satisfy the wedge condition. 
-
-In particular, imagine using the singleton set $1$ in place of $d$. The family $g_x$ would select one element from each set $P \langle x, x \rangle$. This would give you a giant tuple. You'd weed out most of these tuples, leaving only the ones that satisfy the wedge condition. 
-
-Again, in Haskell, due to \index{parametricity}parametricity, the wedge condition is automatically satisfied, and the definition of the end for a profunctor \hask{p} simplifies to:
-
-\begin{haskell}
-type End p = forall x. p x x
-\end{haskell}
-
-The Haskell implementation of an \hask{End} doesn't showcase the fact that it is dual to the \hask{Coend}. This is because, at the time of this writing, Haskell doesn't have a built-in syntax for existential types. If it did, the \hask{Coend} would be implemented as:
-\begin{haskell}
-type Coend p = exists x. p x x
-\end{haskell}
-
-The existential/universal duality between a \hask{Coend} and an \hask{End} means that it's easy to construct a \hask{Coend}---all you need is to pick one type \hask{x} for which you have a value of the type \hask{p x x}. On the other end, to construct an \hask{End} you have to provide a whole family of values \hask{p x x}, one for every type \hask{x}. In other words, you need a polymorphic formula that is parameterized by \hask{x}. A definition of a polymorphic function is a canonical example of such a formula.
-
-
-\subsection{Natural transformations as an end}
-
-The most interesting application of an end is in concisely defining the set of natural transformations. Consider two functors, $F$ and $G$, going between two categories  $\mathcal{B}$ and $\mathcal{C}$. A natural transformation between them is a family of arrows $\alpha_x$ in $\mathcal{C}$. You may think of it as picking one element $\alpha_x$ from each hom-set  $\mathcal{C} (F x, G x)$.
-\[
- \begin{tikzcd}
- && F x
- \arrow[dd, "{\alpha_x \in \cat C (F x, G x)}"]
- \\
- x
- \arrow[urr, dashed, "F"]
- \arrow[drr, dashed, "G"]
- \\
- && G x
- \end{tikzcd}
-\]
-
-We know that the mapping $\langle a, b \rangle \to \mathcal{C} (a, b)$ defines a profunctor.  It turns out that, for any pair of functors, the mapping  $\langle a, b \rangle \to \mathcal{C} (F a, G b)$ also behaves like a profunctor. The action of this profunctor on a pair of arrows $\langle f \colon s \to a, g \colon b \to t \rangle$ is a function:
-\[ \cat C(F a, G b) \to \cat C (F s, G t) \]
-given by the composition:
-\[ F s \xrightarrow{F f} F a \xrightarrow{h} G b \xrightarrow{G g} G t \]
-where $h$ is an  element of $ \mathcal{C} (F a, G b)$.
-
-The diagonal parts of this profunctor are perfect candidates for the components of a natural transformation. In fact, the end:
-\[  \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x) \]
-defines a set of natural transformations from $F$ to $G$.
-
-To show this, let's check the wedge condition. Plugging in our profunctor, we get:
-
-\[
- \begin{tikzcd}
- & \int_{x} \mathcal{C}(F x, G x)
- \arrow[ld, "\pi_a"']
- \arrow[rd, "\pi_b"]
- \\
-  \mathcal{C} ( F a, G a )
- \arrow[dr, "{(Ff \, \circ \, -)}"']
- && \mathcal{C} \langle F b, G b \rangle
- \arrow[dl, "{(- \, \circ\, Gf)}"]
- \\
- &  \mathcal{C} ( F a, G b )
- \end{tikzcd}
-\]
-
-We can pick a single element of the set $\int_{x} \mathcal{C}(F x, G x)$ by instantiating the universal condition for the singleton set:
-
-\[
- \begin{tikzcd}
- & 1
- \arrow[d, dashed, "\alpha"]
-\arrow[ddl, bend right, "\alpha_a"']
- \arrow[ddr, bend left, "\alpha_b"]
- \\
- & \int_{x} \mathcal{C}(F x, G x)
- \arrow[ld, "\pi_a"']
- \arrow[rd, "\pi_b"]
- \\
-  \mathcal{C} ( F a, G a )
- \arrow[dr, "{(F f \, \circ \, -)}"']
- && \mathcal{C} \langle F b, G b \rangle
- \arrow[dl, "{(- \, \circ\, G f)}"]
- \\
- &  \mathcal{C} ( F a, G b )
- \end{tikzcd}
-\]
-We pick the component $\alpha_a$ from the hom-set $\mathcal{C} ( F a, G a )$ and the component $\alpha_b$ from $\mathcal{C} ( F b, G b )$. The wedge condition then boils down to:
-\[ F f \circ \alpha_a = \alpha_b \circ G f \]
-for any $f \colon a \to b$. This is exactly the naturality condition. So any element $\alpha$ of this end is automatically a natural transformation.
-
-The set of natural transformations, or the hom-set in the functor category, is thus given by the end:
-\[ [\mathcal{C}, \mathcal{D}] (F, G) \cong \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x)\]
-
-In Haskell, this is consistent with our earlier definition:
-\begin{haskell}
-type Natural f g = forall x. f x -> g x
-\end{haskell}
-
-As we discussed earlier, to construct an \hask{End} we have to give it a whole family of values parameterized by types. Here, these values are the components of a polymorphic function. 
-
-\subsection{Limits as ends}
-Just like we were able to express colimits as coends, we can express limits as ends. As before, we define a trivial profunctor that ignores its first argument:
-\begin{align*}
- P \langle x, y \rangle &= F y \\
- P \langle f, g \rangle &= F g 
-\end{align*}
-The universal condition that defines an end becomes the definition of a universal cone:
-\[
- \begin{tikzcd}
- &d
- \arrow[ddl, bend right, "g_x"']
- \arrow[ddr, bend left, "g_y"]
- \arrow[d, dashed, "h"]
- \\
- & \int_x F x
- \arrow[ld, "\pi_x"']
- \arrow[rd, "\pi_y"]
- \\
- F x
- \arrow[dr, "F f"']
- &&F y
- \arrow[dl, dashed, "id_{F y}"]
- \\
- & F y
- \end{tikzcd}
-\]
-We can thus use the end notation for limits:
-\[ \int_x F x = \text{lim} F \]
-
-\begin{exercise}
-A product is a limit of a functor from a two-object category $\Cat 2$. Show that it can be defined as an end. Hint: There are no non-identity morphisms in $\Cat 2$.
-\end{exercise}
-
-\section{Continuity of the Hom-Functor}
-
-In category theory, a functor $F$ is called \index{continuous functor}\emph{continuous} if it preserves limits (and co-continuous, if it preserves colimits). It means that, if you have a diagram in the source category, it doesn't matter if you first use $F$ to map the diagram and then take the limit in the target category, or take the limit in the source category and then use $F$ to map this limit. 
-
-The hom-functor is an example of a functor that is continuous in its second argument. Since a product is the simplest example of a limit, this means, in particular, that:
-\[ \mathcal{C}(x, a \times b) \cong \mathcal{C}(x, a) \times \mathcal{C}(x, b) \]
-The left hand side applies the hom-functor to the product (a limit of a span). The right hand side maps the diagram, here just a pair of objects, and takes the product (limit) in the target category. The target category for the hom-functor is $\mathbf{Set}$, so this is just a cartesian product. The two sides are isomorphic by the universal property of the product: the mapping into the product is defined by a pair of mappings into the two objects. 
-
-Continuity of the hom-functor in the first argument is reversed: it maps colimits to limits. Again, the simplest example of a colimit is the sum, so we have:
-\[ \mathcal{C}(a + b, x) \cong \mathcal{C}(a, x) \times \mathcal{C}(b, x) \]
-This follows from the universality of the sum: a mapping out of the sum is defined by a pair of mapping out of the two objects.
-
-It can be shown that an end can be expressed as a limit, and a coend as a colimit. Therefore, by continuity of the hom-functor, we can always pull out the integral sign from inside a hom-set. By analogy with the product, we have the mapping-in formula for an end:
-\[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D(d, P\langle a, a \rangle) \]
-By analogy with the sum, we have a mapping-out formula for the coend:
-\[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D(P\langle a, a \rangle, d) \]
-Notice that, in both cases, the right-hand side is an end.
-
-\section{Fubini Rule}
-
-The Fubini rule in calculus states the conditions under which we can switch the order of integration in double integrals. It turns out that we can similarly switch the order of double ends and coends. The \index{Fubini rule}Fubini rule for ends works for functors of the form $P \colon \cat C \times \cat C^{op} \times \cat D \times \cat D^{op} \to \cat E$. The following expressions, as long as they exist, are isomorphic:
-\[ \int_{c \colon \cat C} \int_{d \colon \cat D} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{d \colon \cat D} \int_{c \colon \cat C} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{\langle c, d \rangle \colon \cat C \times \cat D}  P\langle c, c \rangle \langle d, d \rangle \]
-In the last end, the functor $P$ is reinterpreted as $P \colon (\cat C  \times \cat D)^{op} \times (\cat C \times \cat D)\to \cat E$
-
-The analogous rule works for coends as well.
-
-\section{Ninja Yoneda Lemma}
-
-Having expressed the set of natural transformations as an end, we can now rewrite the Yoneda lemma. This is the original formulation:
-\[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
-Here, $F$ is a (covariant) functor from $\mathcal{C}$ to $\mathbf{Set}$ (a co-presheaf), and so is the hom-functor $\mathcal{C}(a, -)$. 
-Expressing the set of natural transformations as an end we get:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
-
-Similarly, we have the Yoneda lemma for a contravariant functor (a presheaf) $G$:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
-
-These versions of the Yoneda lemma, expressed in terms of ends, are often half-jokingly called ninja-Yoneda lemmas. The fact that the ``integration variable'' is explicit makes them somewhat easier to use in complex formulas.
-
-There is also a dual set of ninja co-Yoneda lemmas that use coends instead. For a covariant functor, we have:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
-and for the contravariant one we have:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(a, x) \times G x \cong G a \]
-
-Physicists might notice the similarity of these formulas to integrals involving the Dirac delta function---strictly speaking, a distribution. This is why profunctors are sometimes called \index{distributors}distributors, following the adage that ``distributors are to functors as distributions are to functions.'' Engineers might notice the similarity of the hom-functor to the impulse function.
-
-This intuition is often expressed by saying that we can perform the ``integration over $x$'' in this formula, resulting in replacing $x$ with $a$ in the integrand $G x$. 
-
-If $\cat C$ is a discrete category, the coend reduces to the sum (coproduct), and the hom-functor reduces to the unit matrix (the Kronecker delta). The co-Yoneda lemma then becomes:
-\[ \sum_j \delta_i^j v_j = v_i \]
-In fact, a lot of linear algebra translates directly to the theory of $\Set$-valued functors. You may often view such functors as vectors in a vector space, in which hom-functors form a basis. Profunctors become matrices and coends are used to multiply such matrices, calculate their traces, or multiply vectors by matrices.
-
-Yet another name for profunctors, especially in Australia, is \index{bimodule}``bimodules.'' This is because the lifting of morphisms by a profunctor is somewhat similar to the left and right actions on sets. 
-
-We'll now proceed with the proof of the co-Yoneda lemma, which is quite instructive, as it uses a few common tricks. Most importantly, we rely on the corollary of the Yoneda lemma, which says that, if all the mappings out from two objects to an arbitrary object are isomorphic, then the two objects are themselves isomorphic. In our case, we'll consider the mappings-out to an arbitrary set $S$ and show that:
-\[ \mathbf{Set} \left(\int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x, S \right) \cong 
-    \Set (F a, S)\]
-Using the co-continuity of the hom-functor, we can pull out the integral sign, replacing the coend with an end:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) \times F x, S \right) \]
-Since the category of sets is cartesian closed, we can curry the product:
-\[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) , S^{F x} \right) \]
-We can now use the Yoneda lemma to ``integrate over $x$.'' The result is $S^{F a}$. Finally, in $\mathbf{Set}$, the exponential object is isomorphic to the hom-set:
-\[S^{F a} \cong \mathbf{Set}(F a, S)\]
-Since $S$ was arbitrary, we conclude that:
-\[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
-
-\begin{exercise}
-Prove the contravariant version of the co-Yoneda lemma.
-\end{exercise}
-
-\subsection{Yoneda lemma in Haskell}
-
-We've already seen the Yoneda lemma implemented in Haskell. We can now rewrite it in terms of an end. We start by defining a profunctor that will go under the end. Its type constructor takes a functor \hask{f} and a type \hask{a} and generates a profunctor that's contravariant in \hask{x} and covariant in \hask{y}:
-\begin{haskell}
-data Yo f a x y = Yo ((a -> x) -> f y)
-\end{haskell}
-The Yoneda lemma establishes the isomorphism between the end over this profunctor and the type obtained by acting with the functor  \hask{f} on \hask{a}. This isomorphism is witnessed by a pair of functions:
-\begin{haskell}
-yoneda :: Functor f => End (Yo f a) -> f a
-yoneda (Yo g) = g id
-
-yoneda_1 :: Functor f => f a -> End (Yo f a)
-yoneda_1 fa = Yo (\h -> fmap h fa)
-\end{haskell}
-
-Similarly, the co-Yoneda lemma uses a coend over the following profunctor:
-\begin{haskell}
-data CoY f a x y = CoY (x -> a) (f y)
-\end{haskell}
-The isomorphism is witnessed by a pair of functions. The first one says that if you have a function \hask{x -> a} and a functorful of \hask{x} then you can make a functorful of \hask{a} using the \hask{fmap}:
-\begin{haskell}
-coyoneda :: Functor f => Coend (CoY f a) -> f a
-coyoneda (Coend (CoY g fa)) = fmap g fa
-\end{haskell}
-You can do it without knowing anything about the existential type \hask{x}.
-
-The second says that if you have a functorful of \hask{a}, you can create a coend by injecting it (together with the identity function) into the existential type:
-\begin{haskell}
-coyoneda_1 :: Functor f => f a -> Coend (CoY f a)
-coyoneda_1 fa = Coend (CoY id fa)
-\end{haskell}
-
-\section{Day Convolution}
-
-Electrical engineers are familiar with the idea of convolution. We can convolve two streams by shifting one of them and summing its product with the other one: 
-\[ (f \star g)(x) = \int^{\infty}_{-\infty} f(y) g(x - y) dy \]
-This formula can be translated almost verbatim to category theory. We can start by replacing the integral with a coend. The problem is, we don't know how to subtract objects. We do however know how to add them, in a co-cartesian category. 
-
-Notice that the sum of the arguments to the two functions is equal to $x$. We could enforce this condition by introducing the Dirac delta function or the ``impulse function,'' $\delta(a + b - x)$. In category theory we use the hom-functor $\cat C (a + b, x)$ to do the same. Thus we can define a convolution of two $\Set$-valued functors:
-\[ (F \star G) x = \int^{a, b} \cat C (a + b, x) \times F a \times G b \]
-Informally, if we could define subtraction as the right adjoint to coproduct, we'd write:
-\[ \int^{a, b} \cat C (a + b, x) \times F a \times G b \cong \int^{a, b} \cat C (a, b - x) \times F a \times G b \cong \int^b F (b - x) \times G b\]
-
-There is nothing special about coproduct so, in general, Day convolution is defined in any monoidal category with a tensor product:
-\[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
-
-In fact, Day convolution for a monoidal category $(\cat C, \otimes, I)$ endows the category of co-presheaves $[\cat C, \Set]$ with a monoidal structure. Simply said, if you can multiply objects in $\cat C$, you can multiply set-valued functors on $\cat C$.
-
-It's easy to check that Day convolution is associative (up to isomorphism) and that $\cat C(I, -)$ serves as the unit object. For instance, we have:
-\[ (\cat C(I, -) \star G) x =  \int^{a, b} \cat C (a \otimes b, x) \times \cat C(I, a) \times G b \cong 
-  \int^{b} \cat C (I \otimes b, x) \times  G b \cong G x\]
-So the unit of Day convolution is the Yoneda functor taken at monoidal unit, which lends itself to the anagrammatic slogan, ``ONE of DAY is the YONEDA of ONE.''
-
-If the tensor product is symmetric, then the corresponding Day convolution is also symmetric (up to isomorphism).
-
-In the special case of a cartesian closed category, we can use the currying adjunction to simplify the formula:
-\[ (F \star G) x = \int^{a, b} \cat C (a \times b, x) \times F a \times G b \cong  \int^{a, b} \cat C (a, x^b) \times F a \times G b \cong  \int^{b}  F (x^b) \times G b\]
-
-In Haskell, the product-based Day convolution can be defined using an existential type:
-\begin{haskell}
-data Day f g x where
+ 满足余楔条件。这个技巧结合Yoneda引理可以带来很大的好处。我们将在接下来的内容中看到一些例子。
+
+ \begin{exercise}
+  为以下泛函对定义一个\hask{Profunctor}实例：
+  \begin{haskell}
+   newtype ProPair q p a b x y = ProPair (q a y, p x b)
+  \end{haskell}
+  提示：保持前四个参数固定：
+  \begin{haskell}
+   instance (Profunctor p, Profunctor q) => Profunctor (ProPair q p a b)
+  \end{haskell}
+ \end{exercise}
+
+ \begin{exercise}
+  泛函组合可以使用余极限表示：
+  \begin{haskell}
+   newtype CoEndCompose p q a b = CoEndCompose (Coend (ProPair q p a b))
+  \end{haskell}
+  为\hask{CoEndCompose}定义一个\hask{Profunctor}实例。
+ \end{exercise}
+
+ \subsection{Colimits as coends（作为余极限的余极限）}
+ 一个忽略其参数之一的二元函数等价于一个一元函数。类似地，一个忽略其参数之一的泛函等价于一个函子。反过来，给定一个函子$F$，我们可以构造一个平凡的泛函。它在对象上的作用由以下公式给出：
+ \[P \langle x, y \rangle = F y \]
+ 它在箭头对上的作用忽略了其中一个箭头：
+ \[P \langle f, g \rangle = F g \]
+
+ 对于任意$f \colon x \to y$，我们这种泛函的余极限的定义简化为以下图表：
+ \[
+  \begin{tikzcd}
+   & F x
+   \arrow[ld, "F f"']
+   \arrow[rd, dashed, "id_{F x}"]
+   \\
+   F y
+   \arrow[dr, "i_y"']
+   \arrow[ddr, bend right,  "g_y"']
+   && F x
+   \arrow[dl, "i_x"]
+   \arrow[ddl, bend left,  "g_x"]
+   \\
+   &\int^x F x
+   \arrow[d, dashed, "h"]
+   \\
+   &d
+  \end{tikzcd}
+ \]
+ 在缩小恒等箭头之后，原始的余楔形图变成了余锥形图（co-cone），通用条件变成了余极限的定义。这就证明了将余极限符号用于余极限的合理性：
+ \[ \int^x F x = \text{colim} F \]
+ 函子$F$定义了目标范畴中的一个图形。这个模式是整个源范畴。
+
+ 如果我们考虑一个离散范畴，其中泛函是一个（可能是无限的）矩阵，余极限是其对角线元素的和（余并）。沿着一条轴恒定的泛函对应于每一行相同的矩阵（每行由一个向量$F x$给出）。这样的矩阵的对角线元素之和等于向量$F x$的所有元素之和。
+ \[
+  \begin{pmatrix}
+   \color{red} F a & F b & F c & ... \\
+   F a & \color{red}F b & F c & ...\\
+   F a & F b &\color{red}F c & ...\\
+   ... & ... & ... & ...
+  \end{pmatrix}
+ \]
+ 在非离散范畴中，这个和则推广为余极限。
+
+
+ \section{Ends（余极限）}
+
+ 就像余极限（coend）推广了伴随态射（profunctor）的对角元素之和一样，它的对偶概念，极限（end），推广了乘积的概念。乘积通过它的投影来定义，极限也是如此。
+
+ 我们在定义乘积时使用的广义“跨越”（span）的概念可以推广为一个对象 $d$，该对象有一系列投影，每个对象 $x$ 对应一个投影：
+ \[ \pi_x \colon d \to P \langle x, x \rangle \]
+ 与余契（co-wedge）相对的是所谓的\index{wedge}契（wedge）：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   P \langle x, x \rangle
+   \arrow[dr, "{P \langle id, f \rangle}"']
+   &&P \langle y, y \rangle
+   \arrow[dl, "{P \langle f, id \rangle}"]
+   \\
+   & P \langle x, y \rangle
+  \end{tikzcd}
+ \]
+ 对于每一个箭头 $f \colon x \to y$，我们要求：
+ \[ P \langle f, id_y \rangle \circ \pi_y = P \langle id_x, f \rangle \circ \pi_x \]
+
+ 极限（end）是一个具有普遍性质的契（universal wedge）。我们为其使用积分符号，这次积分变量写在符号的下方：
+ \[ \int_{x \colon \cat C} P \langle x, x \rangle \]
+
+ 你可能会想知道，为什么在微积分中，基于乘法的积分而不是加法的积分很少被使用。那是因为我们总是可以通过对数将乘法转换为加法。但在范畴论中，我们没有这种奢侈的选择，因此极限和余极限同样重要。
+
+ 总结一下，极限是一个具备一系列态射（projections）的对象：
+ \[ \pi_a \colon \left( \int_x P \langle x, x \rangle \right) \to P \langle a, a \rangle \]
+ 并满足契（wedge）条件。
+
+ 它在此类对象中具有普遍性；也就是说，对于任何其他对象 $d$，如果其带有一系列满足契条件的箭头 $g_x$，那么存在唯一的态射 $h$，使得 $g_x$ 的这系列态射通过 $\pi_x$ 的这系列态射来分解：
+ \[ g_x = \pi_x \circ h \]
+ 图解如下：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ddl, bend right, "g_x"']
+   \arrow[ddr, bend left, "g_y"]
+   \arrow[d, dashed, "h"]
+   \\
+   & \int_x P \langle x, x \rangle
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   P \langle x, x \rangle
+   \arrow[dr, "{P \langle id, f \rangle}"']
+   &&P \langle y, y \rangle
+   \arrow[dl, "{P \langle f, id \rangle}"]
+   \\
+   & P \langle x, y \rangle
+  \end{tikzcd}
+ \]
+
+ 同样地，我们可以说极限是一个 $(e, \pi)$ 对，其中 $e = \int_x P\langle x, x\rangle$ 是一个对象，$\pi \colon \Delta_d \to e$ 是一个\index{extranatural transformation}额外自然变换（extranatural transformation），并且在所有此类对中具有普遍性。契条件实际上是额外自然性条件（extranaturality condition）的特例。
+
+ 如果你要构建一个 $\Set$-值的伴随态射的极限，你可以从包含类别 $\cat C$ 中所有对象 $x$ 的 $P \langle x, x \rangle$ 的巨大积开始，然后剪除不满足契条件的元组。
+
+ 具体来说，假设使用单例集（singleton set）$1$ 代替 $d$。族 $g_x$ 将从每个集合 $P \langle x, x \rangle$ 中选择一个元素。这会给你一个巨大的元组。然后你将剔除大部分的元组，只保留那些满足契条件的元组。
+
+ 同样地，在 Haskell 中，由于\index{parametricity}参数化（parametricity）的原因，契条件自动得到满足，并且对一个伴随态射 \hask{p} 的极限定义简化为：
+
+ \begin{haskell}
+  type End p = forall x. p x x
+ \end{haskell}
+
+ Haskell 中的 \hask{End} 实现并没有展示它是 \hask{Coend} 的对偶这一事实。这是因为在撰写本文时，Haskell 还没有内置的存在类型语法。如果有的话，\hask{Coend} 可以实现为：
+ \begin{haskell}
+  type Coend p = exists x. p x x
+ \end{haskell}
+
+ \hask{Coend} 和 \hask{End} 之间的存在/普遍性二元对立意味着构造 \hask{Coend} 很容易——你只需要选择一个类型 \hask{x}，对于该类型你有一个类型 \hask{p x x} 的值。另一方面，要构造一个 \hask{End}，你必须提供整个族的值 \hask{p x x}，对于每个类型 \hask{x} 都有一个。换句话说，你需要一个以 \hask{x} 为参数的多态公式。多态函数的定义是这种公式的典型示例。
+
+ \subsection{Natural transformations as an end（作为余极限的自然变换）}
+
+ 极限的最有趣的应用是简洁地定义自然变换（natural transformations）的集合。考虑两个函子 $F$ 和 $G$，它们在两个范畴 $\mathcal{B}$ 和 $\mathcal{C}$ 之间移动。它们之间的自然变换是一个在 $\mathcal{C}$ 中的箭头族 $\alpha_x$。你可以将其视为从每个同态集合 $\mathcal{C} (F x, G x)$ 中选择一个元素 $\alpha_x$。
+ \[
+  \begin{tikzcd}
+   && F x
+   \arrow[dd, "{\alpha_x \in \cat C (F x, G x)}"]
+   \\
+   x
+   \arrow[urr, dashed, "F"]
+   \arrow[drr, dashed, "G"]
+   \\
+   && G x
+  \end{tikzcd}
+ \]
+
+ 我们知道，映射 $\langle a, b \rangle \to \mathcal{C} (a, b)$ 定义了一个伴随态射。事实证明，对于任何一对函子，映射 $\langle a, b \rangle \to \mathcal{C} (F a, G b)$ 也表现得像一个伴随态射。此伴随态射对一对箭头 $\langle f \colon s \to a, g \colon b \to t \rangle$ 的作用是一个函数：
+ \[ \cat C(F a, G b) \to \cat C (F s, G t) \]
+ 该函数通过以下方式实现组合：
+ \[ F s \xrightarrow{F f} F a \xrightarrow{h} G b \xrightarrow{G g} G t \]
+ 其中 $h$ 是 $\mathcal{C} (F a, G b)$ 的一个元素。
+
+ 这个伴随态射的对角部分是自然变换分量的完美候选。在实际操作中，这个极限：
+ \[  \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x) \]
+ 定义了从 $F$ 到 $G$ 的自然变换的集合。
+
+ 为了证明这一点，让我们检查契条件。将我们的伴随态射代入，可以得到：
+
+ \[
+  \begin{tikzcd}
+   & \int_{x} \mathcal{C}(F x, G x)
+   \arrow[ld, "\pi_a"']
+   \arrow[rd, "\pi_b"]
+   \\
+   \mathcal{C} ( F a, G a )
+   \arrow[dr, "{(Ff \, \circ \, -)}"']
+   && \mathcal{C} \langle F b, G b \rangle
+   \arrow[dl, "{(- \, \circ\, Gf)}"]
+   \\
+   &  \mathcal{C} ( F a, G b )
+  \end{tikzcd}
+ \]
+
+ 我们可以通过单例集实例化普遍条件，选择集合 $\int_{x} \mathcal{C}(F x, G x)$ 的一个单一元素：
+
+ \[
+  \begin{tikzcd}
+   & 1
+   \arrow[d, dashed, "\alpha"]
+   \arrow[ddl, bend right, "\alpha_a"']
+   \arrow[ddr, bend left, "\alpha_b"]
+   \\
+   & \int_{x} \mathcal{C}(F x, G x)
+   \arrow[ld, "\pi_a"']
+   \arrow[rd, "\pi_b"]
+   \\
+   \mathcal{C} ( F a, G a )
+   \arrow[dr, "{(F f \, \circ \, -)}"']
+   && \mathcal{C} \langle F b, G b \rangle
+   \arrow[dl, "{(- \, \circ\, G f)}"]
+   \\
+   &  \mathcal{C} ( F a, G b )
+  \end{tikzcd}
+ \]
+ 我们从同态集合 $\mathcal{C} ( F a, G a )$ 中选择了分量 $\alpha_a$，从 $\mathcal{C} ( F b, G b )$ 中选择了分量 $\alpha_b$。契条件最终归结为：
+ \[ F f \circ \alpha_a = \alpha_b \circ G f \]
+ 对于任何 $f \colon a \to b$，这正是自然性条件。因此，极限中的任何元素 $\alpha$ 都自动是一个自然变换。
+
+ 自然变换的集合，或者说函子范畴中的同态集合，由极限给出：
+ \[ [\mathcal{C}, \mathcal{D}] (F, G) \cong \int_{x \colon  \mathcal{B}} \mathcal{C}(F x, G x)\]
+
+ 在 Haskell 中，这与我们之前的定义是一致的：
+ \begin{haskell}
+  type Natural f g = forall x. f x -> g x
+ \end{haskell}
+
+ 正如我们前面讨论的那样，要构造一个 \hask{End}，我们必须提供一个以类型为参数的整个族的值。在这里，这些值就是多态函数的分量。
+
+ \subsection{Limits as ends（极限作为余极限）}
+ 正如我们能够将余极限表示为余极限，我们也可以将极限表示为极限。同样地，我们定义了一个忽略其第一个参数的平凡伴随态射：
+ \begin{align*}
+  P \langle x, y \rangle &= F y \\
+  P \langle f, g \rangle &= F g
+ \end{align*}
+ 定义极限的普遍条件成为定义普遍锥体的条件：
+ \[
+  \begin{tikzcd}
+   &d
+   \arrow[ddl, bend right, "g_x"']
+   \arrow[ddr, bend left, "g_y"]
+   \arrow[d, dashed, "h"]
+   \\
+   & \int_x F x
+   \arrow[ld, "\pi_x"']
+   \arrow[rd, "\pi_y"]
+   \\
+   F x
+   \arrow[dr, "F f"']
+   &&F y
+   \arrow[dl, dashed, "id_{F y}"]
+   \\
+   & F y
+  \end{tikzcd}
+ \]
+ 因此我们可以使用极限符号表示极限：
+ \[ \int_x F x = \text{lim} F \]
+
+ \begin{exercise}
+  一个乘积是从两个对象的范畴 $\Cat 2$ 到某个范畴的函子的极限。证明它可以被定义为一个余极限。提示：在 $\Cat 2$ 中没有非恒等态射。
+ \end{exercise}
+
+ \section{Continuity of the Hom-Functor（同态函子的连续性）}
+
+ 在范畴论中，如果一个函子 $F$ 保持极限（也就是说，它保持极限和余极限），我们就称它是\index{continuous functor}连续函子（continuous functor）。这意味着，如果你在源范畴中有一个图表，那么无论是先使用 $F$ 映射图表，然后在目标范畴中取极限，还是在源范畴中取极限然后使用 $F$ 映射这个极限，结果是一样的。
+
+ 同态函子是一个在其第二个参数中连续的函子的例子。由于乘积是最简单的极限示例，这意味着特别地：
+ \[ \mathcal{C}(x, a \times b) \cong \mathcal{C}(x, a) \times \mathcal{C}(x, b) \]
+ 左边将同态函子应用于乘积（一个跨越的极限）。右边映射图表，这里仅是一个对象对，并在目标范畴中取乘积（极限）。对于同态函子来说，目标范畴是 $\mathbf{Set}$，因此这只是一个笛卡尔乘积。通过乘积的普遍性质，这两边是同构的：映射到乘积中的映射是通过映射到两个对象的对定义的。
+
+ 同态函子在第一个参数中的连续性是相反的：它将余极限映射到极限。再一次，最简单的余极限示例是和，因此我们有：
+ \[ \mathcal{C}(a + b, x) \cong \mathcal{C}(a, x) \times \mathcal{C}(b, x) \]
+ 这来自和的普遍性：从和映射出的映射由从两个对象映射出的对定义。
+
+ 可以证明，极限可以表示为极限，余极限可以表示为余极限。因此，通过同态函子的连续性，我们总是可以将积分符号从同态集合中拉出。通过与乘积的类比，我们有极限的映射公式：
+ \[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D(d, P\langle a, a \rangle) \]
+ 通过与和的类比，我们有余极限的映射公式：
+ \[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D(P\langle a, a \rangle, d) \]
+ 请注意，在这两种情况下，右边的表达式是一个余极限。
+
+ \section{Fubini Rule（富比尼法则）}
+
+ 富比尼法则（Fubini rule）在微积分中指出了我们可以交换双重积分中积分顺序的条件。事实证明，我们也可以类似地交换双重极限和余极限的顺序。对于形式为 $P \colon \cat C \times \cat C^{op} \times \cat D \times \cat D^{op} \to \cat E$ 的函子，\index{Fubini rule}富比尼法则适用于以下表达式（只要它们存在）是同构的：
+ \[ \int_{c \colon \cat C} \int_{d \colon \cat D} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{d \colon \cat D} \int_{c \colon \cat C} P\langle c, c \rangle \langle d, d \rangle \cong  \int_{\langle c, d \rangle \colon \cat C \times \cat D}  P\langle c, c \rangle \langle d, d \rangle \]
+ 在最后一个极限中，函子 $P$ 被重新解释为 $P \colon (\cat C  \times \cat D)^{op} \times (\cat C \times \cat D)\to \cat E$
+
+ 类似的规则也适用于余极限。
+
+ \section{Ninja Yoneda Lemma（Ninja 代数引理）}
+
+ 在表达了自然变换的集合作为极限之后，我们现在可以重新写代数引理（Yoneda lemma）。这是原始的表述：
+ \[ [\mathcal{C}, \mathbf{Set}]( \mathcal{C}(a, -), F) \cong F a \]
+ 在这里，$F$ 是一个从 $\mathcal{C}$ 到 $\mathbf{Set}$（一个反预层）的（协变）函子，同态函子 $\mathcal{C}(a, -)$ 也是。
+ 将自然变换的集合表达为极限，我们得到：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
+
+ 类似地，我们有一个适用于逆变函子（一个预层）$G$ 的代数引理：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
+
+ 这些版本的代数引理以极限的形式表达，通常半开玩笑地称之为 Ninja 代数引理。因为“积分变量”是显式的，这使得它们在复杂公式中更容易使用。
+
+ 还有一组对偶的 Ninja 共代数引理，它们使用余极限。对于协变函子，我们有：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
+ 对于逆变函子，我们有：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(a, x) \times G x \cong G a \]
+
+ 物理学家可能会注意到这些公式与涉及狄拉克 $\delta$ 函数的积分的相似性——严格来说，$\delta$ 是一种分布。这就是为什么伴随态射有时被称为\index{distributors}分布器（distributors），遵循“分布器对于函子就像分布对于函数”的格言。工程师可能会注意到同态函子与冲激函数的相似性。
+
+ 这种直觉通常被表达为我们可以在这个公式中执行“对 $x$ 的积分”，从而将被积函数中的 $x$ 替换为 $a$。
+
+ 如果 $\cat C$ 是一个离散范畴，余极限简化为和（余积），同态函子简化为单位矩阵（克罗内克 $\delta$）。共代数引理变为：
+ \[ \sum_j \delta_i^j v_j = v_i \]
+ 事实上，许多线性代数可以直接翻译为 $\Set$-值函子的理论。你可以经常将这些函子视为向量空间中的向量，其中同态函子形成一个基。伴随态射变为矩阵，余极限用于乘以这些矩阵，计算它们的迹，或将向量与矩阵相乘。
+
+ 在澳大利亚，伴随态射还有一个名称，叫做\index{bimodule}双模（bimodules）。这是因为通过伴随态射提升态射的行为类似于集上的左作用和右作用。
+
+ 我们现在将继续证明共代数引理，它相当具有指导意义，因为它使用了一些常见的技巧。最重要的是，我们依赖于代数引理的推论，它说，如果从两个对象映射到任意对象的所有映射是同构的，那么这两个对象本身是同构的。在我们的例子中，我们将考虑映射到任意集合 $S$ 的映射，并表明：
+ \[ \mathbf{Set} \left(\int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x, S \right) \cong
+ \Set (F a, S)\]
+ 使用同态函子的余连续性，我们可以将积分符号提取出来，将余极限替换为极限：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) \times F x, S \right) \]
+ 由于集合范畴是笛卡尔闭的，我们可以对积进行柯里化：
+ \[ \int_{x \colon \mathcal{C}} \mathbf{Set} \left( \mathcal{C}(x, a) , S^{F x} \right) \]
+ 我们现在可以使用代数引理“对 $x$ 进行积分”。结果是 $S^{F a}$。最后，在 $\mathbf{Set}$ 中，指数对象与同态集合同构：
+ \[S^{F a} \cong \mathbf{Set}(F a, S)\]
+ 由于 $S$ 是任意的，我们得出结论：
+ \[ \int^{x \colon \mathcal{C}} \mathcal{C}(x, a) \times F x \cong F a \]
+
+ \begin{exercise}
+  证明共代数引理的逆变版本。
+ \end{exercise}
+
+ \subsection{Yoneda lemma in Haskell（Haskell中的代数引理）}
+
+ 我们已经在 Haskell 中实现了代数引理。我们现在可以将其以极限的形式重写。我们首先定义一个将在极限下使用的伴随态射。它的类型构造器接收一个函子 \hask{f} 和一个类型 \hask{a}，并生成一个在 \hask{x} 上逆变，在 \hask{y} 上协变的伴随态射：
+ \begin{haskell}
+  data Yo f a x y = Yo ((a -> x) -> f y)
+ \end{haskell}
+ 代数引理建立了这个伴随态射下的极限与通过对 \hask{a} 应用函子 \hask{f} 获得的类型之间的同构。这种同构通过一对函数来实现：
+ \begin{haskell}
+  yoneda :: Functor f => End (Yo f a) -> f a
+  yoneda (Yo g) = g id
+
+  yoneda_1 :: Functor f => f a -> End (Yo f a)
+  yoneda_1 fa = Yo (\h -> fmap h fa)
+ \end{haskell}
+
+ 类似地，共代数引理使用下面这个伴随态射上的余极限：
+ \begin{haskell}
+  data CoY f a x y = CoY (x -> a) (f y)
+ \end{haskell}
+ 同构由一对函数表示。第一个函数说明，如果你有一个函数 \hask{x -> a} 和一个包含 \hask{x} 的函子，你就可以使用 \hask{fmap} 创建一个包含 \hask{a} 的函子：
+ \begin{haskell}
+  coyoneda :: Functor f => Coend (CoY f a) -> f a
+  coyoneda (Coend (CoY g fa)) = fmap g fa
+ \end{haskell}
+ 你可以做到这一点，而不需要知道存在类型 \hask{x} 的任何信息。
+
+ 第二个函数说明，如果你有一个包含 \hask{a} 的函子，你可以通过将它（连同恒等函数）注入到存在类型中创建一个余极限：
+ \begin{haskell}
+  coyoneda_1 :: Functor f => f a -> Coend (CoY f a)
+  coyoneda_1 fa = Coend (CoY id fa)
+ \end{haskell}
+
+ \section{Day Convolution（Day 卷积）}
+
+ 电气工程师熟悉卷积的概念。我们可以通过移位其中一个流并求其与另一个流的乘积和来卷积两个流：
+ \[ (f \star g)(x) = \int^{\infty}_{-\infty} f(y) g(x - y) dy \]
+ 这个公式几乎可以直接翻译为范畴论。我们可以从用余极限替换积分开始。问题是，我们不知道如何对对象进行减法操作。然而，我们确实知道如何在共笛卡尔范畴中对它们进行加法操作。
+
+ 请注意，这两个函数的参数之和等于 $x$。我们可以通过引入狄拉克 $\delta$ 函数或“冲激函数”（$\delta(a + b - x)$）来强制执行这一条件。在范畴论中，我们使用同态函子 $\cat C (a + b, x)$ 来实现同样的效果。因此，我们可以定义两个 $\Set$-值函子的卷积：
+ \[ (F \star G) x = \int^{a, b} \cat C (a + b, x) \times F a \times G b \]
+ 非正式地说，如果我们可以定义减法为共积的右伴随函数，我们可以写成：
+ \[ \int^{a, b} \cat C (a + b, x) \times F a \times G b \cong \int^{a, b} \cat C (a, b - x) \times F a \times G b \cong \int^b F (b - x) \times G b\]
+
+ 共积没有什么特别之处，因此，通常情况下，Day 卷积在具有张量积的任何单胚范畴中都可以定义：
+ \[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+
+ 实际上，Day 卷积为一个单胚范畴 $(\cat C, \otimes, I)$ 赋予了 $[\cat C, \Set]$ 的共预层范畴一个单胚结构。简单来说，如果你可以在 $\cat C$ 中对对象进行乘法，你就可以在 $\cat C$ 上对 $\Set$-值函子进行乘法。
+
+ 很容易证明 Day 卷积是关联的（最多是同构），并且 $\cat C(I, -)$ 作为单位对象。例如，我们有：
+ \[ (\cat C(I, -) \star G) x =  \int^{a, b} \cat C (a \otimes b, x) \times \cat C(I, a) \times G b \cong
+ \int^{b} \cat C (I \otimes b, x) \times  G b \cong G x\]
+ 因此，Day 卷积的单位是对单胚单位采取的 Yoneda 函子，这引出了一个字谜般的口号，“Day 的 ONE 是 ONE 的 Yoneda。”
+
+ 如果张量积是对称的，那么相应的 Day 卷积也是对称的（最多是同构）。
+
+ 在笛卡尔闭范畴的特殊情况下，我们可以使用柯里化调整来简化公式：
+ \[ (F \star G) x = \int^{a, b} \cat C (a \times b, x) \times F a \times G b \cong  \int^{a, b} \cat C (a, x^b) \times F a \times G b \cong  \int^{b}  F (x^b) \times G b\]
+
+ 在 Haskell 中，基于乘积的 Day 卷积可以使用存在类型来定义：
+ \begin{haskell}
+  data Day f g x where
   Day :: ((a, b) -> x) -> f a -> g b -> Day f g x
-\end{haskell}
+ \end{haskell}
 
-If we think of functors as containers of values, Day convolution tells us how to combine two different containers into one---given a function that combines two different values into one. 
+ 如果我们将函子视为值的容器，Day 卷积告诉我们如何将两个不同的容器组合成一个——只需给出一个将两个不同值组合成一个的函数。
 
-\begin{exercise}
-Define the \hask{Functor} instance for \hask{Day}.
-\end{exercise}
+ \begin{exercise}
+  为 \hask{Day} 定义 \hask{Functor} 实例。
+ \end{exercise}
 
-\begin{exercise}
-Implement the associator for \hask{Day}.
-\begin{haskell}
-assoc :: Day f (Day g h) x -> Day (Day f g) h x
-\end{haskell}
-\end{exercise}
+ \begin{exercise}
+  为 \hask{Day} 实现关联器。
+  \begin{haskell}
+   assoc :: Day f (Day g h) x -> Day (Day f g) h x
+  \end{haskell}
+ \end{exercise}
 
+ \subsection{Applicative functors as monoids（作为单胚的应用函子）}
 
-\subsection{Applicative functors as monoids}
- 
- We've seen before the definition of applicative functors as lax monoidal functors. It turns out that, just like monads, applicative functors can also be defined as monoids. 
- 
-Recall that a monoid is an object in a monoidal category. The category we're interested in is the co-presheaf category $[\cat C, \Set]$. If $\cat C$ is cartesian, then the co-presheaf category is monoidal with respect to Day convolution, with the unit object $\cat C(I, -)$. A monoid in this category is a functor $F$ equipped with two natural transformations that serve as unit and multiplication:
-\[ \eta \colon \cat C(I, -) \to F \]
-\[ \mu \colon F \star F \to F \]
-In particular, in a cartesian closed category where the unit is the terminal object, $\cat C(1, a)$ is isomorphic to $a$, and the component of the unit at $a$ is:
-\[ \eta_a \colon a \to F a \] 
-You may recognize this function as \hask{pure} in the definition of \hask{Applicative}.
-\begin{haskell}
-pure :: a -> f a
-\end{haskell}
+ 我们之前看到了应用函子作为松弛单胚函子的定义。事实证明，就像单子一样，应用函子也可以定义为单胚。
 
-Let's consider the set of natural transformations from which $\mu$ is taken. We'll write it as an end:
-\[ \mu \in \int_x \Set \big( (F \star F) x, F x \big) \]
-Pluggin in the definition of Day convolution, we get:
-\[ \int_x \Set \big( \int^{a, b} \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
-We can pull out the coend using co-continuity of the hom-functor:
-\[ \int_{x, a, b} \Set \big( \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
-We can then use the currying adjunction in $\Set$ to obtain:
-\[ \int_{x, a, b} \Set \big( \cat C (a \times b, x),  \Set( F a \times  F b, F x) \big) \]
-Finally, we apply the Yoneda lemma to perform the integration over $x$:
-\[ \int_{a, b}  \Set \big( F a \times  F b, F (a \times b) \big) \]
-The result is the set of natural transformations from which to select the second part of the lax monoidal functor:
-\begin{haskell}
-  (>*<) :: f a -> f b -> f (a, b)
-\end{haskell}
+ 回想一下，单胚是一个单胚范畴中的对象。我们感兴趣的范畴是 $[\cat C, \Set]$ 的共预层范畴。如果 $\cat C$ 是笛卡尔的，那么共预层范畴相对于 Day 卷积是单胚的，单位对象是 $\cat C(I, -)$。此范畴中的单胚是一个函子 $F$，它带有两个自然变换，分别作为单位和乘法：
+ \[ \eta \colon \cat C(I, -) \to F \]
+ \[ \mu \colon F \star F \to F \]
+ 特别是在一个笛卡尔闭范畴中，其中单位是终对象，$\cat C(1, a)$ 与 $a$ 同构，并且单位在 $a$ 处的分量是：
+ \[ \eta_a \colon a \to F a \]
+ 你可能会认出这个函数就是 \hask{pure} 在 \hask{Applicative} 定义中的作用。
+ \begin{haskell}
+  pure :: a -> f a
+ \end{haskell}
 
-\subsection{Free Applicatives}
+ 让我们考虑从中选择 $\mu$ 的自然变换的集合。我们将其写为一个极限：
+ \[ \mu \in \int_x \Set \big( (F \star F) x, F x \big) \]
+ 代入 Day 卷积的定义，我们得到：
+ \[ \int_x \Set \big( \int^{a, b} \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
+ 我们可以使用同态函子的余连续性来提取余极限：
+ \[ \int_{x, a, b} \Set \big( \cat C (a \times b, x) \times F a \times  F b, F x \big) \]
+ 然后我们可以在 $\Set$ 中使用柯里化调整：
+ \[ \int_{x, a, b} \Set \big( \cat C (a \times b, x),  \Set( F a \times  F b, F x) \big) \]
+ 最后，我们应用代数引理来对 $x$ 进行积分：
+ \[ \int_{a, b}  \Set \big( F a \times  F b, F (a \times b) \big) \]
+ 结果是从中选择松弛单胚函子的第二部分的自然变换的集合：
+ \begin{haskell}
+ (>*<) :: f a -> f b -> f (a, b)
+ \end{haskell}
 
-We have just learned that applicative functors are monoids in the monoidal category:
-\[ ([\cat C, \Set], \cat C(I, -), \star) \]
-It's only natural to ask what a free monoid in that category is. 
+ \subsection{Free Applicatives（自由应用函子）}
 
-Just like we did with free monads, we'll construct a free applicative as the initial algebra, or the least fixed point of the list functor. Recall that the list functor was defined as:
-\[ \Phi_a x = 1 + a \otimes x \]
-In our case it becomes:
-\[ \Phi_F G = \cat C(I, -) + F \star G \]
-Its fixed point is given by the recursive formula:
-\[ A_F \cong \cat C(I, -) + F \star A_F\]
+ 我们刚刚了解到，应用函子是单胚范畴中的单胚：
+ \[ ([\cat C, \Set], \cat C(I, -), \star) \]
+ 自然会问，这个范畴中的自由单胚是什么。
 
-When translating this to Haskell, we observe that functions from the unit \hask{()->a} are isomorphic to elements of \hask{a}. 
+ 就像我们对自由单子所做的那样，我们将构造一个自由应用函子作为初始代数，或者列表函子的最小不动点。回想一下，列表函子被定义为：
+ \[ \Phi_a x = 1 + a \otimes x \]
+ 在我们的情况下，它变为：
+ \[ \Phi_F G = \cat C(I, -) + F \star G \]
+ 它的不动点由以下递归公式给出：
+ \[ A_F \cong \cat C(I, -) + F \star A_F\]
 
-Corresponding to the two addends in the definition of $A_F$, we get two constructors:
-\begin{haskell}
-data FreeA f x where
+ 将此公式翻译为 Haskell 时，我们观察到从单位 \hask{()->a} 到元素 \hask{a} 的函数是同构的。
+
+ 对应于 $A_F$ 定义中的两个加数，我们得到两个构造函数：
+ \begin{haskell}
+  data FreeA f x where
   DoneA :: x -> FreeA f x
   MoreA :: ((a, b) -> x) -> f a -> FreeA f b -> FreeA f x
-\end{haskell}
-I have inlined the definition of Day convolution:
-\begin{haskell}
-data Day f g x where
+ \end{haskell}
+ 我将 Day 卷积的定义内联化了：
+ \begin{haskell}
+  data Day f g x where
   Day :: ((a, b) -> x) -> f a -> g b -> Day f g x
-\end{haskell}
+ \end{haskell}
 
-The easiest way to show that \hask{FreeA f} is an applicative functor is to go through \hask{Monoidal}:
-\begin{haskell}
-class Monoidal f where
+ 最简单的方式展示 \hask{FreeA f} 是一个应用函子是通过 \hask{Monoidal}：
+ \begin{haskell}
+  class Monoidal f where
   unit  :: f ()
   (>*<) :: f a -> f b -> f (a, b)
-\end{haskell}
+ \end{haskell}
 
-Since \hask{FreeA f} is a generalization of a list, the \hask{Monoidal} instance for free applicative generalizes the idea of list concatenation. We do the pattern matching on the first list, resulting in two cases.
+ 由于 \hask{FreeA f} 是列表的泛化，自由应用函子的 \hask{Monoidal} 实例泛化了列表连接的概念。我们对第一个列表进行模式匹配，导致两个情况。
 
-In the first case, instead of an empty list we have \hask{DoneA x}. Prepending it to the second argument doesn't change the length of the list, but it modifies the type of the values stored in it. It pairs each of them with \hask{x}:
-\begin{haskell}
-  (DoneA x) >*< fry = fmap (x,) fry
-\end{haskell}
+ 在第一种情况下，代替一个空列表，我们有 \hask{DoneA x}。将其附加到第二个参数中不会改变列表的长度，但会修改存储在其中的值的类型。它将每个值与 \hask{x} 配对：
+ \begin{haskell}
+ (DoneA x) >*< fry = fmap (x,) fry
+ \end{haskell}
 
-The second case is a ``list'' whose head \hask{fa} is a functorful of \hask{a}'s, and the tail \hask{frb} is of the type \hask{FreeA f b}. The two are glued using a function \hask{abx :: (a, b) -> x}. 
-\begin{haskell}
-  (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
-\end{haskell}
-To produce the result, we concatenate the two tails using the recursive call to \hask{>*<} and prepend \hask{fa} to it. To glue this head to the new tail we have to provide a function that re-associates the pairs:
-\begin{haskell}
-reassoc :: ((a, b)-> x) -> (a, (b, y)) -> (x, y)
-reassoc abx (a, (b, y)) = (abx (a, b), y)
-\end{haskell}
+ 第二种情况是一个列表，其头部 \hask{fa} 是 \hask{a} 的函子，尾部 \hask{frb} 是类型 \hask{FreeA f b}。这两者通过一个函数 \hask{abx :: (a, b) -> x} 粘合在一起。
+ \begin{haskell}
+ (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
+ \end{haskell}
+ 为了生成结果，我们使用对 \hask{>*<} 的递归调用连接两个尾部，并将 \hask{fa} 附加到它上面。为了将这个头部粘合到新的尾部，我们必须提供一个重新关联这些对的函数：
+ \begin{haskell}
+  reassoc :: ((a, b)-> x) -> (a, (b, y)) -> (x, y)
+  reassoc abx (a, (b, y)) = (abx (a, b), y)
+ \end{haskell}
 
-The complete instance is thus:
-\begin{haskell}
-instance Functor f => Monoidal (FreeA f) where
+ 完整的实例如下：
+ \begin{haskell}
+  instance Functor f => Monoidal (FreeA f) where
   unit = DoneA ()
   (DoneA x) >*< fry = fmap (x,) fry
   (MoreA abx fa frb) >*< fry = MoreA (reassoc abx) fa (frb >*< fry)
-\end{haskell}
+ \end{haskell}
 
-Once we have the \hask{Monoidal} instance, it's straightforward to produce the \hask{Applicative} instance:
-\begin{haskell}
-instance Functor f => Applicative (FreeA f) where
+ 一旦我们有了 \hask{Monoidal} 实例，就很容易生成 \hask{Applicative} 实例：
+ \begin{haskell}
+  instance Functor f => Applicative (FreeA f) where
   pure a = DoneA a
   ff <*> fx = fmap app (ff >*< fx)
-  
-app :: (a -> b, a) -> b
-app (f, a) = f a
-\end{haskell}
 
-\begin{exercise}
-Define the \hask{Functor} instance for the free applicative.
-\end{exercise}
+  app :: (a -> b, a) -> b
+  app (f, a) = f a
+ \end{haskell}
+
+ \begin{exercise}
+  为自由应用函子定义 \hask{Functor} 实例。
+ \end{exercise}
 
 
-\section{The Bicategory of Profunctors}
+ \section{伴随态射的双范畴（The Bicategory of Profunctors）}
 
-Since we know how to compose profunctors using coends, the question arises: is there a category in which they serve as morphisms? The answer is yes, as long as we relax the rules a bit. The problem is that the categorical laws for profunctor composition are nor satisfied ``on the nose,'' but only up to isomorphism. 
+ 既然我们已经知道如何使用余极限（coends）来组合伴随态射（profunctors），那么问题就来了：是否存在一个以这些伴随态射作为态射的范畴？答案是肯定的，只要我们稍微放松一下规则。问题在于，伴随态射组合的范畴定律并不能严格满足，而是只能满足同构意义上的定律。
 
-For instance, we can try to show associativity of profunctor composition. We start with:
-\[ ((P \diamond Q) \diamond R) \langle s, t \rangle = \int^b \left( \int^a P \langle s, a \rangle \times Q \langle a, b \rangle \right) \times R \langle b,  t \rangle \]
-and, after a few transformations, arrive at:
-\[ (P \diamond (Q \diamond R)) \langle s, t \rangle =  \int^a P \langle s, a \rangle \times \left( \int^b Q \langle a, b \rangle \times R \langle b,  t \rangle \right) \]
-We use the associativity of the product and the fact that we can switch the order of coends using the Fubini theorem. Both are true only up to isomorphism. We don't get associativity ``on the nose.''
+ 例如，我们可以尝试展示伴随态射组合的结合律。我们从以下开始：
+ \[ ((P \diamond Q) \diamond R) \langle s, t \rangle = \int^b \left( \int^a P \langle s, a \rangle \times Q \langle a, b \rangle \right) \times R \langle b,  t \rangle \]
+ 然后经过一些转换，得到：
+ \[ (P \diamond (Q \diamond R)) \langle s, t \rangle =  \int^a P \langle s, a \rangle \times \left( \int^b Q \langle a, b \rangle \times R \langle b,  t \rangle \right) \]
+ 我们使用了乘积的结合性和富比尼定理（Fubini theorem）中可以交换余极限的顺序。两者都只能在同构的意义上成立。我们不能获得严格的结合律。
 
-The identity profunctor turns out to be the hom-functor, which can be written symbolically as $\mathcal{C}(-, =)$, with placeholders for both arguments. For instance:
-\[ \left( \mathcal{C}(-, =) \diamond P \right) \langle s, t \rangle = \int^a  \mathcal{C}(s, a) \times P \langle a, t \rangle \cong P \langle s, t \rangle \]
-This is the consequence of the (contravariant) ninja co-Yoneda lemma, which is also an isomorphism, not an equality.
+ 恒等伴随态射实际上是同态函子（hom-functor），它可以符号化地表示为 $\mathcal{C}(-, =)$，其中两个参数为占位符。例如：
+ \[ \left( \mathcal{C}(-, =) \diamond P \right) \langle s, t \rangle = \int^a  \mathcal{C}(s, a) \times P \langle a, t \rangle \cong P \langle s, t \rangle \]
+ 这是（逆变）Ninja 共代数引理（ninja co-Yoneda lemma）的结果，这也是一个同构，而不是一个等式。
 
-A category in which categorical laws are satisfied up to isomorphism is called a \index{bicategory}bicategory. Notice that such a category must be equipped with 2-cells---morphisms between morphisms, which we've already seen in the definition of a 2-category. We need those in order to be able to define isomorphisms between 1-cells. 
+ 一个范畴，如果其范畴定律仅在同构意义上满足，则称为\index{bicategory}双范畴（bicategory）。请注意，这样的范畴必须配备2-态射（2-cells）——即态射之间的态射，这在2-范畴的定义中已经见过。我们需要这些2-态射来定义1-态射之间的同构。
 
-A bicategory $\mathbf{Prof}$ has (small) categories as objects, profunctors as 1-cells, and natural transformations as 2-cells. 
+ 一个双范畴 $\mathbf{Prof}$ 具有（小）范畴作为对象，伴随态射作为1-态射，自然变换作为2-态射。
 
-Since profunctors are functors $\mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$, the standard definition of natural transformations between them applies. It's a family of functions parameterized by objects of $\mathcal{C}^{op} \times  \mathcal{D}$, which are themselves pairs of objects. 
+ 由于伴随态射是从 $\mathcal{C}^{op} \times  \mathcal{D} \to \mathbf{Set}$ 的函子，适用于它们的自然变换的标准定义是一个由 $\mathcal{C}^{op} \times  \mathcal{D}$ 的对象参数化的函数族，这些对象本身是对象的对。
 
-The naturality condition for a transformation $\alpha_{\langle a, b \rangle}$ between two profunctors $P$ and $Q$ takes the form:
-\[
- \begin{tikzcd}
- &P \langle a, b \rangle
- \arrow[ld, "{\alpha_{\langle a, b \rangle}}"']
- \arrow[rd, "{P \langle f, g \rangle}"]
- \\
- Q \langle a, b \rangle
- \arrow[dr, "{Q \langle f, g \rangle}"']
- &&P \langle s, t \rangle
- \arrow[dl, "{\alpha_{\langle s, t \rangle}}"]
- \\
- & Q \langle s, t \rangle
- \end{tikzcd}
-\]
-for every pair of arrows:
-\[ \langle f \colon s \to a, g \colon b \to t \rangle \]
+ 对于两个伴随态射 $P$ 和 $Q$ 之间的变换 $\alpha_{\langle a, b \rangle}$，其自然性条件如下形式：
+ \[
+  \begin{tikzcd}
+   &P \langle a, b \rangle
+   \arrow[ld, "{\alpha_{\langle a, b \rangle}}"']
+   \arrow[rd, "{P \langle f, g \rangle}"]
+   \\
+   Q \langle a, b \rangle
+   \arrow[dr, "{Q \langle f, g \rangle}"']
+   &&P \langle s, t \rangle
+   \arrow[dl, "{\alpha_{\langle s, t \rangle}}"]
+   \\
+   & Q \langle s, t \rangle
+  \end{tikzcd}
+ \]
+ 对于每对箭头：
+ \[ \langle f \colon s \to a, g \colon b \to t \rangle \]
 
-\subsection{Monads in a bicategory}
+ \subsection{双范畴中的单子（Monads in a Bicategory）}
 
-We've seen before that categories, functors, and natural transformations form a 2-category $\Cat{Cat}$. Let's focus on one object, a category $\cat C$, that is a 0-cell in $\Cat{Cat}$. The 1-cells that start and end at this object form a regular category, in this case it's the functor category $[\cat C, \cat C]$. The objects in this category are endo-1-cells of the outer 2-category $\Cat{Cat}$. The arrows between them are the 2-cells of the outer 2-category.
+ 我们之前已经看到，范畴、函子和自然变换构成了一个2-范畴 $\Cat{Cat}$。让我们关注一个对象，即一个0-态射 $\Cat{Cat}$ 中的范畴 $\cat C$。从这个对象出发并终止于它的1-态射构成了一个常规范畴，在本例中，它是函子范畴 $[\cat C, \cat C]$。这个范畴中的对象是外部2-范畴 $\Cat{Cat}$ 的端1-态射（endo-1-cells）。它们之间的箭头是外部2-范畴的2-态射。
 
-This endo-one-cell category is automatically equipped with monoidal structure. We simply define the tensor product as the composition of 1-cells---all 1-cells with the same source and target compose. The monoidal unit object is the identity 1-cell, $I$. In $[\cat C, \cat C]$ this product is the composition of endofunctors and the unit is the identity functor. 
+ 这个端1-态射范畴自动配备了单胚结构。我们简单地定义张量积为1-态射的组合——所有具有相同源和目标的1-态射可以组合。单胚单位对象是恒等1-态射 $I$。在 $[\cat C, \cat C]$ 中，这个乘积是端函子的组合，单位是恒等函子。
 
-If we now focus our attention on just one endo-1-cell $F$, we can ``square'' it, that is use the monoidal product to multiply it by itself. In other words, use the 1-cell composition to create $F \circ F$. We say that $F$ is a monad if we can find 2-cells:
-\[ \mu \colon F \circ F \to F \]
-\[ \eta \colon I \to F \]
-that behave like multiplication and unit, that is they make the associativity and unit diagrams commute. 
-\[
-   \begin{tikzpicture}
-        \node [] (star) {$\cat C$} ;
-        \path[->,draw] (star) to  [in=45,out=135, loop,distance=2cm] node[ below] {$I$} (star);
-        \path[->,draw] (star) to  [in=40,out=140, loop,distance=4cm] node[above] {$F$} (star);
-        \path[->,draw] (star) to  [ in=35,out=145, loop,distance=7cm] node[auto] {$F \circ F$} (star);
-    \end{tikzpicture}
-\]
-In fact a monad can be defined in an arbitrary bicategory, not just the 2-category $\Cat{Cat}$. 
+ 如果我们现在只关注一个端1-态射 $F$，我们可以“平方”它，即使用单胚乘积将其自身相乘。换句话说，使用1-态射组合来创建 $F \circ F$。我们说，如果我们可以找到2-态射：
+ \[ \mu \colon F \circ F \to F \]
+ \[ \eta \colon I \to F \]
+ 使得它们像乘法和单位一样，使得结合性和单位图表交换，那么 $F$ 就是一个单子。
+ \[
+  \begin{tikzpicture}
+   \node [] (star) {$\cat C$} ;
+   \path[->,draw] (star) to  [in=45,out=135, loop,distance=2cm] node[ below] {$I$} (star);
+   \path[->,draw] (star) to  [in=40,out=140, loop,distance=4cm] node[above] {$F$} (star);
+   \path[->,draw] (star) to  [ in=35,out=145, loop,distance=7cm] node[auto] {$F \circ F$} (star);
+  \end{tikzpicture}
+ \]
+ 事实上，一个单子可以在任意双范畴中定义，而不仅仅是2-范畴 $\Cat{Cat}$ 中。
 
-\subsection{Prearrows as monads in $\Cat{Prof}$}
+ \subsection{在 $\Cat{Prof}$ 中的前箭头作为单子（Prearrows as Monads in $\Cat{Prof}$）}
 
-Since $\Cat{Prof}$ is a bicategory, we can define a monad in it. It is an endo-profunctor (a 1-cell):
-\[ P \colon \cat C^{op} \times \cat C \to \Set \]
-equipped with two natural transformations (2-cells):
-\[ \mu \colon P \diamond P \to P \]
-\[ \eta \colon \cat C(-, =) \to P \]
-that satisfy the associativity and unit conditions.
+ 由于 $\Cat{Prof}$ 是一个双范畴，我们可以在其中定义一个单子。它是一个端伴随态射（端1-态射）：
+ \[ P \colon \cat C^{op} \times \cat C \to \Set \]
+ 配备两个自然变换（2-态射）：
+ \[ \mu \colon P \diamond P \to P \]
+ \[ \eta \colon \cat C(-, =) \to P \]
+ 满足结合性和单位条件。
 
-Let's look at these natural transformations as elements of ends. For instance:
-\[ \mu \in \int_{\langle a, b \rangle} \Set \big( \int^x P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
-By co-continuity, this is equivalent to:
-\[ \int_{\langle a, b \rangle, x} \Set \big(P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
-Similarly, the unit natural transformation is:
-\[ \eta \in \int_{\langle a, b \rangle} \Set (\cat C(a, b), P\langle a, b \rangle) \]
+ 让我们将这些自然变换视为余极限中的元素。例如：
+ \[ \mu \in \int_{\langle a, b \rangle} \Set \big( \int^x P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
+ 通过余连续性（co-continuity），这等价于：
+ \[ \int_{\langle a, b \rangle, x} \Set \big(P \langle a, x \rangle \times P \langle x, b \rangle,  P\langle a, b \rangle \big) \]
+ 同样，单位自然变换是：
+ \[ \eta \in \int_{\langle a, b \rangle} \Set (\cat C(a, b), P\langle a, b \rangle) \]
 
-In Haskell, such profunctor monads are called pre-arrows:
-\begin{haskell}
-class Profunctor p => PreArrow p where
+ 在 Haskell 中，这样的伴随态射单子被称为前箭头（pre-arrows）：
+ \begin{haskell}
+  class Profunctor p => PreArrow p where
   (>>>) :: p a x -> p x b -> p a b
   arr   :: (a -> b) -> p a b
-\end{haskell}
-An \hask{Arrow} is a \hask{PreArrow} that is also a Tambara module. We'll talk about Tambara modules in the next chapter.
+ \end{haskell}
+ 一个 \hask{Arrow} 是一个 \hask{PreArrow}，它同时也是一个 Tambara 模块。我们将在下一章讨论 Tambara 模块。
 
-\section{Existential Lens}
+ \section{存在透镜（Existential Lens）}
 
-The first rule of category-theory club is that you don't talk about the internals of objects.
+ 范畴论俱乐部的第一条规则是你不谈论对象的内部结构。
 
-The second rule of category-theory club is that, if you have to talk about the internals of objects, use arrows only.
+ 范畴论俱乐部的第二条规则是，如果你必须谈论对象的内部结构，请只使用箭头。
 
-\subsection{Existential lens in Haskell}
+ \subsection{Haskell 中的存在透镜（Existential Lens in Haskell）}
 
-What does it mean for an object to be a composite---to have parts? At the very minimum, you should be able to retrieve a part of such an object. Even better if you can replace that part with a new one. This pretty much defines a lens:
-\begin{haskell}
-get :: s -> a
-set :: s -> a -> s
-\end{haskell}
-Here, \hask{get} extracts the part \hask{a} from the whole \hask{s}, and \hask{set} replaces that part with a new \hask{a}. Lens laws help to reinforce this picture. And it's all done in terms of arrows. 
+ 什么意味着一个对象是复合的——即它具有部分？至少，你应该能够检索该对象的某个部分。如果你还能用一个新的部分替换这个部分，那就更好了。这几乎定义了一个透镜（lens）：
+ \begin{haskell}
+  get :: s -> a
+  set :: s -> a -> s
+ \end{haskell}
+ 这里，\hask{get} 从整体 \hask{s} 中提取部分 \hask{a}，而 \hask{set} 用一个新的 \hask{a} 替换该部分。透镜定律有助于加强这一概念。而且这一切都是通过箭头完成的。
 
-Another way of describing a composite object is to say that it can be split into a focus and a residue. The trick is that, although we want to know what type the focus is, we don't care about the type of the residue. All we need to know about the residue is that it can be combined with the focus to recreate the whole object. 
+ 描述复合对象的另一种方法是说它可以被分割为焦点和剩余部分。诀窍在于，虽然我们想知道焦点的类型，但我们不关心剩余部分的类型。我们只需要知道剩余部分可以与焦点结合以重新构建整个对象。
 
-In Haskell, we would express this idea using an existential type:
-\begin{haskell}
-data LensE s a where
-    LensE :: (s -> (c, a), (c, a) -> s) -> LensE s a
-\end{haskell}
-This tells us that there exists some unspecified type \hask{c}, such that \hask{s} can be split into, and reconstructed from, a product \hask{(c, a)}. 
+ 在 Haskell 中，我们使用存在类型来表达这个想法：
+ \begin{haskell}
+  data LensE s a where
+  LensE :: (s -> (c, a), (c, a) -> s) -> LensE s a
+ \end{haskell}
+ 这告诉我们存在某种未指定的类型 \hask{c}，使得 \hask{s} 可以被分割成一个 \hask{(c, a)}，并可以从中重建。
 
-\[
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
-\node at (0, -0.9) {$s$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
-\node at (0, 0) {$a$};
-\node at (0, -0.9) {$c$};
-\end{tikzpicture}
-\]
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
+   \node at (0, -0.9) {$s$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
+   \node at (0, 0) {$a$};
+   \node at (0, -0.9) {$c$};
+  \end{tikzpicture}
+ \]
 
+ 可以从这种存在形式中推导出 \hask{get}/\hask{set} 版本的透镜。
+ \begin{haskell}
+  toGet :: LensE s a -> (s -> a)
+  toGet (LensE (l, r)) = snd . l
 
-The \hask{get}/\hask{set} version of the lens can be derived from this existential form.
-\begin{haskell}
-toGet :: LensE s a -> (s -> a)
-toGet (LensE (l, r)) = snd . l
+  toSet :: LensE s a -> (s -> a -> s)
+  toSet (LensE (l, r)) s a = r (fst (l s), a)
+ \end{haskell}
 
-toSet :: LensE s a -> (s -> a -> s)
-toSet (LensE (l, r)) s a = r (fst (l s), a)
-\end{haskell}
+ 注意，我们不需要知道剩余部分的类型。我们利用了存在透镜包含了 \hask{c} 的生产者和消费者这一事实，而我们只是调解它们之间的关系。
 
-Notice that we don't need to know anything about the type of the residue. We take advantage of the fact that the existential lens contains both the producer and the consumer of \hask{c} and we're just mediating between the two.
+ 提取“裸”剩余部分是不可能的，正如以下代码无法编译所证明的那样：
+ \begin{haskell}
+  getResidue :: Lens s a -> c
+  getResidue (Lens (l, r)) = fst . l
+ \end{haskell}
 
-It's impossible to extract a ``naked'' residue, as witnessed by the fact that the following code doesn't compile:
-\begin{haskell}
-getResidue :: Lens s a -> c
-getResidue (Lens (l, r)) = fst . l
-\end{haskell}
+ \subsection{范畴论中的存在透镜（Existential Lens in Category Theory）}
 
-\subsection{Existential lens in category theory}
+ 我们可以很容易地将透镜的新定义翻译到范畴论中，使用余极限（coend）表达存在类型：
+ \[ \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times a, s) \]
+ 事实上，我们可以将其推广为类型变化透镜，其中焦点 $a$ 可以被替换为新类型 $b$ 的焦点。将 $a$ 替换为 $b$ 会产生一个新的复合对象 $t$：
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
+   \node at (0, 0) {$b$};
+   \node at (0, -0.9) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
+   \node at (0, -0.9) {$t$};
+  \end{tikzpicture}
+ \]
 
-We can easily translate the new definition of the lens to category theory by expressing the existential type as a coend:
-\[ \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times a, s) \]
-In fact, we can generalize it to a type-changing lens, in which the focus $a$ can be replaced with a new focus of a different type $b$. Replacing $a$ with $b$ will produce a new composite object $t$:
-\[
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.2);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.6);
-\node at (0, 0) {$b$};
-\node at (0, -0.9) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.2);
-\node at (0, -0.9) {$t$};
-\end{tikzpicture}
-\]
+ 透镜现在由两对对象参数化：$\langle s, t\rangle$ 为外部对象对，$\langle a, b \rangle$ 为内部对象对。存在剩余 $c$ 仍然是隐藏的：
+ \[ \mathcal{L}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times b, t) \]
+ 余极限下的乘积是一个在 $y$ 上协变、在 $x$ 上逆变的伴随态射的对角部分：
+ \[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
+ \begin{exercise}
+  证明：
+  \[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
+  是一个在 $\langle x, y\rangle$ 上的伴随态射。
+ \end{exercise}
 
-The lens is now parameterized by two pairs of objects: $\langle s, t\rangle$ for the outer ones, and $ \langle a, b \rangle$ for the inner ones. The existential residue $c$ remains hidden:
-\[ \mathcal{L}\langle s, t\rangle \langle a, b \rangle = \int^{c} \mathcal{C}(s, c \times a) \times  \mathcal{C}(c \times b, t) \]
-The product under the coend is the diagonal part of the profunctor that is covariant in $y$ and contravariant in $x$:
-\[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
-\begin{exercise}
-Show that:
-\[ \mathcal{C}(s, y \times a) \times  \mathcal{C}(x \times b, t) \]
-is a profunctor in $\langle x, y\rangle$.
-\end{exercise}
+ \subsection{Haskell 中的类型变化透镜（Type-changing Lens in Haskell）}
 
-
-\subsection{Type-changing lens in Haskell}
-In Haskell, we can define a type-changing lens as the following existential type:
-\begin{haskell}
-data LensE s t a b where
+ 在 Haskell 中，我们可以定义一个类型变化透镜为以下存在类型：
+ \begin{haskell}
+  data LensE s t a b where
   LensE :: (s -> (c, a)) -> ((c, b) -> t) -> LensE s t a b
-\end{haskell}
+ \end{haskell}
 
-As before, we can use the existential lens to get and set the focus:
-\begin{haskell}
-toGet :: LensE s t a b -> (s -> a)
-toGet (LensE l r) = snd . l
+ 和之前一样，我们可以使用存在透镜来获取和设置焦点：
+ \begin{haskell}
+  toGet :: LensE s t a b -> (s -> a)
+  toGet (LensE l r) = snd . l
 
-toSet :: LensE s t a b -> (s -> b -> t)
-toSet (LensE l r) s a = r (fst (l s), a)
-\end{haskell}
+  toSet :: LensE s t a b -> (s -> b -> t)
+  toSet (LensE l r) s a = r (fst (l s), a)
+ \end{haskell}
 
-The two functions, \hask{s->(c, a)} and \hask{(c, b)->t} are often called the \emph{forward} and the \emph{backward} pass. 
-The forward pass can be used to extract the focus \hask{a}. The backward pass provides the answer to the question: If we wanted the result of the forward pass to be some other \hask{b}, what \hask{t} should we pass to it? 
+ 这两个函数，\hask{s->(c, a)} 和 \hask{(c, b)->t}，通常被称为\emph{前向}和\emph{后向}传递。
+ 前向传递可以用于提取焦点 \hask{a}。后向传递提供了一个问题的答案：如果我们希望前向传递的结果是另一个 \hask{b}，我们应该传递给它什么 \hask{t}？
 
-And sometimes we're just asking: What change \hask{t} should we make to the input if we wanted to change the focus by \hask{b}. The latter point of view is especially useful when using lenses to describe \index{neural networks}neural networks.
+ 有时我们只是问：如果我们希望通过 \hask{b} 更改焦点，我们应该对输入进行什么更改 \hask{t}？这种观点在使用透镜描述\index{神经网络}神经网络（neural networks）时特别有用。
 
-The simplest example of a lens acts on a product. It can extract or replace one component of the product, treating the other as the residue. In Haskell, we'd implement it as:
-\begin{haskell}
-prodLens :: LensE (c, a) (c, b) a b
-prodLens = LensE id id
-\end{haskell}
-Here, the type of the whole is the product \hask{(c, a)}. When we replace \hask{a} with \hask{b} we end up with the target type \hask{(c, b)}. Since the source and the target are already products, the two functions in the definition of the existential lens are just identities.
+ 透镜的最简单示例作用于乘积。它可以提取或替换乘积的一个分量，将另一个分量视为剩余部分。在 Haskell 中，我们将其实现为：
+ \begin{haskell}
+  prodLens :: LensE (c, a) (c, b) a b
+  prodLens = LensE id id
+ \end{haskell}
+ 在这里，整体的类型是乘积 \hask{(c, a)}。当我们将 \hask{a} 替换为 \hask{b} 时，我们最终得到目标类型 \hask{(c, b)}。由于源和目标已经是乘积，存在透镜定义中的两个函数只是恒等函数。
 
-\subsection{Lens composition}
+ \subsection{透镜组合（Lens Composition）}
 
-The main advantage of using lenses is that they compose. A composition of two lenses lets us zoom in on a subcomponent of a component. 
+ 使用透镜的主要优点在于它们可以组合。两个透镜的组合使我们可以放大到某个分量的子分量。
 
-Suppose that we start with a lens that lets us access the focus \hask{a}  and change it to \hask{b}. This focus is part of a whole described by the source \hask{s} and the target \hask{t}. 
+ 假设我们从一个透镜开始，它使我们可以访问焦点 \hask{a} 并将其更改为 \hask{b}。这个焦点是整体的一部分，由源 \hask{s} 和目标 \hask{t} 描述。
 
-We also have the inner lens that can access the focus of \hask{a'}  inside the whole of \hask{a}, and replace it with \hask{b'} to give us a new \hask{b}. 
+ 我们还有一个内部透镜，它可以访问 \hask{a} 内的焦点 \hask{a'}，并将其替换为 \hask{b'}，从而为我们提供一个新的 \hask{b}。
 
-We can now construct a composite lens that can access \hask{a'} and \hask{b'} inside of \hask{s} and \hask{t}. The trick is to realize that we can take, as the new residue, a product of the two residues:
-\[
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
-\node at (0, -1.1) {$s$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\node at (0, 0) {$a$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
-\node at (0, 0) {$a'$};
-\node at (0, -0.6) {$c'$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\]
+ 现在我们可以构造一个组合透镜，使我们能够在 \hask{s} 和 \hask{t} 中访问 \hask{a'} 和 \hask{b'}。诀窍是意识到我们可以将两个剩余部分的乘积作为新的剩余部分：
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
+   \node at (0, -1.1) {$s$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \node at (0, 0) {$a$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
+   \node at (0, 0) {$a'$};
+   \node at (0, -0.6) {$c'$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+ \]
 
-\[
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
-\node at (0, 0) {$b'$};
-\node at (0, -0.6) {$c'$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
-\filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
-\node at (0, 0) {$b$};
-\node at (0, -1.1) {$c$};
-\end{tikzpicture}
-\hspace{20pt}
-\begin{tikzpicture}
-\filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
-\node at (0, -1.1) {$t$};
-\end{tikzpicture}
-\]
+ \[
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \filldraw[fill=red!30, draw=white] (0, 0) circle (0.4);
+   \node at (0, 0) {$b'$};
+   \node at (0, -0.6) {$c'$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=blue!50!green!20, draw=white] (0, 0) circle (1.4);
+   \filldraw[fill=orange!30, draw=white] (0, 0) circle (0.9);
+   \node at (0, 0) {$b$};
+   \node at (0, -1.1) {$c$};
+  \end{tikzpicture}
+  \hspace{20pt}
+  \begin{tikzpicture}
+   \filldraw[fill=gray!50, draw=white] (0, 0) circle (1.4);
+   \node at (0, -1.1) {$t$};
+  \end{tikzpicture}
+ \]
 
 
 
-\begin{haskell}
-compLens :: LensE a b a' b' -> LensE s t a b -> LensE s t a' b'
-compLens (LensE l2 r2) (LensE l1 r1) = LensE l3 r3
+ \begin{haskell}
+  compLens :: LensE a b a' b' -> LensE s t a b -> LensE s t a' b'
+  compLens (LensE l2 r2) (LensE l1 r1) = LensE l3 r3
   where l3 = assoc' . bimap id l2  . l1
-        r3 = r1 . bimap id r2 . assoc
-\end{haskell}
-The left mapping in the new lens is given by the following composite:
-\[ s \xrightarrow{l_1} (c, a)   \xrightarrow{(id, l_2)} (c, (c', a'))  \xrightarrow{assoc'} ((c, c'), a')\]
-and the right mapping is given by:
-\[ ((c, c'), b') \xrightarrow{assoc}  (c, (c', b')) \xrightarrow{(id, r_2)} (c, b) \xrightarrow{r_1} t \]
+  r3 = r1 . bimap id r2 . assoc
+ \end{haskell}
+ 新透镜中的左映射由以下组合给出：
+ \[ s \xrightarrow{l_1} (c, a)   \xrightarrow{(id, l_2)} (c, (c', a'))  \xrightarrow{assoc'} ((c, c'), a')\]
+ 右映射由以下公式给出：
+ \[ ((c, c'), b') \xrightarrow{assoc}  (c, (c', b')) \xrightarrow{(id, r_2)} (c, b) \xrightarrow{r_1} t \]
 
-We have used the associativity and functoriality of the product:
-\begin{haskell}
-assoc :: ((c, c'), b') -> (c, (c', b'))
-assoc ((c, c'), b') = (c, (c', b'))
+ 我们使用了乘积的结合性和函子性：
+ \begin{haskell}
+  assoc :: ((c, c'), b') -> (c, (c', b'))
+  assoc ((c, c'), b') = (c, (c', b'))
 
-assoc' :: (c, (c', a')) -> ((c, c'), a')
-assoc' (c, (c', a')) = ((c, c'), a')
+  assoc' :: (c, (c', a')) -> ((c, c'), a')
+  assoc' (c, (c', a')) = ((c, c'), a')
 
-instance Bifunctor (,) where
+  instance Bifunctor (,) where
   bimap f g (a, b) = (f a, g b)
-\end{haskell}
+ \end{haskell}
 
-As an example, let's compose two product lenses:
-\begin{haskell}
-l3 :: LensE (c, (c', a')) (c, (c', b')) a' b'
-l3 = compLens prodLens prodLens
-\end{haskell}
-and apply it to a nested product:
-\begin{haskell}
-x :: (String, (Bool, Int))
-x = ("Outer", (True, 42))
-\end{haskell}
-Our composite lens lets us not only retrieve the innermost component:
-\begin{haskell}
-toGet l3 x
-> 42
-\end{haskell}
-but also replace it with a value of a different type (here, \hask{Char}):
-\begin{haskell}
-toSet l3 x 'z'
-> ("Outer",(True,'z'))
-\end{haskell}
+ 作为示例，让我们组合两个乘积透镜：
+ \begin{haskell}
+  l3 :: LensE (c, (c', a')) (c, (c', b')) a' b'
+  l3 = compLens prodLens prodLens
+ \end{haskell}
+ 并将其应用于嵌套的乘积：
+ \begin{haskell}
+  x :: (String, (Bool, Int))
+  x = ("Outer", (True, 42))
+ \end{haskell}
+ 我们的组合透镜不仅让我们检索最内层的组件：
+ \begin{haskell}
+  toGet l3 x
+  > 42
+ \end{haskell}
+ 还可以用不同类型的值（这里是 \hask{Char}）替换它：
+ \begin{haskell}
+  toSet l3 x 'z'
+  > ("Outer",(True,'z'))
+ \end{haskell}
 
-\subsection{Category of lenses}
+ \subsection{透镜的范畴（Category of Lenses）}
 
-Since lenses can be composed, you might be wondering if there is a category in which lenses are hom-sets. 
+ 由于透镜可以组合，你可能会想知道是否存在一个范畴，其中透镜作为同态集（hom-sets）。
 
-Indeed, there is a category $\mathbf{Lens}$ whose objects are pairs of objects in $\mathcal{C}$, and arrows from $\langle s, t\rangle$ to $ \langle a, b \rangle$ are elements of  $\mathcal{L} \langle s, t\rangle \langle a, b \rangle$.
+ 确实存在一个范畴 $\mathbf{Lens}$，其对象是 $\mathcal{C}$ 中对象的对，而从 $\langle s, t\rangle$ 到 $ \langle a, b \rangle$ 的箭头是 $\mathcal{L} \langle s, t\rangle \langle a, b \rangle$ 的元素。
 
-The formula for the composition of existential lenses is too complicated to be useful in practice. In the next chapter we'll see an alternative representation of lenses using Tambara modules, in which composition is just a composition of functions.
+ 存在透镜的组合公式太复杂，以至于在实际操作中难以使用。在下一章中，我们将看到使用 Tambara 模块表示透镜的另一种表示法，其中组合只是函数的组合。
 
-\section{Lenses and Fibrations}
+ \section{透镜与纤维丛 (Lenses and Fibrations)}
 
-There is an alternative view of lenses using the language of fiber bundles. A projection $p$ that defines a fibration can be seen as ``decomposing'' the bundle $E$ into fibers. 
+ 透镜可以通过纤维丛的语言来理解。定义纤维化的投影 $p$ 可以被看作将丛 $E$ 分解为纤维的过程。
 
-In this view, $p$ plays the role of \hask{get}:
-\[ p \colon E \to B \]
-The base $B$ represents the type of the focus and $E$ represents the type of the composite from which that focus can be extracted.
+ 在这种观点下，$p$ 扮演了 \hask{get} 的角色：
+ \[ p \colon E \to B \]
+ 其中 $B$ 代表焦点的类型，而 $E$ 代表可以从中提取出焦点的复合类型。
 
-The other part of the lens, \hask{set}, is a mapping: 
-\[ q \colon E \times B \to E \]
-Let's see how we can interpret it using fibrations.
-\subsection{Transport law}
+ 透镜的另一部分 \hask{set} 是一个映射：
+ \[ q \colon E \times B \to E \]
+ 让我们看看如何使用纤维化解释它。
 
-We interpret $q$ as ``transporting'' an element of the bundle $E$ to a new fiber. The new fiber is specified by an element of $B$.
+ \subsection{传输定律 (Transport Law)}
 
-This property of the transport is expressed by the get/set lens law, or the \emph{transport} law, that says that ``you get what you set'':
-\begin{haskell}
-get (set s a) = a
-\end{haskell}
-We say that $q(s, a)$ transports $s$ to a new fiber over $a$:
+ 我们将 $q$ 解释为将丛 $E$ 的一个元素“传输”到新纤维的操作。新纤维由 $B$ 的一个元素指定。
 
-\[
-\begin{tikzpicture}
+ 传输的这种特性由 get/set 透镜定律，即\emph{传输}定律来表达，它说明“你得到的就是你设置的”：
+ \begin{haskell}
+  get (set s a) = a
+ \end{haskell}
+ 我们说 $q(s, a)$ 将 $s$ 传输到 $a$ 上的新纤维：
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.1}; % s
-\def\yfss{1.6}; % s'
-\def\yft{2.2}; % fiber top
+ \[
+  \begin{tikzpicture}
 
-\def\dx{0.9};
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.1}; % s
+   \def\yfss{1.6}; % s'
+   \def\yft{2.2}; % fiber top
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2*\dx};
-\def\xbr{\xbl + 4*\dx};
+   \def\dx{0.9};
+
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2*\dx};
+   \def\xbr{\xbl + 4*\dx};
 
 
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\draw (\xbl, \yb) -- (\xbr, \yb);
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
 
-\filldraw[black] (\xbm, \yfs) circle (1 pt);
-\node[left] at (\xbm, \yfs) {$s$};
-\draw[blue] (\xbm, \yfs) edge[->, bend left] (\xbmr, \yfss);
-\filldraw[black] (\xbmr, \yfss) circle (1 pt);
-\node[right] at (\xbmr, \yfss) {$q(s, a)$};
+   \filldraw[black] (\xbm, \yfs) circle (1 pt);
+   \node[left] at (\xbm, \yfs) {$s$};
+   \draw[blue] (\xbm, \yfs) edge[->, bend left] (\xbmr, \yfss);
+   \filldraw[black] (\xbmr, \yfss) circle (1 pt);
+   \node[right] at (\xbmr, \yfss) {$q(s, a)$};
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
 
-\end{tikzpicture}
-\]
+  \end{tikzpicture}
+ \]
 
-We can rewrite this law in terms of $p$ and $q$:
-\[ p \circ q = \pi_2 \]
-where $\pi_2$ is the second projection from the product.
+ 我们可以用 $p$ 和 $q$ 来重新表达这个定律：
+ \[ p \circ q = \pi_2 \]
+ 其中 $\pi_2$ 是从乘积到第二个分量的投影。
 
-Equivalently, we can represent it as a commuting diagram:
-\[
- \begin{tikzcd}
- E \times B
- \arrow[dd, "\varepsilon \times id"']
- \arrow[rd, "q"]
- \\
- & E
- \arrow[dl, "p"]
- \\
- B
+ 等价地，我们可以将其表示为一个交换图：
+ \[
+  \begin{tikzcd}
+   E \times B
+   \arrow[dd, "\varepsilon \times id"']
+   \arrow[rd, "q"]
+   \\
+   & E
+   \arrow[dl, "p"]
+   \\
+   B
   \end{tikzcd}
-\]
-Here, instead of using the projection $\pi_2$, I used a comonoidal counit $\varepsilon$:
-\[ \varepsilon \colon E \to 1 \]
-followed by the unit law for the product. Using a comonoid makes it easier to generalize this construction to a tensor product in a monoidal category. 
+ \]
+ 在这里，我使用了一个余单模余单元 $\varepsilon$ 而不是投影 $\pi_2$：
+ \[ \varepsilon \colon E \to 1 \]
+ 然后应用乘积的单位定律。使用余单模使得这个结构更容易推广到单模范畴中的张量积。
 
-\subsection{Identity law}
-Here's the set/get law or the \emph{identity} law. It says that ``nothing changes if you set what you get'':
-\begin{haskell}
-set s (get  s) = s
-\end{haskell}
-We can write it in terms of a comonoidal comultiplication:
-\[ \delta \colon E \to E \times E \]
-The set/get law requires the following composite to be an identity:
-\[ E \xrightarrow{\delta} E \times E \xrightarrow{id \times p} E \times B \xrightarrow{q} E \]
-Here's the illustration of this law in a bundle:
-\[
-\begin{tikzpicture}
+ \subsection{恒等定律 (Identity Law)}
+ 这是 set/get 定律或\emph{恒等}定律。它说明“如果你设置的是你得到的东西，那么不会发生任何变化”：
+ \begin{haskell}
+  set s (get  s) = s
+ \end{haskell}
+ 我们可以用一个余单模的余乘法来表达：
+ \[ \delta \colon E \to E \times E \]
+ set/get 定律要求以下组合是一个恒等映射：
+ \[ E \xrightarrow{\delta} E \times E \xrightarrow{id \times p} E \times B \xrightarrow{q} E \]
+ 下图展示了这个定律在丛中的体现：
+ \[
+  \begin{tikzpicture}
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.1}; % s
-\def\yfss{1.6}; % s'
-\def\yft{2.8}; % fiber top
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.1}; % s
+   \def\yfss{1.6}; % s'
+   \def\yft{2.8}; % fiber top
 
-\def\dx{0.9};
+   \def\dx{0.9};
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2*\dx};
-\def\xbr{\xbl + 4*\dx};
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2*\dx};
+   \def\xbr{\xbl + 4*\dx};
 
 
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\draw (\xbl, \yb) -- (\xbr, \yb);
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
 
-\node at (\xbmr, \yfss) (s) {};
-\draw[->,shorten <=6pt,shorten >=6pt, blue](s.west)arc(360:0:0.7);
-\filldraw[black] (\xbmr, \yfss) circle (1 pt);
-\node[left] at (\xbmr, \yfss) {$s = $};
-\node[right] at (\xbmr, \yfss) {$q(s, a)$};
+   \node at (\xbmr, \yfss) (s) {};
+   \draw[->,shorten <=6pt,shorten >=6pt, blue](s.west)arc(360:0:0.7);
+   \filldraw[black] (\xbmr, \yfss) circle (1 pt);
+   \node[left] at (\xbmr, \yfss) {$s = $};
+   \node[right] at (\xbmr, \yfss) {$q(s, a)$};
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
 
-\end{tikzpicture}
-\]
+  \end{tikzpicture}
+ \]
 
-\subsection{Composition law}
+ \subsection{组合定律 (Composition Law)}
 
-Finally, here's the set/set law, or the \emph{composition} law. It says that ``the last set wins'':
-\begin{haskell}
-set (set s a) a' = set s a'
-\end{haskell}
-and the corresponding commuting diagram:
-\[
- \begin{tikzcd}
- E \times B \times B
- \arrow[d, "id \times \varepsilon \times id"']
- \arrow[rd, "q \times id"]
- \\
- E \times B
- \arrow[d, "q"']
- & E \times B
- \arrow[dl, "q "]
- \\
- E
+ 最后，这是 set/set 定律或\emph{组合}定律。它说明“最后设置的值获胜”：
+ \begin{haskell}
+  set (set s a) a' = set s a'
+ \end{haskell}
+ 对应的交换图如下：
+ \[
+  \begin{tikzcd}
+   E \times B \times B
+   \arrow[d, "id \times \varepsilon \times id"']
+   \arrow[rd, "q \times id"]
+   \\
+   E \times B
+   \arrow[d, "q"']
+   & E \times B
+   \arrow[dl, "q "]
+   \\
+   E
   \end{tikzcd}
-\]
-Again, to get rid of the middle $B$, I used the counit rather than a projection from the product.
+ \]
+ 同样地，为了去除中间的 $B$，我使用了余单元而不是从乘积中的投影。
 
-This is what the set/set law looks like in a bundle:
-\[
-\begin{tikzpicture}
+ 这就是 set/set 定律在丛中的样子：
+ \[
+  \begin{tikzpicture}
 
-\def\yb{0}; % base
-\def\yfb{0.6}; % fiber bottom
-\def\yfs{1.3}; % s'
-\def\yfss{2.1}; % s''
-\def\yft{2.8}; % fiber top
+   \def\yb{0}; % base
+   \def\yfb{0.6}; % fiber bottom
+   \def\yfs{1.3}; % s'
+   \def\yfss{2.1}; % s''
+   \def\yft{2.8}; % fiber top
 
-\def\dx{1};
+   \def\dx{1};
 
-\def\xbl{0};
-\def\xbm{\xbl + \dx};
-\def\xbmr{\xbl + 2.5*\dx};
-\def\xbmrr{\xbl + 4*\dx};
-\def\xbr{\xbl + 7.2*\dx};
-
-
-\filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
-
-\draw (\xbl, \yb) -- (\xbr, \yb);
-
-\draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
-\draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
-\draw[dashed] (\xbmrr, \yfb) -- (\xbmrr, \yft); %fiber
-
-\filldraw[black] (\xbm, \yfss) circle (1 pt);
-\node[left] at (\xbm, \yfss) {$s$};
-
-\draw[red] (\xbm, \yfss)  edge[->, bend left]  (\xbmr, \yfs);
-
-\filldraw[black] (\xbmr, \yfs) circle (1 pt);
-\node[right] at (\xbmr, \yfs) {$q(s, a)$};
-\node[left] at (\xbmr, \yfs) {$s' =$};
-
-\draw[blue] (\xbmr, \yfs) edge[->, bend left] (\xbmrr, \yfss);
-
-\filldraw[black] (\xbmrr, \yfss) circle (1 pt);
-\node[right] at (\xbmrr, \yfss) {$q(a', s') = q(a', s)$};
-
-\draw (\xbm, \yfss) edge[->, bend left] (\xbmrr, \yfss);
+   \def\xbl{0};
+   \def\xbm{\xbl + \dx};
+   \def\xbmr{\xbl + 2.5*\dx};
+   \def\xbmrr{\xbl + 4*\dx};
+   \def\xbr{\xbl + 7.2*\dx};
 
 
-\filldraw[black] (\xbmr, \yb) circle (1 pt);
-\node[below] at (\xbmr, \yb) {$a$};
+   \filldraw[fill=orange!30, draw=white] (\xbl, \yfb) rectangle (\xbr, \yft);
 
-\filldraw[black] (\xbmrr, \yb) circle (1 pt);
-\node[below] at (\xbmrr, \yb) {$a'$};
+   \draw (\xbl, \yb) -- (\xbr, \yb);
 
-\node[above] at (\xbmr, \yft) {$p^{-1} a$};
-\node[above] at (\xbmrr, \yft) {$p^{-1} a'$};
-\node[right] at (\xbr, \yb) {$B$};
-\node[right] at (\xbr, \yft) {$E$};
+   \draw[dashed] (\xbm, \yfb) -- (\xbm, \yft); %fiber
+   \draw[dashed] (\xbmr, \yfb) -- (\xbmr, \yft); %fiber
+   \draw[dashed] (\xbmrr, \yfb) -- (\xbmrr, \yft); %fiber
 
-\end{tikzpicture}
-\]
+   \filldraw[black] (\xbm, \yfss) circle (1 pt);
+   \node[left] at (\xbm, \yfss) {$s$};
 
-\subsection{Type-changing lens}
+   \draw[red] (\xbm, \yfss)  edge[->, bend left]  (\xbmr, \yfs);
 
-A type-changing lens generalizes transport to act between bundles. We have to define a whole family of bundles. We start with a category $\cat A$ whose objects define the types that we will use for the foci of our lens. 
+   \filldraw[black] (\xbmr, \yfs) circle (1 pt);
+   \node[right] at (\xbmr, \yfs) {$q(s, a)$};
+   \node[left] at (\xbmr, \yfs) {$s' =$};
 
-We construct the set $B$ as the combined set of all elements of all focus types. $B$ is fibrated over $\cat A$---the projection $\pi$ sending an element of $B$ to its corresponding type. You may think of $B$ as the set of objects of the coslice category $1/ \cat A$.
+   \draw[blue] (\xbmr, \yfs) edge[->, bend left] (\xbmrr, \yfss);
 
-The bundle of bundles $E$ is a set that's fibered over $B$ with the projection $p$. Since $B$ itself is fibered over $\cat A$, $E$ is transitively fibered over $\cat A$, with the composite projection $\pi \circ p$. It's this coarser fibration that splits $E$ into a family of bundles. Each of these bundles corresponds to a different type of the composite for a given focus type. A type-changing lens will move between these bundles. 
+   \filldraw[black] (\xbmrr, \yfss) circle (1 pt);
+   \node[right] at (\xbmrr, \yfss) {$q(a', s') = q(a', s)$};
 
-\[
-\begin{tikzpicture}
-\def\xl{-3};
-\def\xr{0};
-\def\yb{0};
-\def\yt{2};
+   \draw (\xbm, \yfss) edge[->, bend left] (\xbmrr, \yfss);
 
-\def\dy{0.4};
-\def\dx{0.5};
 
-\def\a{(\xl, \yb)};
-\def\b{(\xr, \yb)};
-\def\c{(\xl, \yt)};
-\def\d {(\xr, \yt)};
+   \filldraw[black] (\xbmr, \yb) circle (1 pt);
+   \node[below] at (\xbmr, \yb) {$a$};
+
+   \filldraw[black] (\xbmrr, \yb) circle (1 pt);
+   \node[below] at (\xbmrr, \yb) {$a'$};
+
+   \node[above] at (\xbmr, \yft) {$p^{-1} a$};
+   \node[above] at (\xbmrr, \yft) {$p^{-1} a'$};
+   \node[right] at (\xbr, \yb) {$B$};
+   \node[right] at (\xbr, \yft) {$E$};
+
+  \end{tikzpicture}
+ \]
+
+ \subsection{类型转换透镜 (Type-changing Lens)}
+
+ 类型转换透镜将传输泛化为在丛之间操作。我们必须定义一整个丛的家族。我们从一个范畴 $\cat A$ 开始，其对象定义了我们将用于透镜焦点的类型。
+
+ 我们构造集合 $B$ 作为所有焦点类型的所有元素的联合集合。$B$ 在 $\cat A$ 上纤维化——投影 $\pi$ 将 $B$ 的一个元素发送到其对应的类型。你可以将 $B$ 视为余切范畴 $1/ \cat A$ 的对象集合。
+
+ 丛的丛 $E$ 是一个在 $B$ 上纤维化的集合，其投影为 $p$。由于 $B$ 本身在 $\cat A$ 上纤维化，$E$ 在 $\cat A$ 上传递地纤维化，投影为复合投影 $\pi \circ p$。正是这种更粗的纤维化将 $E$ 分解为一个丛的家族。每个丛对应于给定焦点类型的复合类型的不同类型。类型转换透镜将在这些丛之间移动。
+
+ \[
+  \begin{tikzpicture}
+   \def\xl{-3};
+   \def\xr{0};
+   \def\yb{0};
+   \def\yt{2};
+
+   \def\dy{0.4};
+   \def\dx{0.5};
+
+   \def\a{(\xl, \yb)};
+   \def\b{(\xr, \yb)};
+   \def\c{(\xl, \yt)};
+   \def\d {(\xr, \yt)};
 
 % _a second plane
-\def\aa{(\xl + \dx, \yb + \dy)};
-\def\ba{(\xr + \dx, \yb + \dy)};
-\def\ca{(\xl + \dx, \yt + \dy)};
-\def\da{(\xr + \dx, \yt + \dy)};
+   \def\aa{(\xl + \dx, \yb + \dy)};
+   \def\ba{(\xr + \dx, \yb + \dy)};
+   \def\ca{(\xl + \dx, \yt + \dy)};
+   \def\da{(\xr + \dx, \yt + \dy)};
 
 % _b third plane
-\def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
-\def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
-\def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
-\def\db{(\xr + 2*\dx, \yt + 2*\dy)};
+   \def\ab{(\xl + 2*\dx, \yb + 2*\dy)};
+   \def\bb{(\xr + 2*\dx, \yb + 2*\dy)};
+   \def\cb{(\xl + 2*\dx, \yt + 2*\dy)};
+   \def\db{(\xr + 2*\dx, \yt + 2*\dy)};
 
 % shifted walls
-\def\yshift{-1.5};
-\def\xshift{1.5};
+   \def\yshift{-1.5};
+   \def\xshift{1.5};
 
 % E
-\draw \a rectangle \d;
-\draw[draw=black!40!green] \aa rectangle \da;
-\draw \ab rectangle \db;
+   \draw \a rectangle \d;
+   \draw[draw=black!40!green] \aa rectangle \da;
+   \draw \ab rectangle \db;
 
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
+   \draw \a -- \ab;
+   \draw \b -- \bb;
+   \draw \d -- \db;
+   \draw \c -- \cb;
 
-\node[above] at \cb {$E$};
+   \node[above] at \cb {$E$};
 
 % B
 % rebase yb (bottom)
-\def\yb{\yshift}
+   \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{0};
+   \def\xr{0};
 
-\draw \a -- \b;
-\draw \ab -- \bb;
-\draw[red] \aa -- \ba;
+   \draw \a -- \b;
+   \draw \ab -- \bb;
+   \draw[red] \aa -- \ba;
 % diagonal
-\draw \a -- \ab;
-\draw \b -- \bb;
-\draw \d -- \db;
-\draw \c -- \cb;
-\node[above] at \ab {$B$};
+   \draw \a -- \ab;
+   \draw \b -- \bb;
+   \draw \d -- \db;
+   \draw \c -- \cb;
+   \node[above] at \ab {$B$};
 
 
 % A
 % rebase yb (bottom)
-\def\yb{\yshift}
+   \def\yb{\yshift}
 % rebase xr (right wall)
-\def\xr{\xshift};
+   \def\xr{\xshift};
 
-\draw \b -- \bb;
-\node[right] at \bb {$\cat A$};
-\filldraw[black] \ba circle (1 pt);
+   \draw \b -- \bb;
+   \node[right] at \bb {$\cat A$};
+   \filldraw[black] \ba circle (1 pt);
 
 %projections
 
-\draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$\pi$} (\xshift +\dx, \yshift + \dy);
+   \draw[red, shorten <=0.2cm, shorten >=0.2cm, ->] (0 + \dx, \yshift + \dy) -- node[above]{$\pi$} (\xshift +\dx, \yshift + \dy);
 
-\draw[draw=black!40!green, shorten >=0.1cm, ->] (0 - \dx, 0 + 3 * \dy) -- node[below right]{$p$} (0 - \dx, \yshift + \dy);
+   \draw[draw=black!40!green, shorten >=0.1cm, ->] (0 - \dx, 0 + 3 * \dy) -- node[below right]{$p$} (0 - \dx, \yshift + \dy);
 
-\node[right] at (0 - \dx, 0 + 3 * \dy) {$s$};
-\filldraw[black] (0 - \dx, 0 + 3 * \dy) circle (1 pt);
-
-
-\end{tikzpicture}
-\]
-
-The projection $p$ takes an element $s \in E$ and produces an element $b \in B$ whose type is given by $\pi b$. This is the generalization of \hask{get}. 
-
-The transport $q$, which corresponds to \hask{set}, takes an element $s \in E$ and an element $b \in B$ and produces a new element $t \in E$. The important observation is that $s$ and $t$ may belong to different sub-bundles of $E$.
+   \node[right] at (0 - \dx, 0 + 3 * \dy) {$s$};
+   \filldraw[black] (0 - \dx, 0 + 3 * \dy) circle (1 pt);
 
 
-The transport satisfies the following laws:
+  \end{tikzpicture}
+ \]
 
-The get/set law (transport):
+ 投影 $p$ 将元素 $s \in E$ 转换为一个元素 $b \in B$，其类型由 $\pi b$ 给出。这是 \hask{get} 的推广。
 
-\[ p (q (b, s)) = b \]
+ 对应于 \hask{set} 的传输 $q$ 接收一个元素 $s \in E$ 和一个元素 $b \in B$，并生成一个新元素 $t \in E$。重要的是要注意，$s$ 和 $t$ 可以属于 $E$ 的不同子丛。
 
-The set/get law (identity):
+ 传输满足以下定律：
 
-\[ q ( p (s), s) = s \]
+ get/set 定律（传输）：
 
-The set/set law (composition):
+ \[ p (q (b, s)) = b \]
 
-\[ q (c, q (b, s)) = q (c, s) \]
+ set/get 定律（恒等）：
 
-\section{Important Formulas}
-This is a handy (co-)end calculus cheat-sheet.
-\begin{itemize}
-\item Continuity of the hom-functor:
-\[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D \left(d, P\langle a, a \rangle \right) \]
-\item Co-continuity of the hom-functor:
-\[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D \left( P\langle a, a \rangle, d \right) \]
-\item Ninja Yoneda:
-\[ \int_{x} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
-\item Ninja co-Yoneda:
-\[ \int^{x} \mathcal{C}(x, a) \times F x \cong F a \]
-\item Ninja Yoneda for contravariant functors (presheaves):
-\[ \int_{x} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
-\item Ninja co-Yoneda for contravariant functors:
-\[ \int^{x} \mathcal{C}(a, x) \times G x \cong G a \]
-\item Day convolution:
-\[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+ \[ q ( p (s), s) = s \]
 
-\end{itemize}
+ set/set 定律（组合）：
+
+ \[ q (c, q (b, s)) = q (c, s) \]
+
+ \section{重要公式 (Important Formulas)}
+ 这是一个便捷的（共）端计算速查表。
+ \begin{itemize}
+  \item Hom-函子连续性 (Continuity of the hom-functor):
+  \[\cat D\left(d, \int_a P\langle a, a \rangle \right) \cong \int_a \cat D \left(d, P\langle a, a \rangle \right) \]
+  \item Hom-函子共连续性 (Co-continuity of the hom-functor):
+  \[\cat D\left( \int^a P\langle a, a \rangle , d \right) \cong \int_a \cat D \left( P\langle a, a \rangle, d \right) \]
+  \item 忍者 Yoneda (Ninja Yoneda):
+  \[ \int_{x} \mathbf{Set} (\mathcal{C}(a, x), F x) \cong F a \]
+  \item 忍者 Co-Yoneda (Ninja co-Yoneda):
+  \[ \int^{x} \mathcal{C}(x, a) \times F x \cong F a \]
+  \item 反变函子（预层）的忍者 Yoneda (Ninja Yoneda for contravariant functors):
+  \[ \int_{x} \mathbf{Set} (\mathcal{C}(x, a), G x) \cong G a \]
+  \item 反变函子（预层）的忍者 Co-Yoneda (Ninja co-Yoneda for contravariant functors):
+  \[ \int^{x} \mathcal{C}(a, x) \times G x \cong G a \]
+  \item Day 卷积 (Day Convolution):
+  \[ (F \star G) x = \int^{a, b} \cat C (a \otimes b, x) \times F a \times G b \]
+
+ \end{itemize}
 
 
 \end{document}

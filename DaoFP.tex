@@ -1,5 +1,5 @@
 \documentclass[11pt, book]{memoir}
-
+\usepackage[UTF8]{ctex}
 \settrims{0pt}{0pt} % page and stock same size
 \settypeblocksize{*}{34.5pc}{*} % {height}{width}{ratio}
 \setlrmargins{*}{*}{1} % {spine}{edge}{ratio}
@@ -16,9 +16,9 @@
 \usepackage{makeidx}
 
 \usepackage{amsfonts}
-\usepackage{amssymb}  
-\usepackage{amsthm} 
-\usepackage{amsmath} 
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
 \usepackage{tikz-cd}
 \usetikzlibrary{backgrounds}
 \usepackage{float}
@@ -46,13 +46,13 @@
 \DeclareRobustCommand{\hask}[1]{\ifmmode\text{\texttt{#1}}\else\mintinline{Haskell}{#1}\fi}
 %\newcommand{\hask}[1]{\mintinline{Haskell}{#1}}
 \newenvironment{haskell}
-  {\VerbatimEnvironment
-         \fvset{formatcom=\upshape} % Use upright shape for this environment
-  	\begin{minted}[escapeinside=??, mathescape=true, tabsize=1, bgcolor=black!3, xleftmargin=3pt ]{Haskell}}
+{\VerbatimEnvironment
+\fvset{formatcom=\upshape} % Use upright shape for this environment
+  \begin{minted}[escapeinside=??, mathescape=true, tabsize=1, bgcolor=black!3, xleftmargin=3pt ]{Haskell}}
   {\end{minted}}
-\makeatletter
+    \makeatletter
 % replace \medskip before and after the box with nothing, i.e., remove it
-\patchcmd{\minted@colorbg}{\medskip}{}{}{}
+    \patchcmd{\minted@colorbg}{\medskip}{}{}{}
 \patchcmd{\endminted@colorbg}{\medskip}{}{}{}
 \makeatother
 
@@ -60,87 +60,86 @@
 \newcommand{\llens}{\mathopen{[\!(}}
 \newcommand{\rlens}{\mathclose{)\!]}}
 
-
 \makeindex
 
 \begin{document}
-\setcounter{tocdepth}{4}
-\setcounter{secnumdepth}{4}
-\frontmatter
+  \setcounter{tocdepth}{4}
+  \setcounter{secnumdepth}{4}
+  \frontmatter
 
-\title{\huge The Dao of Functional Programming}
-\author{\Large Bartosz Milewski }
+  \title{\huge The Dao of Functional Programming}
+  \author{\Large Bartosz Milewski }
 
-\date{\vfill (Last updated: \today)}
+  \date{\vfill (Last updated: \today)}
 
-\maketitle
+  \maketitle
 
-\tableofcontents
+  \tableofcontents*
 
-\clearpage
+  \clearpage
 
-\section{Preface}
+  \section{序言}
 
-Most programming texts, following Brian Kernighan, start with ``Hello World!''. It's natural to want to get the immediate gratification of making the computer do your bidding and print these famous words. But the real mastery of computer programming goes deeper than that, and rushing into it may only give you a false feeling of power, when in reality you're just parroting the masters. If your ambition is just to learn a useful, well-paid skill then, by all means, write your "Hello World!" program. There are tons of books and courses that will teach you how to write code in any language of your choice. However, if you really want to get to the essence of programming, you need to be patient and persistent.
+  大多数编程教材，遵循 Brian Kernighan 的做法，都是以``Hello World!''开始的。这很自然，因为我们想立即通过让计算机执行命令并打印出这些著名的词语来获得满足感。但计算机编程的真正掌握远比这更深刻，急于求成可能只会给你一种虚假的力量感，而实际上你只是在模仿大师。如果你的目标只是学习一项有用且薪水丰厚的技能，那么，尽管去写你的``Hello World!''程序吧。有大量的书籍和课程可以教你如何用你选择的任何语言编写代码。然而，如果你真的想深入编程的本质，你需要耐心和坚持。
 
-Category theory is the branch of mathematics that provides the abstractions that accord with the practical experience of programming. Paraphrasing von Clausewitz: Programming is merely the continuation of mathematics with other means. A lot of complex ideas of category theory become obvious to programmers when explained in terms of data types and functions. In this sense, category theory might be more accessible to programmers than it is to professional mathematicians.
+  范畴论是数学的一个分支，它提供了与编程实践经验相符的抽象。借用克劳塞维茨的一句话：编程只是以其他方式继续数学的过程。当用数据类型和函数来解释范畴论的许多复杂概念时，程序员们可能比专业数学家更容易理解它们。
 
-When faced with a new categorical concepts I would often look them up on Wikipedia or nLab, or re-read a chapter from Mac Lane or Kelly. These are great sources, but they require some up front familiarity with the topics and the ability to fill in the gaps. One of the goals of this book is to provide the necessary bootstrap to continue studying category theory.
+  当我面对新的范畴概念时，我常常会在 Wikipedia 或 nLab 上查找它们，或者重新阅读 Mac Lane 或 Kelly 的某一章。这些都是很好的资源，但它们要求你对主题有一定的熟悉度，并且有能力填补其中的空白。本书的一个目标是提供必要的引导，以继续学习范畴论。
 
-There is a lot of folklore knowledge in category theory and in computer science that is nowhere to be found in the literature. It's very difficult to acquire useful intuitions when going through dry definitions and theorems. I tried, as much as possible, to provide the missing intuitions and explain not only the whats but also the whys.
+  在范畴论和计算机科学中，有许多民间知识在文献中是找不到的。当你通过干巴巴的定义和定理来学习时，很难获得有用的直觉。我尽可能地提供了那些缺失的直觉，并解释了不仅是什么，还解释了为什么。
 
-The title of this book alludes to Benjamin Hoff's ``The Tao of Pooh'' and to Robert Pirsig's ``Zen and the Art of Motorcycle Maintenance,'' both being attempts by Westerners to assimilate elements of Eastern philosophy. Loosely speaking, the idea is that category theory is to programming as the Dao\footnote{Dao is the more modern spelling of Tao} is to Western philosophy. Many of the definitions of category theory make no sense on first reading but in time you learn to appreciate their deep wisdom. If category theory were to be summarized in one soundbite, it would be: ``Things are defined by their relationship to the Universe.'' 
+  本书的标题暗示了 Benjamin Hoff 的``The Tao of Pooh''和 Robert Pirsig 的``Zen and the Art of Motorcycle Maintenance''，这两本书都是西方人尝试吸收东方哲学元素的作品。粗略地说，范畴论之于编程，正如道（Dao）\footnote{Dao 是 Tao 的现代拼写}之于西方哲学。许多范畴论的定义在第一次阅读时显得毫无意义，但随着时间的推移，你会逐渐理解其中深刻的智慧。如果要用一句话总结范畴论，那就是：``事物通过它们与宇宙的关系来定义。''
 
-\subsection{Set theory}
+  \subsection{集合论}
 
-Traditionally, set theory was considered the foundation of mathematics, although more recently type theory is vying for this title. In a sense, set theory is the assembly language of mathematics, and as such contains a lot of implementation details that often obscure  the presentation of high level ideas. 
+  传统上，集合论被认为是数学的基础，尽管最近类型论也在争夺这一头衔。从某种意义上说，集合论是数学的汇编语言，包含了许多实现细节，这些细节往往会掩盖高级思想的表达。
 
-Category theory is not trying to replace set theory, and it's often used to build abstractions that are later modeled using sets. In fact the fundamental theorem of category theory, the Yoneda lemma, connects categories to their models in set theory. We can find useful intuition in computer graphics, where we build and manipulate abstract worlds only to, at the last moment, project and sample them for a digital display.
+  范畴论并不是要取代集合论，通常它被用来构建抽象，然后用集合来建模。事实上，范畴论的基本定理尤内达引理将范畴与集合论中的模型联系起来。我们可以在计算机图形学中找到有用的直觉，在那里我们构建和操作抽象世界，直到最后一刻才将它们投影并采样到数字显示器上。
 
-It's not necessary to be fluent in set theory in order to study category theory. But some familiarity with the basics is necessary. For instance the idea that sets contain elements. We say that, given a set $S$ and an element $a$, it makes sense to ask whether $a$ is an element of $S$ or not. This statement is written as $a \in S$ ($a$ is a member of $S$). It's also possible to have an empty set that contains no elements. 
+  为了学习范畴论，不必精通集合论。但一些基本知识是必要的。例如，集合包含元素的概念。我们说，给定一个集合 $S$ 和一个元素 $a$，可以问 $a$ 是否属于 $S$。这个陈述写作 $a \in S$ （$a$ 是 $S$ 的成员）。也可以有一个不包含任何元素的空集合。
 
-The important property of elements of a set is that they can be compared for equality. Given two elements $a \in S$ and $b \in S$, we can ask: Is $a$ equal to $b$? Or we may impose the condition that $a = b$, in case $a$ and $b$ are results of two different recipes for selecting elements of the set $S$. Equality of set elements is the essence of all the commuting diagrams in category theory.
+  集合元素的重要属性是它们可以比较是否相等。给定两个元素 $a \in S$ 和 $b \in S$，我们可以问：$a$ 是否等于 $b$？或者我们可以强加条件 $a = b$，如果 $a$ 和 $b$ 是通过不同的方法从集合 $S$ 中选择的元素的结果。集合元素的相等性是所有范畴论中交换图的本质。
 
-A cartesian product of two sets $S \times T$ is defined as a set of all pairs of elements $\langle s, t\rangle$, such that $s \in S$ and $t \in T$.
+  两个集合的笛卡尔积 $S \times T$ 被定义为一组所有的元素对 $\langle s, t \rangle$，其中 $s \in S$ 和 $t \in T$。
 
-A function $f \colon S \to T$, from the source set called the \emph{domain} of $f$ to the target set called the \emph{codomain}, is also defined as a set of pairs. These are the pairs of the form $\langle s, t \rangle$ where $t = f s$. Here $f s$ is the result of the action of the function $f$ on the argument $s$. You might be more familiar with the notation $f(s)$ for function application, but here I'll follow the Haskell convention of omitting the parentheses (and commas, for functions of multiple variables).
+  一个从源集合（称为 $f$ 的\emph{定义域}）到目标集合（称为 $f$ 的\emph{值域}）的函数 $f \colon S \to T$ 也被定义为一组对。这些对的形式为 $\langle s, t \rangle$，其中 $t = f s$。这里 $f s$ 是函数 $f$ 作用在参数 $s$ 上的结果。你可能更熟悉函数应用的符号 $f(s)$，但这里我将遵循 Haskell 的惯例，省略括号（以及多个变量的逗号）。
 
-In programming we are used to functions being defined by a sequence of instructions. We provide an argument $s$ and apply the instructions to eventually produce the result $t$. We are often worried about how long it may take to evaluate the result, or if the algorithm terminates at all. In mathematics we assume that, for any given argument $s \in S$ the result $t \in T$ is immediately available, and that it's unique. In programming we call such functions pure and total.
+  在编程中，我们习惯于通过一系列指令来定义函数。我们提供一个参数 $s$ 并应用指令，最终产生结果 $t$。我们经常担心计算结果可能需要多长时间，或者算法是否会终止。在数学中，我们假设对于任何给定的参数 $s \in S$，结果 $t \in T$ 是立即可得的，并且是唯一的。在编程中，我们称这种函数为纯函数且是全函数。
 
-\subsection{Conventions}
+  \subsection{约定}
 
-I tried to keep the notation coherent throughout the book. It's based loosely on the prevailing style in nLab.
+  我尽量使全书的符号保持一致。它大致基于 nLab 中流行的风格。
 
-In particular, I decided to use lowercase letters like $a$ or $b$ for objects in a category and uppercase letters like $S$ for sets (even though sets are objects in the category of sets and functions). Generic categories have names like $\cat C$ or $\cat D$, whereas specific categories have names like $\Set$ or $\Cat{Cat}$. 
+  特别地，我决定使用小写字母，如 $a$ 或 $b$ 来表示范畴中的对象，并使用大写字母如 $S$ 来表示集合（尽管集合是集合与函数范畴中的对象）。通用范畴有名称如 $\cat C$ 或 $\cat D$，而特定的范畴有名称如 $\Set$ 或 $\Cat{Cat}$。
 
-Programming examples are written in Haskell. Although this is not a Haskell manual, the introduction of language constructs is gradual enough to help the reader navigate the code. The fact that Haskell syntax is often based on mathematical notation is an additional advantage. Program fragments are written in the following format:
-\begin{haskell}
-apply :: (a -> b, a) -> b
-apply (f, x) = f x
-\end{haskell}
+  编程示例以 Haskell 语言编写。尽管这不是一本 Haskell 手册，但语言构造的引入是逐渐进行的，以帮助读者理解代码。Haskell 语法通常基于数学符号，这是一个额外的优势。程序片段以如下格式编写：
+  \begin{haskell}
+    apply :: (a -> b, a) -> b
+    apply (f, x) = f x
+  \end{haskell}
 
-\mainmatter
+  \mainmatter
 
-\subfile{1-CleanSlate}
-\subfile{2-Composition}
-\subfile{3-Isomorphism}
-\subfile{4-SumTypes}
-\subfile{5-ProductTypes}
-\subfile{6-FunctionTypes}
-\subfile{7-Recursion}
-\subfile{8-Functors}
-\subfile{9-NaturalTransformations}
-\subfile{10-Adjunctions}
-\subfile{11-DependentTypes}
-\subfile{12-Algebras}
-\subfile{13-Coalgebras}
-\subfile{14-Monads}
-\subfile{15-MonadsAdjunctions}
-\subfile{16-Comonads}
-\subfile{17-Ends}
-\subfile{18-Tambara}
-\subfile{19-Kan}
-\subfile{20-Enrichment}
+  \subfile{1-CleanSlate}
+  \subfile{2-Composition}
+  \subfile{3-Isomorphism}
+  \subfile{4-SumTypes}
+  \subfile{5-ProductTypes}
+  \subfile{6-FunctionTypes}
+  \subfile{7-Recursion}
+  \subfile{8-Functors}
+  \subfile{9-NaturalTransformations}
+  \subfile{10-Adjunctions}
+  \subfile{11-DependentTypes}
+  \subfile{12-Algebras}
+  \subfile{13-Coalgebras}
+  \subfile{14-Monads}
+  \subfile{15-MonadsAdjunctions}
+  \subfile{16-Comonads}
+  \subfile{17-Ends}
+  \subfile{18-Tambara}
+  \subfile{19-Kan}
+  \subfile{20-Enrichment}
 
 \printindex
 

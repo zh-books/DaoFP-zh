@@ -1,155 +1,153 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
 
-\chapter{Clean Slate}
+ \chapter{Clean Slate\\白板}
 
-Programming starts with types and functions. You probably have some preconceptions about what types and functions are: get rid of them! They will cloud your mind.
+ 编程始于类型（Types）和函数（Functions）。你可能对类型和函数是什么有一些先入为主的观念：抛弃它们！它们会混淆你的思维。
 
-Don't think about how things are implemented in hardware. What computers are is just one of the many models of computation. We shouldn't get attached to it. You can perform computations in your mind, or with pen and paper. The physical substrate is irrelevant to the idea of programming.
+ 不要考虑事物是如何在硬件中实现的。计算机只是众多计算模型中的一种。我们不应该依附于此。你可以在脑海中进行计算，或者使用笔和纸进行计算。物理载体与编程的思想无关。
 
-\section{Types and Functions}
+ \section{Types and Functions\\类型与函数}
 
-Paraphrasing Lao Tzu\footnote{The modern spelling of Lao Tzu is Laozi, but I'll be using the traditional one. Lao Tzu was the semi-legendary author of Tao Te Ching (or Daodejing), a classic text on Daoism.}: \emph{The type that can be described is not the eternal type}. In other words, type is a primitive notion. It cannot be defined.
+ 引用老子的话\footnote{老子的现代拼写是Laozi，但我会使用传统的拼写。老子是《道德经》（Tao Te Ching或Daodejing）的半传奇作者，这是一部关于道教的经典著作。}：\emph{“可描述的类型不是永恒的类型。”} 换句话说，类型（Type）是一种原始概念。它无法被定义。
 
-Instead of calling it a \emph{type}, we could as well call it an \emph{object} or a \emph{proposition}. These are the words that are used to describe it in different areas of mathematics (type theory, category theory, and logic, respectively).
+ 我们可以不称它为“类型”，而是称为“对象”（Object）或“命题”（Proposition）。在数学的不同领域（如类型论、范畴论和逻辑）中，这些词汇被用来描述它。
 
-There may be more than one type, so we need a way to name them. We could do it by pointing fingers at them, but since we want to effectively communicate with other people, we usually name them. So we'll talk about type $a$, $b$, $c$; or \hask{Int}, \hask{Bool}, \hask{Double}, and so on. These are just names.
+ 可能有不止一种类型，所以我们需要一种方式来命名它们。我们可以通过指向它们来做到这一点，但为了有效地与他人交流，我们通常为它们命名。因此，我们会谈论类型 $a$、$b$、$c$；或者 \hask{Int}、\hask{Bool}、\hask{Double} 等等。这些只是名称。
 
-A type by itself has no meaning. What makes it special is how it connects to other types. The connections are described by arrows. An arrow has one type as its source and one type as its target. The target could be the same as the source, in which case the arrow loops around.
+ 类型本身没有意义。使它特别的是它如何与其他类型连接。这些连接由箭头（Arrows）描述。一个箭头有一个类型作为其源，另一个类型作为其目标。目标可以与源相同，在这种情况下，箭头会回环。
 
-An arrow between types is called a \emph{function}. An arrow between objects is called a \emph{morphism}. An arrow between propositions is called an \emph{entailment}. These are just words that are used to describe arrows in different areas of mathematics. You can use them interchangeably.
+ 类型之间的箭头称为“函数”（Function）。对象之间的箭头称为“态射”（Morphism）。命题之间的箭头称为“蕴涵”（Entailment）。这些只是用来描述不同数学领域中的箭头的词汇。你可以互换使用它们。
 
-A proposition is something that may be true. In logic, we interpret an arrow between two objects as $a$ entails $b$, or $b$ is derivable from $a$. 
-\pagebreak
+ 命题是可能为真的东西。在逻辑中，我们将两个对象之间的箭头解释为 $a$ 蕴涵 $b$，或者 $b$ 可以从 $a$ 推导出来。
 
-There may be more than one arrow between two types, so we need to name them. For instance, here's an arrow called $f$ that goes from type $a$ to type $b$
+ 在两个类型之间可能有多个箭头，所以我们需要为它们命名。例如，这里有一个从类型 $a$ 到类型 $b$ 的箭头，叫做 $f$。
 
-\[ a \xrightarrow f b \]
+ \[ a \xrightarrow f b \]
 
-One way to interpret this is to say that the function $ f$ takes an argument of type $a$ and produces a result of type $b$. Or that $ f$ is a proof that if $a$ is true then $b$ is also true.
+ 解释这一点的一种方式是说函数 $f$ 接受一个类型为 $a$ 的参数，并生成一个类型为 $b$ 的结果。或者说 $f$ 是一种证明，如果 $a$ 为真，那么 $b$ 也为真。
 
-Note: The connection between type theory, lambda calculus (which is the foundation of programming), logic, and category theory is known as the Curry-Howard-Lambek correspondence.
+ 注意：类型论、lambda 演算（Lambda Calculus，编程的基础）、逻辑和范畴论之间的联系被称为 Curry-Howard-Lambek 对应（Curry-Howard-Lambek Correspondence）。
 
-\section{Yin and Yang}
+ \section{Yin and Yang\\阴阳}
 
-An object is defined by its connections. An arrow is a proof, a witness, of the fact that two objects are connected. Sometimes there's no proof, the objects are disconnected; sometimes there are many proofs; and sometimes there's a single proof---a unique arrow between two objects.
+ 一个对象由它的连接来定义。箭头（Arrow）是两个对象连接的证明，一个证据。有时没有证明，对象是断开的；有时有很多证明；有时只有一个证明——两个对象之间的唯一箭头。
 
-What does it mean to be \index{unique}\emph{unique}? It means that if you can find two of those, then they must be equal.
+ 什么是\emph{唯一的}？这意味着如果你能找到两个这样的东西，那么它们一定是相等的。
 
-An object that has a unique outgoing arrow to every object is called the \emph{initial object}.
+ 一个对每个对象都有唯一出射箭头的对象称为“初始对象”（Initial Object）。
 
-Its dual is an object that has a unique incoming arrow from every object. It's called the \emph{terminal object}. 
+ 它的对偶是一个从每个对象都有唯一入射箭头的对象。它被称为“终端对象”（Terminal Object）。
 
-In mathematics, the initial object is often denoted by $0$ and the terminal object by $1$.
+ 在数学中，初始对象通常表示为 $0$，终端对象表示为 $1$。
 
-The arrow from $0$ to any object $a$ is denoted by $\mbox{!`}_a$, often abbreviated to $\mbox{!`}$.
+ 从 $0$ 到任何对象 $a$ 的箭头表示为 $\mbox{!`}_a$，通常缩写为 $\mbox{!`}$。
 
-The arrow from any object $a$ to $1$ is denoted by $!_a$, often abbreviated to $!$.
+ 从任何对象 $a$ 到 $1$ 的箭头表示为 $!_a$，通常缩写为 $!$。
 
-The initial object is the source of everything. As a type it's known in Haskell as \hask{Void}. It symbolizes the chaos from which everything arises. Since there is an arrow from \hask{Void} to everything, there is also an arrow from \hask{Void} to itself. 
+ 初始对象是一切的源头。作为一种类型，它在 Haskell 中被称为 \hask{Void}。它象征着一切事物源于其中的混沌。由于有一个从 \hask{Void} 到一切事物的箭头，也有一个从 \hask{Void} 到它自身的箭头。
 
-\[
- \begin{tikzcd}
- \hask{Void}
- \arrow[loop]
- \end{tikzcd}
-\]
+ \[
+  \begin{tikzcd}
+   \hask{Void}
+   \arrow[loop]
+  \end{tikzcd}
+ \]
 
-Thus \hask{Void} begets \hask{Void} and everything else.
+ 因此，\hask{Void} 产生了 \hask{Void} 和其他一切。
 
-The terminal object unites everything. As a type it's known as Unit. It symbolizes the ultimate order.
+ 终端对象将一切联合起来。作为一种类型，它被称为 \hask{Unit}。它象征着终极秩序。
 
-In logic, the terminal object signifies the ultimate truth, symbolized by $T$ or $ \top$. The fact that there's an arrow to it from any object means that $ \top$ is true no matter what your assumptions are. 
+ 在逻辑中，终端对象象征着终极真理，用 $T$ 或 $ \top$ 表示。事实是，从任何对象到它都有一个箭头，这意味着无论你的假设是什么，$ \top$ 都是正确的。
 
-Dually, the initial object signifies logical falsehood, contradiction, or a counterfactual. It's written as  False and symbolized by an upside down T, $ \bot$. The fact that there is an arrow from it to any object means that you can prove anything starting from false premises. 
+ 相对地，初始对象象征逻辑谬误、矛盾或反事实。它写作 False，用倒 T 符号 $ \bot$ 表示。事实是，从它到任何对象都有一个箭头，这意味着你可以从错误的前提开始证明任何事情。
 
-In English, there is a special grammatical construct for counterfactual implications. When we say, ``If wishes were horses, beggars would ride,'' we mean that the equality between wishes and horses implies that beggars be able to ride. But we know that the premise is false.
+ 在英语中，有一种特殊的语法结构用于反事实蕴涵。当我们说，“如果愿望是马，乞丐会骑马”，我们的意思是愿望与马的等价性意味着乞丐能够骑马。但我们知道这个前提是错误的。
 
-A programming language lets us communicate with each other and with computers. Some languages are easier for the computer to understand, others are closer to the theory. We will use Haskell as a compromise.
+ 编程语言让我们可以相互交流，也可以与计算机交流。有些语言对计算机来说更容易理解，另一些则更接近理论。我们将使用 Haskell 作为折中。
 
-In Haskell, the name for the terminal type is \hask{()}, a pair of empty parentheses, pronounced Unit. This notation will make sense later.
+ 在 Haskell 中，终端类型的名称是 \hask{()}，一对空括号，读作 \hask{Unit}。这种符号稍后会更有意义。
 
-There are infinitely many types in Haskell, and there is a unique function/arrow from \hask{Void} to each one of them. All these functions are known under the same name: \hask{absurd}.
+ 在 Haskell 中有无限多的类型，并且从 \hask{Void} 到每个类型都有一个唯一的函数/箭头。所有这些函数都有相同的名称：\hask{absurd}。
 
-\begin{center}
-\begin{tabular} {|c | c | c|}
-\hline
-Programming & Category theory & Logic \\
-\hline
-type & object & proposition \\
-function & morphism (arrow) & implication \\
-\hask{Void} & initial object, $0$ & False $\bot$ \\
-\hask{()} & terminal object, $1$ & True $\top$ \\
-\hline
+ \begin{center}
+  \begin{tabular} {|c | c | c|}
+   \hline
+   编程 & 范畴论 & 逻辑 \\
+   \hline
+   类型 & 对象 & 命题 \\
+   函数 & 态射（箭头） & 蕴涵 \\
+   \hask{Void} & 初始对象，$0$ & False $\bot$ \\
+   \hask{()} & 终端对象，$1$ & True $\top$ \\
+   \hline
 
-\end{tabular}
-\end{center}
+  \end{tabular}
+ \end{center}
 
-\section{Elements}
+ \section{Elements\\元素}
 
-An object has no parts but it may have structure. The structure is defined by the arrows pointing at the object. We can \emph{probe} the object with arrows.
+ 一个对象没有部分，但它可能有结构。结构由指向对象的箭头定义。我们可以用箭头\emph{探测}对象。
 
-In programming and in logic we want our initial object to have no structure. So we'll assume that it has no incoming arrows (other than the one that's looping back from it). Therefore \hask{Void} has no structure. 
+ 在编程和逻辑中，我们希望初始对象没有结构。所以我们假设它没有入射箭头（除了从它自身回环的那个）。因此 \hask{Void} 没有结构。
 
-The terminal object has the simplest structure. There is only one incoming arrow from any object to it: there is only one way of probing it from any direction. In this respect, the terminal object behaves like an indivisible point. Its only property is that it exists, and the arrow from any other object proves it. 
+ 终端对象有最简单的结构。只有一个从任何对象到它的入射箭头：只有一种方式可以从任何方向探测它。在这方面，终端对象表现得像一个不可分割的点。它唯一的属性是它存在，并且从任何其他对象到它的箭头证明了这一点。
 
-Because the terminal object is so simple, we can use it to probe other, more complex objects. 
+ 由于终端对象非常简单，我们可以用它来探测其他更复杂的对象。
 
-If there is more than one arrow coming from the terminal object to some object $a$, it means that $a$ has some structure: there is more than one way of looking at it. Since the terminal object behaves like a point, we can visualize each arrow from it as picking a different point or element of its target. 
+ 如果有多个箭头从终端对象指向某个对象 $a$，这意味着 $a$ 有某种结构：有多种方式可以看待它。由于终端对象表现得像一个点，我们可以将每个箭头视为从它选取目标的不同点或元素。
 
-In category theory we say that $ x$ is a \emph{global element} of $a$ if it's an arrow
+ 在范畴论中，如果 $x$ 是一个箭头，我们说它是 $a$ 的\emph{全局元素}（Global Element）。
 
-\[ 1 \xrightarrow x a \]
+ \[ 1 \xrightarrow x a \]
 
-We'll often simply call it an element (omitting ``global'').
+ 我们经常简单地称之为元素（省略“全局”）。
 
-In type theory, $ x \colon A$ means that $x$ is of type $A$.
+ 在类型论中，$x \colon A$ 意味着 $x$ 是 $A$ 类型的。
 
-In Haskell, we use the double-colon notation instead:
-\begin{haskell}
-x :: A
-\end{haskell}
-(Haskell uses capitalized names for concrete types, and lower-cased names for type variables.)
+ 在 Haskell 中，我们使用双冒号符号：
+ \begin{haskell}
+  x :: A
+ \end{haskell}
+ （Haskell 对具体类型使用大写名称，对类型变量使用小写名称。）
 
-We say that \hask{x} is a term of type \hask{A} but, categorically, we'll interpret it as an arrow $x : 1 \to A$, a global element of \hask{A}. \footnote{The Haskell type system distinguishes between \hask{x :: A} and \hask{x :: () -> A}. However, they denote the same thing in categorical semantics.}
+ 我们说 \hask{x} 是 \hask{A} 类型的一个项，但在范畴论中，我们将其解释为箭头 $x : 1 \to A$，即 \hask{A} 的全局元素。\footnote{Haskell 类型系统区分 \hask{x :: A} 和 \hask{x :: () -> A}。然而，在范畴语义中，它们表示相同的东西。}
 
-In logic, such $ x$ is called the proof of $ A$, since it corresponds to the implication $ \top \to A$ (if \textbf{True} is true then \textbf{A} is true). Notice that there may be many different proofs of $A$.
+ 在逻辑中，这样的 $x$ 被称为 $A$ 的证明，因为它对应于蕴涵 $ \top \to A$（如果 \textbf{True} 为真，那么 \textbf{A} 也为真）。请注意，$A$ 可能有许多不同的证明。
 
-Since we have mandated there be no arrows from any other object to \hask{Void}, there is no arrow from the terminal object to it. Therefore \hask{Void} has no elements. This is why we think of \hask{Void} as empty.
+ 由于我们规定不允许有任何其他对象到 \hask{Void} 的箭头，因此从终端对象到它没有箭头。因此，\hask{Void} 没有元素。这就是为什么我们认为 \hask{Void} 是空的。
 
-The terminal object has just one element, since there is a unique arrow coming from it to itself, $ 1 \to 1$. This is why we sometimes call it a singleton. 
+ 终端对象只有一个元素，因为只有一个从它到它自身的箭头，$1 \to 1$。这就是为什么我们有时称它为单一元素集。
 
-Note: In category theory there is no prohibition against the initial object having incoming arrows from other objects. However, in cartesian closed categories that we're studying here, this is not allowed.
+ 注意：在范畴论中，没有禁止初始对象从其他对象接收箭头。然而，在我们这里研究的笛卡尔闭范畴中，这是不允许的。
 
-\section{The Object of Arrows}
+ \section{The Object of Arrows\\箭头的对象}
 
-Arrows between any two objects form a set\footnote{Strictly speaking, this is true only in a \emph{locally small} category.}. This is why some knowledge of set theory is a prerequisite to the study of category theory. 
+ 任何两个对象之间的箭头形成一个集合\footnote{严格来说，这只在\emph{局部小}范畴中成立。}。这就是为什么集合论的一些知识是学习范畴论的先决条件。
 
-In programming we talk about the \emph{type} of functions from \hask{a} to \hask{b}. In Haskell we write:
-\begin{haskell}
-f :: a -> b
-\end{haskell}
-meaning that \hask{f} is of the type ``function from \hask{a} to \hask{b}''. Here, \hask{a->b} is just the name we are giving to this type. 
+ 在编程中，我们谈论从 \hask{a} 到 \hask{b} 的函数的\emph{类型}。在 Haskell 中我们写：
+ \begin{haskell}
+  f :: a -> b
+ \end{haskell}
+ 意思是 \hask{f} 是“从 \hask{a} 到 \hask{b} 的函数”类型。在这里，\hask{a->b} 只是我们给这个类型起的名字。
 
-If we want function types to be treated the same way as other types, we need an \emph{object} that would represent a set of arrows from \hask{a} to \hask{b}.
+ 如果我们希望函数类型与其他类型被相同对待，我们需要一个\emph{对象}，它可以表示从 \hask{a} 到 \hask{b} 的箭头集合。
 
-To fully define this object, we would have to describe its relation to other objects, in particular to \hask{a} and \hask{b}. We don't have the tools to do that yet, but we'll get there. 
+ 要完全定义这个对象，我们必须描述它与其他对象的关系，特别是与 \hask{a} 和 \hask{b} 的关系。我们还没有工具来做到这一点，但我们会到达那里。
 
-For now, let's keep in mind the following distinction: On the one hand we have arrows which connect two objects \hask{a} and \hask{b}. These arrows form a set. On the other hand we have an \emph{object of arrows} from  \hask{a} to \hask{b}. An ``element'' of this object is defined as an arrow from the terminal object \hask{()} to the object we call \hask{a->b}. 
+ 目前，让我们记住以下区别：一方面，我们有连接两个对象 \hask{a} 和 \hask{b} 的箭头。这些箭头形成一个集合。另一方面，我们有一个从 \hask{a} 到 \hask{b} 的\emph{箭头对象}。这个对象的“元素”被定义为从终端对象 \hask{()} 到我们称之为 \hask{a->b} 的对象的箭头。
 
-The notation we use in programming tends to blur this distinction. This is why in category theory we call the object of arrows an \emph{exponential} and write it as $ b^a$ (the source object is in the exponent). So the statement:
-\begin{haskell}
-f :: a -> b
-\end{haskell}
-is equivalent to
+ 在编程中我们使用的符号倾向于模糊这个区别。这就是为什么在范畴论中我们称箭头对象为\emph{指数对象}（Exponential Object）并将其写作 $b^a$（源对象在指数中）。因此，以下语句：
+ \begin{haskell}
+  f :: a -> b
+ \end{haskell}
+ 等同于
 
-\[ 1 \xrightarrow f b^a\]
+ \[ 1 \xrightarrow f b^a\]
 
-In logic, an arrow $ A \to B$ is an implication: it states the fact that ``if A then B.'' An exponential object $ B^A$ is the corresponding proposition. It could be true or it could be false, we don't know. You have to prove it. Such a proof is an element of $ B^A$. 
+ 在逻辑中，箭头 $A \to B$ 是一个蕴涵：它陈述了“如果 A，那么 B”的事实。指数对象 $B^A$ 是相应的命题。它可能为真，也可能为假，我们不知道。你必须证明它。这样的证明是 $B^A$ 的一个元素。
 
-Show me an element of $ B^A$ and I'll know that $ B$ follows from $ A$.
+ 给我看 $B^A$ 的一个元素，我就知道 $B$ 是从 $A$ 推导出来的。
 
-Consider again the statement, ``If wishes were horses, beggars would ride''---this time as an object. It's not an empty object, because you can point at a proof of it---something along the lines: ``A person who has a horse rides it. Beggars have wishes. Since wishes are horses, beggars have horses. Therefore beggars ride.'' But, even though you have a proof of this statement, it's of no use to you, because you can never prove its premise: ``wish = horse''. 
-
+ 再考虑一下这个语句，“如果愿望是马，乞丐会骑马”——这次作为一个对象。它不是一个空对象，因为你可以指出它的证明——类似于：“一个有马的人骑马。乞丐有愿望。因为愿望是马，所以乞丐有马。因此，乞丐骑马。”但即使你有这个语句的证明，对你来说也没有用，因为你永远无法证明它的前提：“愿望 = 马”。
 
 \end{document}

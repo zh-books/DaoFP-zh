@@ -1,0 +1,6 @@
+pdflatex -interaction=nonstopmode DaoFP.tex
+xelatex -interaction=nonstopmode DaoFP.tex
+
+#解决hask代码高亮问题 我爱ChatGPT
+pip install Pygments
+xelatex -interaction=nonstopmode -shell-escape DaoFP.tex

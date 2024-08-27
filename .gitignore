@@ -1,7 +1,6 @@
 
 *.aux
 *.log
-*.pdf
 *.gz
 *.pygtex
 *.pygstyle
@@ -13,3 +12,4 @@ DaoFP.ilg
 *.fls
 *.out
 *.pyg
+.idea

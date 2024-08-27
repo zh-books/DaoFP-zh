@@ -1,579 +1,574 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{5}
+ \setcounter{chapter}{5}
 
-\chapter{Function Types}
+ \chapter{Function Types\\函数类型}
 
-There is another kind of composition that is at the heart of functional programming. It happens when you pass a function as an argument to another function. The outer function can then use this argument as a pluggable part of its own machinery. It lets you implement, for instance, a generic sorting algorithm that accepts an arbitrary comparison function. 
+ 在函数式编程中，还有一种核心的组合方式。当你将一个函数作为参数传递给另一个函数时，外部函数可以将这个参数作为自身机制中的一个可插拔部分。这使得你可以实现一个通用的排序算法，该算法接受任意的比较函数。
 
-If we model functions as arrows between objects, then what does it mean to have a function as an argument? 
+ 如果我们将函数建模为对象之间的箭头，那么拥有一个函数作为参数意味着什么呢？
 
-We need a way to objectify functions in order to define arrows that have an ``object of arrows'' as a source or as a target. A function that takes a function as an argument or returns a function is called a \emph{higher-order} function. Higher-order functions are the work-horses of functional programming.
+ 我们需要一种将函数对象化的方法，以便定义以“箭头对象”作为源或目标的箭头。接受函数作为参数或返回函数的函数被称为\emph{higher-order function}（高阶函数）。高阶函数是函数式编程的工作马。
 
-\subsection{Elimination rule}
+ \subsection{Elimination rule\\消去规则}
 
-The defining quality of a function is that it can be applied to an argument to produce the result. We have defined function application in terms of composition:
+ 函数的定义性特征是它可以应用于一个参数来产生结果。我们已经根据组合定义了函数应用：
 
-\[
- \begin{tikzcd}
- 1
- \arrow[d, "x"']
- \arrow[rd, "y"]
- \\
- a
- \arrow[r, "f"']
-& b
- \end{tikzcd}
-\]
-Here $f$ is represented as an arrow from $a$ to $b$, but we would like to be able to replace $f$ with an element of the object of arrows or, as mathematicians call it, the exponential object $b^a$; or as we call it in programming, a function type \hask{a->b}. 
+ \[
+  \begin{tikzcd}
+   1
+   \arrow[d, "x"']
+   \arrow[rd, "y"]
+   \\
+   a
+   \arrow[r, "f"']
+   & b
+  \end{tikzcd}
+ \]
+ 这里，$f$被表示为从$a$到$b$的箭头，但我们希望能够将$f$替换为箭头对象的一个元素，或者用数学家的话来说，替换为指数对象$b^a$；在编程中，我们称之为函数类型\hask{a->b}。
 
-Given an element of $b^a$ and an element of $a$, function application should produce an element of $b$. In other words, given a pair of elements:
-\begin{align*}
-f &\colon 1 \to b^a \\
-x &\colon 1 \to a
-\end{align*}
-it should produce an element:
-\[y \colon 1 \to b \]
+ 给定$b^a$的一个元素和$a$的一个元素，函数应用应该产生$b$的一个元素。换句话说，给定一对元素：
+ \begin{align*}
+  f &\colon 1 \to b^a \\
+  x &\colon 1 \to a
+ \end{align*}
+ 它应该产生一个元素：
+ \[y \colon 1 \to b \]
 
-Keep in mind that, here, $f$ denotes an element of $b^a$. Previously, it was an arrow from $a$ to $b$.
+ 请记住，这里$f$表示$b^a$的一个元素。之前，它是从$a$到$b$的一个箭头。
 
-We know that a pair of elements $(f, x)$ is equivalent to an element of the product $b^a \times a$. We can therefore define function application as a single arrow:
-\[\varepsilon_{a b} \colon b^a \times a \to b\]
-This way $y$, the result of the application, is defined by this commuting diagram:
-\[
- \begin{tikzcd}
- 1
- \arrow[d, "{(f, x)}"']
- \arrow[rd, "y"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon_{a b}"']
-& b
- \end{tikzcd}
-\]
-Function application is the \emph{elimination rule} for function type. 
+ 我们知道，一对元素$(f, x)$等价于积$b^a \times a$的一个元素。因此，我们可以将函数应用定义为一个单一的箭头：
+ \[\varepsilon_{a b} \colon b^a \times a \to b\]
+ 这样，应用的结果$y$由以下交换图定义：
+ \[
+  \begin{tikzcd}
+   1
+   \arrow[d, "{(f, x)}"']
+   \arrow[rd, "y"]
+   \\
+   b^a \times a
+   \arrow[r, "\varepsilon_{a b}"']
+   & b
+  \end{tikzcd}
+ \]
+ 函数应用是函数类型的\emph{消去规则}。
 
-When somebody gives you an element of the function object, the only thing you can do with it is to apply it to an element of the argument type using $\varepsilon$. 
+ 当有人给你一个函数对象的元素时，你唯一能做的就是使用$\varepsilon$将它应用于参数类型的一个元素。
 
-\subsection{Introduction rule}
-To complete the definition of the function object, we also need the introduction rule. 
+ \subsection{Introduction rule\\引入规则}
+ 为了完成函数对象的定义，我们还需要引入规则。
 
-First, suppose that there is a way of constructing a function object $b^a$ from some other object $c$. It means that there is an arrow
-\[h \colon c \to b^a\]
-We know that we can eliminate the result of $h$ using $\varepsilon_{a b}$, but we have to first multiply it by $a$. So let's first multiply $c$ by $a$ and the use functoriality to map it to $b^a \times a$. 
+ 首先，假设有一种方法可以从其他对象构造函数对象$b^a$。这意味着存在一个箭头
+ \[h \colon c \to b^a\]
+ 我们知道我们可以使用$\varepsilon_{a b}$消去$h$的结果，但我们必须首先将其乘以$a$。因此，首先将$c$乘以$a$，然后使用函子性将其映射到$b^a \times a$。
 
-Functoriality lets us apply a pair of arrows to a product to get another product. Here, the pair of arrows is $(h, id_a)$ (we want to turn $c$ into $b^a$, but we're not interested in modifying $a$)
-\[ c \times a \xrightarrow{h \times id_a} b^a \times a \]
-We can now follow this with function application to get to $b$
-\[ c \times a \xrightarrow{h \times id_a} b^a \times a \xrightarrow{\varepsilon_{a b}} b\]
-This composite arrow defines a mapping we'll call $f$:
-\[f \colon c \times a \to b\]
-Here's the corresponding diagram
+ 函子性让我们可以将一对箭头应用于一个积以得到另一个积。在这里，箭头对是$(h, id_a)$（我们希望将$c$转变为$b^a$，但我们对修改$a$不感兴趣）
+ \[ c \times a \xrightarrow{h \times id_a} b^a \times a \]
+ 现在我们可以用函数应用继续将其映射到$b$:
+ \[ c \times a \xrightarrow{h \times id_a} b^a \times a \xrightarrow{\varepsilon_{a b}} b\]
+ 这个复合箭头定义了一个我们称之为$f$的映射：
+ \[f \colon c \times a \to b\]
+ 以下是相应的图示：
 
-\[
- \begin{tikzcd}
- c \times a
- \arrow[d, dashed, "h \times id_a"']
- \arrow[rd, "f"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon"']
-& b
- \end{tikzcd}
-\]
-This commuting diagram tells us that, given an $h$, we can construct an $f$; but we can also demand the converse: Every mapping out, $f \colon c \times a \to b$, should uniquely define a mapping into the exponential, $h \colon c \to b^a$. 
+ \[
+  \begin{tikzcd}
+   c \times a
+   \arrow[d, dashed, "h \times id_a"']
+   \arrow[rd, "f"]
+   \\
+   b^a \times a
+   \arrow[r, "\varepsilon"']
+   & b
+  \end{tikzcd}
+ \]
+ 这个交换图告诉我们，给定一个$h$，我们可以构造一个$f$；但我们也可以要求反过来：每一个映射$f \colon c \times a \to b$都应该唯一地定义一个到指数对象的映射$h \colon c \to b^a$。
 
-We can use this property, this one-to-one correspondence between two sets of arrows, to define the exponential object. This is the \emph{introduction rule} for the function object $b^a$. 
+ 我们可以利用这个属性，即箭头集合之间的一一对应关系来定义指数对象。这是函数对象$b^a$的\emph{引入规则}。
 
-We've seen that product was defined using its mapping-in property. Function application, on the other hand, is defined as a \emph{mapping out} of a product. 
+ 我们已经看到积是通过它的映射进入性质定义的。而函数应用则定义为从一个积中映射出来的\emph{映射出}。
 
-\subsection{Currying}
+ \subsection{Currying\\柯里化}
 
-There are several ways of looking at this definition. One is to see it as an example of currying. 
+ 有几种方式可以看待这个定义。一种是将其视为柯里化的一个例子。
 
-So far we've been only considering functions of one argument. This is not a real limitation, since we can always implement a function of two arguments as a (single-argument) function from a product. The $f$ in the definition of the function object is such a function:
-\begin{haskell}
-f :: (c, a) -> b
-\end{haskell}
-\hask{h} on the other hand is a function that returns a function:
-\begin{haskell}
-h :: c -> (a -> b)
-\end{haskell}
-Currying is the isomorphism between these two sets of arrows. 
+ 到目前为止，我们只考虑了单参数的函数。这并不是一个真正的限制，因为我们总是可以实现一个双参数的函数作为一个从积到函数的（单参数）函数。函数对象定义中的$f$就是这样一个函数：
+ \begin{haskell}
+  f :: (c, a) -> b
+ \end{haskell}
+ 而\hask{h}则是一个返回函数的函数：
+ \begin{haskell}
+  h :: c -> (a -> b)
+ \end{haskell}
+ 柯里化就是这两个箭头集合之间的同构。
 
-This isomorphism can be represented in Haskell by a pair of (higher-order) functions. Since, in Haskell, currying works for any types, these functions are written using type variables---they are \emph{polymorphic}:
-\begin{haskell}
-curry   :: ((c, a) -> b)   -> (c -> (a -> b))
-\end{haskell}
+ 这种同构可以通过一对（高阶）函数在Haskell中表示出来。由于在Haskell中，柯里化适用于任何类型，这些函数使用类型变量编写——它们是\emph{多态}的：
+ \begin{haskell}
+  curry   :: ((c, a) -> b)   -> (c -> (a -> b))
+ \end{haskell}
 
-\begin{haskell}
-uncurry :: (c -> (a -> b)) -> ((c, a) -> b)
-\end{haskell}
-In other words, the $h$ in the definition of the function object can be written as 
-\[ h = curry\, f \]
+ \begin{haskell}
+  uncurry :: (c -> (a -> b)) -> ((c, a) -> b)
+ \end{haskell}
+ 换句话说，函数对象定义中的$h$可以写成：
+ \[ h = curry\, f \]
 
-Of course, written this way, the types of \hask{curry} and \hask{uncurry} correspond to function objects rather than arrows. This distinction is usually glossed over because there is a one-to-one correspondence between the \emph{elements} of the exponential and the \emph{arrows} that define them. This is easy to see when we replace the arbitrary object $c$ with the terminal object. We get:
+ 当然，以这种方式书写，\hask{curry}和\hask{uncurry}的类型对应于函数对象而非箭头。这种区别通常被忽略，因为指数的\emph{元素}和定义它们的\emph{箭头}之间有一一对应的关系。当我们用终端对象替换任意对象$c$时，这一点很容易看出。我们得到：
 
-\[
- \begin{tikzcd}
- 1 \times a
- \arrow[d, dashed, "h \times id_a"']
- \arrow[rd, "f"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon_{a b}"']
-& b
- \end{tikzcd}
-\]
-In this case, $h$ is an element of the object $b^a$, and $f$ is an arrow from $1 \times a$ to $b$. But we know that $1 \times a$ is isomorphic to $a$ so, effectively, $f$ is an arrow from $a$ to $b$. 
+ \[
+  \begin{tikzcd}
+   1 \times a
+   \arrow[d, dashed, "h \times id_a"']
+   \arrow[rd, "f"]
+   \\
+   b^a \times a
+   \arrow[r, "\varepsilon_{a b}"']
+   & b
+  \end{tikzcd}
+ \]
+ 在这种情况下，$h$是对象$b^a$的一个元素，$f$是从$1 \times a$到$b$的一个箭头。但我们知道$1 \times a$同构于$a$，所以实际上，$f$是从$a$到$b$的一个箭头。
 
-Therefore, from now on, we'll call an arrow \hask{->} an arrow $\to$, without making much fuss about it. The correct incantation for this kind of phenomenon is to say that the category is self-enriched.
+ 因此，从现在开始，我们将\hask{->}箭头称为$\to$箭头，而不必过多纠缠于此。这种现象的正确表达方式是说这个范畴是自封闭的。
 
-We can write $\varepsilon_{a b}$ as a Haskell function \hask{apply}:
-\begin{haskell}
-apply :: (a -> b, a) -> b
-apply (f, x) = f x
-\end{haskell}
-but it's just a syntactic trick: function application is built into the language: \hask{f x} means \hask{f} applied to \hask{x}. Other programming languages require the arguments to a function to be enclosed in parentheses, not so in Haskell. 
+ 我们可以将$\varepsilon_{a b}$写成Haskell函数\hask{apply}：
+ \begin{haskell}
+  apply :: (a -> b, a) -> b
+  apply (f, x) = f x
+ \end{haskell}
+ 但这只是一个语法技巧：函数应用内置于语言中：\hask{f x}意味着\hask{f}应用于\hask{x}。其他编程语言要求函数的参数用括号括起来，而在Haskell中则不需要。
 
-Even though defining function application as a separate function may seem redundant, Haskell library does provide an infix operator \hask{$} for that purpose:
-\begin{haskell}
-($) :: (a -> b) -> a -> b
+ 尽管将函数应用定义为一个单独的函数似乎是多余的，Haskell库确实提供了一个用于此目的的中缀操作符\hask{$}：
+ \begin{haskell}
+  ($) :: (a -> b) -> a -> b
 f $ x = f x
 \end{haskell}
-The trick, though, is that regular function application binds to the left, e.g., \hask{f x y} is the same as \hask{(f x) y}; but the dollar sign binds to the right, so that 
+但这个技巧在于常规的函数应用绑定到左边，例如，\hask{f x y}与\hask{(f x) y}相同；但美元符号绑定到右边，因此
 \begin{haskell}
 f  $ g x
 \end{haskell}
-is the same as \hask{f (g x)}. In the first example, \hask{f} must be a function of (at least) two arguments; in the second, it could be a function of one argument.
+与\hask{f (g x)}相同。在第一个例子中，\hask{f}必须是一个（至少）双参数函数；在第二个例子中，它可以是一个单参数函数。
 
-In Haskell, currying is ubiquitous. A function of two arguments is almost always written as a function returning a function. Because the function arrow \hask{->} binds to the right, there is no need to parenthesize such types. For instance, the pair constructor has the signature:
+在Haskell中，柯里化无处不在。双参数函数几乎总是被写作返回一个函数的函数。由于函数箭头\hask{->}绑定到右边，因此不需要为此类类型加括号。例如，配对构造函数具有如下签名：
 \begin{haskell}
 pair :: a -> b -> (a, b)
 \end{haskell}
-You may think of if as a function of two arguments returning a pair, or a function of one argument returning a function of one argument, \hask{b->(a, b)}. This way it's okay to partially apply such a function, the result being another function. For instance, we can define:
+你可以将其视为一个双参数函数，返回一个配对，或者是一个单参数函数，返回一个单参数函数\hask{b->(a, b)}。因此，可以部分应用此类函数，其结果为另一个函数。例如，我们可以定义：
 \begin{haskell}
 pairWithTen :: a -> (Int, a)
 pairWithTen = pair 10 -- partial application of pair
 \end{haskell}
+\subsection{Relation to lambda calculus\\与λ演算的关系}
 
+另一种看待函数对象定义的方法是将$c$解释为$f$定义的环境类型。在这种情况下，通常将环境称为$\Gamma$。箭头被解释为使用$\Gamma$中定义的变量的表达式。
 
-
-\subsection{Relation to lambda calculus}
-
-Another way of looking at the definition of the function object is to interpret $c$ as the type of the environment in which $f$ is defined. In that case it's customary to call the environment $\Gamma$. The arrow is interpreted as an expression that uses the variables defined in $\Gamma$. 
-
-Consider a simple example, the expression:
+考虑一个简单的例子，表达式：
 \[a x^2 + b x + c\]
-You may think of it as being parameterized by a triple of real numbers $(a, b, c)$ and a variable $x$, taken to be, let's say, a complex number. The triple is an element of a product $\mathbb{R} \times \mathbb{R} \times \mathbb{R}$. This product is the environment $\Gamma$ for our expression. 
+你可以将其看作是由一个实数三元组$(a, b, c)$和一个变量$x$（假设为一个复数）参数化的。该三元组是一个积$\mathbb{R} \times \mathbb{R} \times \mathbb{R}$的元素。这个积就是我们的表达式的环境$\Gamma$。
 
-The variable $x$ is an element of $\mathbb{C}$. The expression is an arrow from the product $\Gamma \times \mathbb{C}$ to the result type (here, also $\mathbb{C}$)
+变量$x$是$\mathbb{C}$的一个元素。表达式是从积$\Gamma \times \mathbb{C}$到结果类型（这里也是$\mathbb{C}$）的箭头：
 \[f \colon \Gamma \times \mathbb{C} \to \mathbb{C} \]
-This is a mapping-out from a product, so we can use it to construct a function object  $\mathbb{C}^{\mathbb{C}}$ and define a mapping $h \colon \Gamma \to \mathbb{C}^{\mathbb{C}}$
+这是从一个积映射出的映射，因此我们可以用它来构造一个函数对象$\mathbb{C}^{\mathbb{C}}$并定义一个映射$h \colon \Gamma \to \mathbb{C}^{\mathbb{C}}$
 \[
- \begin{tikzcd}
- \Gamma \times \mathbb{C}
- \arrow[d, dashed, "h \times id_{\mathbb{C}}"']
- \arrow[rd, "f"]
- \\
- \mathbb{C}^{\mathbb{C}} \times \mathbb{C}
- \arrow[r, "\varepsilon"']
+\begin{tikzcd}
+\Gamma \times \mathbb{C}
+\arrow[d, dashed, "h \times id_{\mathbb{C}}"']
+\arrow[rd, "f"]
+\\
+\mathbb{C}^{\mathbb{C}} \times \mathbb{C}
+\arrow[r, "\varepsilon"']
 & \mathbb{C}
- \end{tikzcd}
+\end{tikzcd}
 \]
-This new mapping $h$ can be seen as a constructor of the function object. The resulting function object represents all functions from $\mathbb{C}$ to $\mathbb{C}$ that have access to the environment $\Gamma$; that is, to the triple of parameters $(a, b, c)$. 
+这个新的映射$h$可以被看作是函数对象的构造器。所得的函数对象表示所有从$\mathbb{C}$到$\mathbb{C}$的函数，这些函数可以访问环境$\Gamma$，即参数三元组$(a, b, c)$。
 
-Corresponding to our original expression $a x^2 + b x + c$ there is a particular function in $\mathbb{C}^{\mathbb{C}}$ that we write as:
+对应于我们最初的表达式$a x^2 + b x + c$，在$\mathbb{C}^{\mathbb{C}}$中有一个特定的函数，我们写作：
 \[  \lambda x . \,a x^2 + b x + c \]
-or, in Haskell, with the \index{backslash}backslash replacing $\lambda$,
+或者在Haskell中，使用\index{backslash}反斜杠代替$\lambda$:
 \begin{haskell}
 \x -> a * x^2 + b * x + c
 \end{haskell}
 
-The arrow $h \colon \Gamma \to \mathbb{C}^{\mathbb{C}}$ is uniquely determined by the arrow $f$. This mapping produces a function that we call $\lambda x . f$.
+箭头$h \colon \Gamma \to \mathbb{C}^{\mathbb{C}}$由箭头$f$唯一确定。此映射生成我们称之为$\lambda x . f$的函数。
 
-In general, the defining diagram for the function object becomes:
+一般而言，函数对象的定义图变为：
 \[
- \begin{tikzcd}
- \Gamma \times a
- \arrow[d, dashed, "{h \times id_a}"']
- \arrow[rd, "f"]
- \\
- b^a \times a
- \arrow[r, "\varepsilon"']
+\begin{tikzcd}
+\Gamma \times a
+\arrow[d, dashed, "{h \times id_a}"']
+\arrow[rd, "f"]
+\\
+b^a \times a
+\arrow[r, "\varepsilon"']
 & b
- \end{tikzcd}
+\end{tikzcd}
 \]
 
-The environment $\Gamma$ that provides free parameters for the expression $f$ is a product of multiple objects representing the types of the parameters (in our example, it was $\mathbb{R} \times \mathbb{R} \times \mathbb{R}$). 
+提供表达式$f$的自由参数的环境$\Gamma$是代表参数类型的多个对象的积（在我们的例子中是$\mathbb{R} \times \mathbb{R} \times \mathbb{R}$）。
 
-An empty environment is represented by the terminal object $1$, the unit of the product. In that case, $f$ is just an arrow $a \to b$, and $h$ simply picks an element from the function object $b^a$ that corresponds to $f$. 
+空环境由终端对象$1$表示，积的单位。在这种情况下，$f$只是一个从$a$到$b$的箭头，而$h$只是从函数对象$b^a$中挑选出与$f$对应的一个元素。
 
-It's important to keep in mind that, in general, a function object represents functions that depend on external parameters. Such functions are called \index{closure}\emph{closures}. Closures are functions that capture values from their environment.
+需要牢记的是，通常情况下，函数对象表示依赖于外部参数的函数。这样的函数被称为\index{closure}\emph{闭包}。闭包是从其环境中捕获值的函数。
 
-Here's our example translated to Haskell. Corresponding to $f$ we have an expression:
+以下是我们例子在Haskell中的翻译。与$f$对应的是一个表达式：
 \begin{haskell}
 (a :+ 0) * x * x + (b :+ 0) * x + (c :+ 0)
 \end{haskell}
-If we use \hask{Double} to approximate $\mathbb{R}$, our environment is a product \hask{(Double, Double, Double)}. The type \hask{Complex} is parameterized by another type---here we used \hask{Double} again:
+如果我们用\hask{Double}来近似$\mathbb{R}$，我们的环境是一个积\hask{(Double, Double, Double)}。类型\hask{Complex}由另一个类型参数化——这里我们再次使用\hask{Double}:
 \begin{haskell}
 type C = Complex Double
 \end{haskell}
-The conversion from \hask{Double} to \hask{C} is done by setting the imaginary part to zero, as in \hask{(a :+ 0)}. 
+从\hask{Double}到\hask{C}的转换是通过将虚部设为零来完成的，例如\hask{(a :+ 0)}。
 
-The corresponding arrow $h$ takes the environment and produces a closure of the type \hask{C -> C}:
+相应的箭头$h$接受环境并生成一个类型为\hask{C -> C}的闭包：
 \begin{haskell}
 h :: (Double, Double, Double) -> (C -> C)
 h (a, b, c) = \x -> (a :+ 0) * x * x + (b :+ 0) * x + (c :+ 0)
 \end{haskell}
 
-\subsection{Modus ponens}
+\subsection{Modus ponens\\演绎规则}
 
-In logic, the function object corresponds to an implication. An arrow from the terminal object to the function object is the proof of that implication. Function application $\varepsilon$ corresponds to what logicians call \emph{modus ponens}: if you have a proof of the implication $A \Rightarrow B$ and a proof of $A$ then this constitutes the proof of $B$.
+在逻辑中，函数对象对应于一个蕴涵。从终端对象到函数对象的箭头是该蕴涵的证明。函数应用$\varepsilon$对应于逻辑学家称之为\emph{演绎规则}的概念：如果你有$A \Rightarrow B$的证明以及$A$的证明，那么这就构成了$B$的证明。
 
-\section{Sum and Product Revisited}
+\section{Sum and Product Revisited\\再谈和与积}
 
-When functions gain the same status as elements of other types, we have the tools to directly translate diagrams into code. 
+当函数与其他类型的元素获得相同的地位时，我们拥有了直接将图表转换为代码的工具。
 
-\subsection{Sum types}
+\subsection{Sum types\\和类型}
 
-Let's start with the definition of the sum.
+我们从和类型的定义开始。
 \[
- \begin{tikzcd}
- a
- \arrow[dr,  bend left, "\text{Left}"']
- \arrow[ddr, bend right, "f"']
- && b
- \arrow[dl, bend right, "\text{Right}"]
- \arrow[ddl, bend left, "g"]
- \\
+\begin{tikzcd}
+a
+\arrow[dr,  bend left, "\text{Left}"']
+\arrow[ddr, bend right, "f"']
+&& b
+\arrow[dl, bend right, "\text{Right}"]
+\arrow[ddl, bend left, "g"]
+\\
 &a + b
 \arrow[d, dashed, "h"]
 \\
 & c
- \end{tikzcd}
+\end{tikzcd}
 \]
-We said that the pair of arrows $(f, g)$ uniquely determines the mapping $h$ out of the sum. We can write it concisely using a higher-order function:
+我们说过，箭头对$(f, g)$唯一地决定了从和类型到其他对象的映射$h$。我们可以使用一个高阶函数简洁地将其写成：
 \begin{haskell}
 h = mapOut (f, g)
 \end{haskell}
-where:
+其中：
 \begin{haskell}
 mapOut :: (a -> c, b -> c) -> (Either a b -> c)
 mapOut (f, g) = \aorb -> case aorb of
-                         Left  a -> f a
-                         Right b -> g b
+Left  a -> f a
+Right b -> g b
 \end{haskell}
-This function takes a pair of functions as an argument and it returns a function. 
+这个函数以一对函数作为参数，并返回一个函数。
 
-First, we pattern-match the pair \hask{(f, g)} to extract \hask{f} and \hask{g}. Then we construct a new function using a lambda. This lambda takes an argument of the type \hask{Either a b}, which we call \hask{aorb}, and does the case analysis on it. If it was constructed using \hask{Left}, we apply \hask{f} to its contents, otherwise we apply \hask{g}. 
+首先，我们通过模式匹配提取\hask{(f, g)}中的\hask{f}和\hask{g}。然后我们使用lambda构造一个新函数。这个lambda接受一个类型为\hask{Either a b}的参数，我们称之为\hask{aorb}，并对其进行case分析。如果它是用\hask{Left}构造的，我们将其内容传递给\hask{f}，否则传递给\hask{g}。
 
-Note that the function we are returning is a closure. It captures \hask{f} and \hask{g} from its environment. 
+请注意，我们返回的函数是一个闭包。它从环境中捕获\hask{f}和\hask{g}。
 
-The function we have implemented closely follows the diagram, but it's not written in the usual Haskell style. Haskell programmers prefer to curry functions of multiple arguments. Also, if possible, they prefer to eliminate lambdas. 
+我们实现的函数与图示非常相似，但它并不是通常的Haskell风格。Haskell程序员更喜欢将多参数函数柯里化。此外，如果可能的话，他们更喜欢消除lambdas。
 
-Here's the version of the same function taken from the Haskell standard library, where it goes under the name (lower-case) \hask{either}:
+以下是相同函数的Haskell标准库中的版本，它以小写字母\hask{either}命名：
 \begin{haskell}
 either :: (a -> c) -> (b -> c) -> Either a b -> c
 either f _ (Left x)     =  f x
 either _ g (Right y)    =  g y
 \end{haskell}
+另一方向的双射（从$h$到对$(f, g)$）也遵循图的箭头：
 
-The other direction of the bijection, from $h$ to the pair $(f, g)$, also follows the arrows of the diagram.
 \begin{haskell}
 unEither :: (Either a b -> c) -> (a -> c, b -> c)
 unEither h = (h . Left, h . Right)
 \end{haskell}
 
+\subsection{Product types\\积类型}
 
-\subsection{Product types}
-
-Product types are dually defined by their mapping-in property.
+积类型通过它们的映射入属性对偶地定义。
 \[
- \begin{tikzcd}
- & c
+\begin{tikzcd}
+& c
 \arrow[d, dashed, "h"]
- \arrow[ddl, bend right, "f"']
- \arrow[ddr, bend left, "g"]
+\arrow[ddl, bend right, "f"']
+\arrow[ddr, bend left, "g"]
 \\
 &a \times b
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
+\arrow[dl,  "\text{fst}"]
+\arrow[dr,   "\text{snd}"']
 \\
 a && b
- \end{tikzcd}
+\end{tikzcd}
 \]
-Here's the direct Haskell reading of this diagram
+这是直接从这个图在Haskell中的读取：
 \begin{haskell}
 h :: (c -> a, c -> b) -> (c -> (a, b))
 h (f, g) = \c -> (f c, g c)
 \end{haskell}
-And this is the stylized version written in Haskell style as an infix operator \hask{&&&}
+这是用Haskell风格编写的版本，作为中缀操作符\hask{&&&}：
 \begin{haskell}
 (&&&) :: (c -> a) -> (c -> b) -> (c -> (a, b))
 (f &&& g) c = (f c, g c)
 \end{haskell}
-The other direction of the bijection is given by:
+双射的另一个方向是：
 \begin{haskell}
 fork :: (c -> (a, b)) -> (c -> a, c -> b)
 fork h = (fst . h, snd . h)
 \end{haskell}
-which also closely follows the reading of the diagram.
+这也与图的读取密切相关。
 
-\subsection{Functoriality revisited}
+\subsection{Functoriality revisited\\函子性再探}
 
-Both sum and product are functorial, which means that we can apply functions to their contents. We are ready to translate those diagrams into code. 
+无论是和类型还是积类型都是函子的，这意味着我们可以将函数应用到它们的内容上。我们准备好将这些图转化为代码。
 
-This is the functoriality of the sum type:
+这是和类型的函子性：
 
 \[
- \begin{tikzcd}
- a
- \arrow[d, "f"]
- \arrow[dr,  bend left, "\text{Left}"']
-  && b
- \arrow[d, "g"]
- \arrow[dl, bend right, "\text{Right}"]
- \\
- a'
- \arrow[rd, "\text{Left}"']
+\begin{tikzcd}
+a
+\arrow[d, "f"]
+\arrow[dr,  bend left, "\text{Left}"']
+&& b
+\arrow[d, "g"]
+\arrow[dl, bend right, "\text{Right}"]
+\\
+a'
+\arrow[rd, "\text{Left}"']
 &a + b
 \arrow[d, dashed, "h"]
 & b'
 \arrow[ld, "\text{Right}"]
 \\
 & a' + b'
- \end{tikzcd}
+\end{tikzcd}
 \]
-Reading this diagram we can immediately write $h$ using \hask{either}:
+读取这个图，我们可以立即使用\hask{either}编写$h$：
 \begin{haskell}
 h f g = either (Left . f) (Right . g)
 \end{haskell}
-Or we could expand it and call it \hask{bimap}:
+或者我们可以将其扩展并称之为\hask{bimap}：
 \begin{haskell}
 bimap :: (a -> a') -> (b -> b') -> Either a b -> Either a' b'
 bimap f g (Left  a) = Left  (f a)
 bimap f g (Right b) = Right (g b)
 \end{haskell}
-Similarly for the product type:
+对于积类型也类似：
 \[
- \begin{tikzcd}
- & a \times b
+\begin{tikzcd}
+& a \times b
 \arrow[d, dashed, "h"]
- \arrow[dl,  "\text{fst}"']
- \arrow[dr,   "\text{snd}"]
+\arrow[dl,  "\text{fst}"']
+\arrow[dr,   "\text{snd}"]
 \\
 a
 \arrow[d, "f"']
 &a' \times b'
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
+\arrow[dl,  "\text{fst}"]
+\arrow[dr,   "\text{snd}"']
 & b
 \arrow[d, "g"]
 \\
 a' && b'
- \end{tikzcd}
+\end{tikzcd}
 \]
-$h$ can be written as:
+$h$可以写成：
 \begin{haskell}
 h f g = (f . fst) &&& (g . snd)
 \end{haskell}
-Or it could be expanded to
+或者可以将其扩展为：
 \begin{haskell}
 bimap :: (a -> a') -> (b -> b') -> (a, b) -> (a', b')
 bimap f g (a, b) = (f a, g b)
 \end{haskell}
-In both cases we call this higher-order function \hask{bimap} since, in Haskell, both the sum and the product are instances of a more general class called \hask{Bifunctor}.
+在这两种情况下，我们都称这个高阶函数为\hask{bimap}，因为在Haskell中，和类型和积类型都是一个更通用类\hask{Bifunctor}的实例。
 
-\section{Functoriality of the Function Type}
+\section{Functoriality of the Function Type\\函数类型的函子性}
 
-The function type, or the exponential, is also functorial, but with a twist. We are interested in a mapping from $b^a$ to $b'^{a'}$, where the primed objects are related to the non-primed ones through some arrows---to be determined. 
+函数类型或指数类型也是函子的，但有一个不同之处。我们感兴趣的是从$b^a$到$b'^{a'}$的映射，其中带撇号的对象通过一些箭头与不带撇号的对象相关联——这些箭头有待确定。
 
-The exponential is defined by its mapping-in property, so if we're looking for
+指数类型通过其映射入属性定义，因此如果我们在寻找
 \[k \colon b^a \to b'^{a'} \]
-we should draw the diagram that has $k$ as a mapping into $b'^{a'}$. We get this diagram from the original definition by substituting $b^a$ for $c$ and primed objects for the non-primed ones:
+我们应该画出有$k$作为映射入$b'^{a'}$的图。我们通过将$b^a$替换为$c$并将带撇号的对象替换为不带撇号的对象，从原始定义中得到这个图：
 
 \[
- \begin{tikzcd}
- b^a \times a'
- \arrow[d, dashed, "k \times id_a"']
- \arrow[rd, "g"]
- \\
- b'^{a'} \times a'
- \arrow[r, "\varepsilon"']
+\begin{tikzcd}
+b^a \times a'
+\arrow[d, dashed, "k \times id_a"']
+\arrow[rd, "g"]
+\\
+b'^{a'} \times a'
+\arrow[r, "\varepsilon"']
 & b'
- \end{tikzcd}
+\end{tikzcd}
 \]
-The question is: can we find an arrow $g$ to complete this diagram? 
+问题是：我们可以找到一个箭头$g$来完成这个图吗？
 \[g \colon b^a \times a' \to b'\]
-If we find such a $g$, it will uniquely define our $k$.
+如果我们找到这样一个$g$，它将唯一地确定我们的$k$。
 
-The way to think about this problem is to consider how we would implement $g$. It takes the product $b^a \times a'$ as its argument. Think of it as a pair: an element of the function object from $a$ to $b$ and an element of $a'$. The only thing we can do with the function object is to apply it to something. But $b^a$ requires an argument of type $a$, and all we have at our disposal is $a'$. We can't do anything unless somebody gives us an arrow $a' \to a$. This arrow applied to $a'$ will generate the argument for $b^a$. However, the result of the application is of type $b$, and $g$ is supposed to produce a $b'$. Again, we'll need an arrow $b \to b'$ to complete our assignment. 
+思考这个问题的方法是考虑如何实现$g$。它将$b^a \times a'$的积作为其参数。可以将其视为一个对：从$a$到$b$的函数对象的一个元素和一个$a'$的元素。我们唯一能对函数对象做的事情是将其应用于某些东西。但$b^a$需要一个类型为$a$的参数，而我们所拥有的只是$a'$。除非有人给我们一个箭头$a' \to a$，否则我们无能为力。该箭头应用于$a'$将生成$b^a$的参数。然而，应用的结果是$b$类型，而$g$应该生成一个$b'$。再一次，我们需要一个箭头$b \to b'$来完成我们的赋值。
 
-This may sound complicated, but the bottom line is that we require two arrows between the primed and non-primed objects. The twist is that the first arrow goes from $a'$ to $a$, which feels backward from the usual functoriality considerations. In order to map $b^a$ to $b'^{a'}$ we need a pair of arrows:
+这可能听起来很复杂，但底线是我们需要两个箭头来连接带撇号和不带撇号的对象。不同之处在于第一个箭头从$a'$到$a$，这在通常的函子性考虑中似乎是逆向的。为了将$b^a$映射到$b'^{a'}$，我们需要一对箭头：
 \begin{align*}
 f &\colon a' \to a \\
-g &\colon b \to b' 
+g &\colon b \to b'
 \end{align*}
 
-This is somewhat easier to explain in Haskell. Our goal is to implement a function \hask{a' -> b'}, given a function \hask{h :: a -> b}. 
+这在Haskell中更容易解释。我们的目标是实现一个函数\hask{a' -> b'}，给定一个函数\hask{h :: a -> b}。
 
-This new function takes an argument of the type \hask{a'} so, before we can pass it to \hask{h}, we need to convert \hask{a'} to \hask{a}. That's why we need a function \hask{f :: a' -> a}. 
+这个新函数接受一个类型为\hask{a'}的参数，因此在我们将其传递给\hask{h}之前，我们需要将\hask{a'}转换为\hask{a}。这就是为什么我们需要一个函数\hask{f :: a' -> a}。
 
-Since \hask{h} produces a \hask{b}, and we want to return a \hask{b'}, we need another function \hask{g :: b -> b'}. All this fits nicely into one higher-order function:
+由于\hask{h}生成一个\hask{b}，而我们希望返回一个\hask{b'}，我们需要另一个函数\hask{g :: b -> b'}。所有这些都很好地适合于一个高阶函数：
 \begin{haskell}
 dimap :: (a' -> a) -> (b -> b') -> (a -> b) -> (a' -> b')
 dimap f g h = g . h . f
 \end{haskell}
-Similar to \hask{bimap} being an interface to the typeclass \hask{Bifunctor}, \hask{dimap} is a member of the typeclass \hask{Profunctor}.
+类似于\hask{bimap}是类型类\hask{Bifunctor}的一个接口，\hask{dimap}是类型类\hask{Profunctor}的成员。
 
-\section{Bicartesian Closed Categories}
+\section{Bicartesian Closed Categories\\双笛卡尔封闭范畴}
 
-A category in which both the product and the exponential are defined for any pair of objects, and which has a terminal object, is called \emph{cartesian closed}. The idea is that hom-sets are not something alien to the category in question: the category is ``closed'' under the operation of forming hom-sets.
+一个同时为任意对象对定义了积和指数，并且具有终端对象的范畴被称为\emph{笛卡尔封闭}。这个想法是，同态集对于所讨论的范畴来说并不是外来的东西：这个范畴在形成同态集的操作下是“封闭的”。
 
-If the category also has sums (coproducts) and the initial object, it's called \emph{bicartesian closed}. 
+如果范畴还具有和类型（余积）和初始对象，那么它被称为\emph{双笛卡尔封闭}。
 
-This is the minimum structure for modeling programming languages. 
+这是建模编程语言的最小结构。
 
-Data types constructed using these operations are called \emph{algebraic data types}. We have addition, multiplication, and exponentiation (but not subtraction or division) of types; with all the familiar laws we know from high-school algebra. They are satisfied up to isomorphism. There is one more algebraic law that we haven't discussed yet.
+使用这些操作构造的数据类型被称为\emph{代数数据类型}。我们有加法、乘法和指数（但没有减法或除法）类型；以及我们在高中代数中熟悉的所有定律。它们在同构意义上得到满足。还有一个代数定律我们还没有讨论。
 
-\subsection{Distributivity}
+\subsection{Distributivity\\分配性}
 
-Multiplication of numbers distributes over addition. Should we expect the same in a bicartesian closed category?
+数的乘法对加法是分配的。我们应该期望在双笛卡尔封闭范畴中也是如此吗？
 \[b \times a + c \times a \cong (b + c) \times a\]
 
-The left to right mapping is easy to construct, since it's simultaneously a mapping out of a sum and a mapping into a product. We can construct it by gradually decomposing it into simpler mappings. In Haskell, this means implementing a function
+从左到右的映射很容易构造，因为它同时是一个和类型的映射出和积的映射入。我们可以通过逐步将其分解为更简单的映射来构造它。在Haskell中，这意味着实现一个函数：
 \begin{haskell}
 dist :: Either (b, a) (c, a) -> (Either b c, a)
 \end{haskell}
-A mapping out of the sum on the left is given by a pair of arrows:
+一个从左边的和类型映射出的映射由一对箭头给出：
 \begin{align*}
 f &\colon b\times a \to (b + c) \times a \\
-g &\colon c\times a \to (b + c) \times a 
+g &\colon c\times a \to (b + c) \times a
 \end{align*}
 \[
- \begin{tikzcd}
- b \times a
- \arrow[dr,  bend left, "\text{Left}"]
- \arrow[ddr, bend right, "f"']
- && c \times a
- \arrow[dl, bend right, "\text{Right}"']
- \arrow[ddl, bend left, "g"]
- \\
+\begin{tikzcd}
+b \times a
+\arrow[dr,  bend left, "\text{Left}"]
+\arrow[ddr, bend right, "f"']
+&& c \times a
+\arrow[dl, bend right, "\text{Right}"']
+\arrow[ddl, bend left, "g"]
+\\
 & b \times a + c \times a
 \arrow[d, dashed, "\text{dist}"]
 \\
 & (b + c) \times a
- \end{tikzcd}
+\end{tikzcd}
 \]
 
-We write it in Haskell as:
+我们将其写成Haskell代码：
 \begin{haskell}
 dist = either f g
-  where
-    f   :: (b, a) -> (Either b c, a)
-    g   :: (c, a) -> (Either b c, a)
+where
+f   :: (b, a) -> (Either b c, a)
+g   :: (c, a) -> (Either b c, a)
 \end{haskell}
-The \index{\hask{where}}\hask{where} clause is used to introduce the definitions of sub-functions.
+在\index{\hask{where}} \hask{where}子句中定义辅助函数的实现。
 
-Now we need to implement $f$ and $g$. They are mappings into the product, so each of them is equivalent to a pair of arrows. For instance, the first one is given by the pair:
+现在我们需要实现$f$和$g$。它们是积中的映射，因此每一个都对应于一对箭头。例如，第一个由一对箭头给出：
 \begin{align*}
 f' &\colon b \times a \to (b + c) \\
-f'' &\colon b \times a \to  a
+f'' &\colon b \times a \to a
 \end{align*}
 \[
- \begin{tikzcd}
- & b \times a
+\begin{tikzcd}
+& b \times a
 \arrow[d, dashed, "f"]
- \arrow[ddl, bend right, "f'"']
- \arrow[ddr, bend left, "f''"]
+\arrow[ddl, bend right, "f'"']
+\arrow[ddr, bend left, "f''"]
 \\
 & (b + c) \times a
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
+\arrow[dl,  "\text{fst}"]
+\arrow[dr,   "\text{snd}"']
 \\
 b + c && a
- \end{tikzcd}
+\end{tikzcd}
 \]
 
-In Haskell:
+在Haskell中：
 \begin{haskell}
-    f = f' &&& f''
-    f'  :: (b, a) -> Either b c
-    f'' :: (b, a) -> a
+f = f' &&& f''
+f'  :: (b, a) -> Either b c
+f'' :: (b, a) -> a
 \end{haskell}
-The first arrow can be implemented by projecting the first component $b$ and then using $\text{Left}$ to construct the sum. The second is just the projection $\text{snd}$:
+第一个箭头可以通过投影第一个分量$b$并使用$\text{Left}$来构造和类型。第二个只是投影$\text{snd}$：
 \begin{align*}
- f' &= \text{Left} \circ \text{fst} \\
- f'' &= \text{snd}
+f' &= \text{Left} \circ \text{fst} \\
+f'' &= \text{snd}
 \end{align*}
-Similarly, we decompose $g$ into a pair $g'$ and $g''$:
+类似地，我们将$g$分解为一对$g'$和$g''$：
 \[
- \begin{tikzcd}
- & c \times a
+\begin{tikzcd}
+& c \times a
 \arrow[d, dashed, "g"]
- \arrow[ddl, bend right, "g'"']
- \arrow[ddr, bend left, "g''"]
+\arrow[ddl, bend right, "g'"']
+\arrow[ddr, bend left, "g''"]
 \\
 & b + c \times a
- \arrow[dl,  "\text{fst}"]
-  \arrow[dr,   "\text{snd}"']
+\arrow[dl,  "\text{fst}"]
+\arrow[dr,   "\text{snd}"']
 \\
 (b + c) && a
- \end{tikzcd}
+\end{tikzcd}
 \]
 
-Combining all these together, we get:
+将所有这些组合在一起，我们得到：
 \begin{haskell}
 dist = either f g
-  where
-    f   = f' &&& f''
-    f'  = Left . fst
-    f'' = snd
-    g   = g' &&& g''
-    g'  = Right . fst
-    g'' = snd
+where
+f   = f' &&& f''
+f'  = Left . fst
+f'' = snd
+g   = g' &&& g''
+g'  = Right . fst
+g'' = snd
 \end{haskell}
-These are the type signatures of the helper functions:
+这些是辅助函数的类型签名：
 \begin{haskell}
-    f   :: (b, a) -> (Either b c, a)
-    g   :: (c, a) -> (Either b c, a)
-    f'  :: (b, a) -> Either b c
-    f'' :: (b, a) -> a
-    g'  :: (c, a) -> Either b c
-    g'' :: (c, a) -> a
+f   :: (b, a) -> (Either b c, a)
+g   :: (c, a) -> (Either b c, a)
+f'  :: (b, a) -> Either b c
+f'' :: (b, a) -> a
+g'  :: (c, a) -> Either b c
+g'' :: (c, a) -> a
 \end{haskell}
-They can also be inlined to produce this terse form:
+它们也可以内联以生成这种简洁形式：
 \begin{haskell}
 dist = either ((Left . fst) &&& snd) ((Right . fst) &&& snd)
 \end{haskell}
 
-This style of programming is called \emph{point free} because it omits the arguments (points). For readability reasons, Haskell programmers prefer a more explicit style. The above function would normally be implemented as:
+这种编程风格被称为\emph{无点式}，因为它省略了参数（点）。出于可读性原因，Haskell程序员更喜欢更明确的风格。上面的函数通常会实现为：
 \begin{haskell}
 dist (Left  (b, a)) = (Left  b, a)
 dist (Right (c, a)) = (Right c, a)
 \end{haskell}
 
-Notice that we have only used the definitions of sums and products. The other direction of the isomorphism requires the use of the exponential, so it's only valid in a bicartesian \emph{closed} category. This is not immediately clear from the straightforward Haskell implementation:
+请注意，我们只使用了和类型和积的定义。双射的另一个方向需要使用指数，因此它仅在双笛卡尔\emph{封闭}范畴中有效。这在Haskell的直接实现中并不立即显现：
 \begin{haskell}
 undist :: (Either b c, a) -> Either (b, a) (c, a)
 undist (Left b, a)  = Left (b, a)
 undist (Right c, a) = Right (c, a)
 \end{haskell}
-but that's because currying is implicit in Haskell. 
+但这是因为在Haskell中柯里化是隐式的。
 
-Here's the point-free version of this function:
+这是这个函数的无点式版本：
 \begin{haskell}
 undist = uncurry (either (curry Left) (curry Right))
 \end{haskell}
-This may not be the most readable implementation, but it underscores the fact that we need the exponential: we use both \hask{curry} and \hask{uncurry} to implement the mapping.
+这可能不是最易读的实现，但它强调了我们需要指数的事实：我们使用了\hask{curry}和\hask{uncurry}来实现这个映射。
 
-We'll come back to this identity later, when we are equipped with more powerful tools: adjunctions.
+我们将在后续章节中使用更强大的工具：伴随来回到这个恒等式。
 
 \begin{exercise}
-Show that:
+证明：
 \[ 2 \times a \cong a + a \]
-where $2$ is the Boolean type. Do the proof diagrammatically first, and then implement two Haskell functions witnessing the isomorphism.
+其中$2$是布尔类型。首先用图形方式证明，然后实现两个Haskell函数来见证这个同构。
 \end{exercise}
-
 \end{document}

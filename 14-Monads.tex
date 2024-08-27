@@ -1,1363 +1,1477 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{13}
+    \setcounter{chapter}{13}
 
-\chapter{Monads}
+    \chapter{Monads（单子）}
 
-What do a wheel, a clay pot, and a wooden house have in common? They are all useful because of the emptiness in their center. 
+    轮子、陶罐和木房子有什么共同点？它们都因为中心的空洞而变得有用。
 
-Lao Tzu says: ``The value comes from what is there, but the use comes from what is not there.''
+    老子说：“有之以为利，无之以为用。”
 
-What does the \hask{Maybe} functor, the list functor, and the reader functor have in common? They all have emptiness in their center. 
+    \hask{Maybe}函子、列表函子和读者函子有什么共同点？它们的中心也都有空洞。
 
-When monads are explained in the context of programming, it's hard to see the common pattern when you focus on the functors. To understand monads you have to look inside functors and read between the lines of code.
+    当单子（monads）在编程背景下被解释时，如果你专注于函子，很难看到共同的模式。要理解单子，你必须深入到函子内部，阅读代码之间的含义。
 
-\section{Programming with Side Effects}
+    \section{Programming with Side Effects（带有副作用的编程）}
 
-So far we've been talking about programming in terms of computations that were modeled mainly on functions between sets (with the exception of non-termination). In programming, such functions are called \emph{total} and \emph{pure}. 
+    到目前为止，我们一直在讨论的编程主要是基于集合之间的函数（除了非终止的情况）。在编程中，这些函数被称为\emph{全函数}（total）和\emph{纯函数}（pure）。
 
-A total function is defined for all values of its arguments. 
+    全函数对其参数的所有值都有定义。
 
-A pure function is implemented purely in terms of its arguments and, in case of closures, the captured values---it has no access to, much less the ability to modify the outside world. 
+    纯函数纯粹基于其参数实现，若是闭包函数，纯函数只基于捕获的值——它无法访问外部世界，更不能修改它。
 
-Most real-world programs, though, have to interact with the external world: they read and write files, process network packets, prompt users for data, etc. Most programming languages solve this problem by allowing side effect. A side effect is anything that breaks the totality or the purity of a function. 
+    然而，大多数现实世界的程序都必须与外部世界交互：它们读取和写入文件，处理网络数据包，提示用户输入数据，等等。大多数编程语言通过允许副作用来解决这个问题。副作用是指任何打破函数全性或纯性的行为。
 
-Unfortunately, this shotgun approach adopted by imperative languages makes reasoning about programs extremely hard. When composing effectful computations one has to carefully reason about the composition of effects on a case-by-case basis. To make things even harder, most effects are hidden not only inside the implementation (as opposed to the interface) of a particular function, but also in the implementation of all the functions that it's calling, recursively.
+    不幸的是，命令式语言采用的这种“散弹枪”方法使得对程序进行推理变得极其困难。在组合带有副作用的计算时，人们必须小心地逐案推理副作用的组合。更糟糕的是，大多数副作用不仅隐藏在特定函数的实现（而不是接口）中，还隐藏在它所调用的所有函数的实现中，甚至是递归调用的函数中。
 
-The solution adopted by purely functional languages, like Haskell, is to encode side effects in the return types of pure functions. Amazingly, this is possible for all relevant effects. 
+    纯函数式语言（如Haskell）采用的解决方案是将副作用编码到纯函数的返回类型中。令人惊讶的是，这对于所有相关的副作用都是可行的。
 
-The idea is that, instead of a computation of the type \hask{a->b} with side effects, we use a function \hask{ a -> f b}, where the type constructor \hask{f} encodes the appropriate effect. At this point there are no conditions imposed on \hask{f}. It doesn't even have to be a \hask{Functor}, much less a monad. This will come later, when we talk about effect composition.
+    这个想法是，用返回类型为\hask{a->b}的计算代替带有副作用的计算，我们使用一个函数\hask{a -> f b}，其中类型构造器\hask{f}编码了适当的副作用。在这一点上，\hask{f}没有任何限制。它甚至不必是一个\hask{Functor}，更不必是一个单子。这将在我们讨论副作用组合时再来详细说明。
 
-Below is the list of common effects and their pure-function versions.
+    下面是常见副作用及其纯函数版本的列表。
 
-\subsection{Partiality}
-In imperative languages, partiality is often encoded using exceptions. When a function is called with the ``wrong'' value for its argument, it throws an exception. In some languages, the type of exception is encoded in the signature of the function using special syntax. 
+    \subsection{Partiality（部分性）}
 
-In Haskell, a partial computation can be implemented by a function returning the result inside the \hask{Maybe} functor. Such a function, when called with the ``wrong'' argument, returns \hask{Nothing}, otherwise is wraps the result in the \hask{Just} constructor.
+    在命令式语言中，部分性通常通过异常来编码。当一个函数使用“错误”的值调用时，它会抛出异常。在某些语言中，异常的类型使用特殊语法编码在函数的签名中。
 
-If we want to encode more information about the type of the failure, we can use the \hask{Either} functor, with the \hask{Left} traditionally passing the error data (often a simple \hask{String}); and \hask{Right} encapsulating the real return, if available.
+    在Haskell中，部分计算可以通过返回\hask{Maybe}函子内的结果来实现。当一个函数使用“错误”的参数调用时，它会返回\hask{Nothing}，否则会将结果包装在\hask{Just}构造器中。
 
-The caller of a \hask{Maybe}-valued function cannot easily ignore the exceptional condition. In order to extract the value, they have to pattern-match the result and decide how to deal with \hask{Nothing}. This is in contrast to the ``poor-man's \hask{Maybe}'' of some imperative languages where the error condition is encoded using a null pointer.
+    如果我们想要编码更多关于失败类型的信息，可以使用\hask{Either}函子，其中\hask{Left}通常传递错误数据（通常是一个简单的\hask{String}）；而\hask{Right}封装了实际的返回结果，如果有的话。
 
-\subsection{Logging}
+    调用返回\hask{Maybe}类型的函数的调用者无法轻易忽略异常情况。为了提取值，他们必须对结果进行模式匹配，并决定如何处理\hask{Nothing}。这与某些命令式语言中使用空指针编码错误情况的“穷人版\hask{Maybe}”形成对比。
 
-Sometimes a computation has to log some values in some external data structure. Logging or auditing is a side effect that's particularly dangerous in concurrent programs, where multiple threads might try to access the same log simultaneously.
+    \subsection{Logging（记录）}
 
-The simple solution is for a function to return the computed value paired with the item to be logged. In other words, a logging computation of the type \hask{ a -> b } can be replaced by a pure function:
-\begin{haskell}
-a -> Writer w b
-\end{haskell}
-where the \hask{Writer} functor is a thin encapsulation of the product:
-\begin{haskell}
-newtype Writer w a = Writer (a, w)
-\end{haskell}
-with \hask{w} being the type of the log.
+    有时一个计算必须在某个外部数据结构中记录一些值。记录或审计是一个特别危险的副作用，尤其是在并发程序中，多个线程可能会尝试同时访问同一个日志。
 
-The caller of this function is then responsible for extracting the value to be logged. This is a common trick: make the function provide all the data, and let the caller deal with the effects.
+    一个简单的解决方案是让函数返回计算值，并与要记录的项配对。换句话说，将类型为\hask{a -> b}的记录计算替换为纯函数：
+    \begin{haskell}
+        a -> Writer w b
+    \end{haskell}
+    其中\hask{Writer}函子是一个薄薄的积的封装：
+    \begin{haskell}
+        newtype Writer w a = Writer (a, w)
+    \end{haskell}
+    其中\hask{w}是日志的类型。
 
-\subsection{Environment}
+    然后由调用者负责提取要记录的值。这是一个常见的技巧：让函数提供所有的数据，让调用者处理副作用。
 
-Some computations need read-only access to some external data stored in the environment. The read-only environment, instead of being secretly accessed by a computation, can be simply passed to a function as an additional argument. If we have a computation \hask{ a -> b } that needs access to some environment \hask{e}, we replace it with a function \hask{ (a, e) -> b }. At first, this doesn't seem to fit the pattern of encoding side effects in the return type. However, such a function can always be curried to the form:
-\begin{haskell}
-a -> (e -> b)
-\end{haskell}
-The return type of this function can be encoded in the reader functor, itself parameterized by the environment type \hask{e}:
-\begin{haskell}
-newtype Reader e a = Reader (e -> a)
-\end{haskell}
+    \subsection{Environment（环境）}
 
-This is an example of a delayed side effect. The function:
-\begin{haskell}
-a -> Reader e a
-\end{haskell}
-doesn't want to deal with effects so it delegates the responsibility to the caller. You may think of it as producing a script to be executed at a later time. The function \hask{runReader} plays the role of a very simple interpreter of this script:
-\begin{haskell}
-runReader :: Reader e a -> e -> a
-runReader (Reader h) e = h e
-\end{haskell}
+    有些计算需要只读访问存储在环境中的某些外部数据。只读环境可以简单地作为附加参数传递给函数，而不是由计算秘密访问。如果我们有一个需要访问某些环境\hask{e}的计算\hask{a -> b}，我们将其替换为一个函数\hask{(a, e) -> b}。起初，这似乎不符合在返回类型中编码副作用的模式。然而，这样的函数总是可以柯里化为以下形式：
+    \begin{haskell}
+        a -> (e -> b)
+    \end{haskell}
+    该函数的返回类型可以编码在读者函子中，它本身由环境类型\hask{e}参数化：
+    \begin{haskell}
+        newtype Reader e a = Reader (e -> a)
+    \end{haskell}
 
-\subsection{State}
+    这是一个延迟副作用的示例。该函数：
+    \begin{haskell}
+        a -> Reader e a
+    \end{haskell}
+    不想处理副作用，因此它将责任委托给调用者。你可以将其视为生成一个稍后执行的脚本。函数\hask{runReader}扮演了这个脚本的一个非常简单的解释器角色：
+    \begin{haskell}
+        runReader :: Reader e a -> e -> a
+        runReader (Reader h) e = h e
+    \end{haskell}
 
-The most common side effect is related to accessing and potentially modifying some shared state. Unfortunately, shared state is the notorious source of concurrency errors. This is a serious problem in object-oriented languages where stateful objects can be transparently shared between many clients. In Java, such objects may be provided with individual mutexes at the cost of impaired performance and the risk of deadlocks.
+    \subsection{State（状态）}
 
-In functional programming we make state manipulations explicit: we pass the state as an additional argument and return the modified state paired with the return value. We replace a stateful computation \hask{ a -> b } with
-\begin{haskell}
-(a, s) -> (b, s)
-\end{haskell}
-where \hask{s} is the type of state. As before, we can curry such a function to get it to the form:
-\begin{haskell}
-a -> (s -> (b, s))
-\end{haskell}
-This return type can be encapsulated in the following functor:
-\begin{haskell}
-newtype State s a = State (s -> (a, s))
-\end{haskell}
-The caller of such a function is supposed to retrieve the result and the modified state by providing the initial state and calling the helper function, the interpreter, \hask{runState}:
-\begin{haskell}
-runState :: State s a -> s -> (a, s)
-runState (State h) s = h s
-\end{haskell}
-Notice that, modulo constructor unpacking, \hask{runState} is bona fide function application. 
+    最常见的副作用与访问和潜在地修改某些共享状态有关。不幸的是，共享状态是并发错误的臭名昭著的根源。这是面向对象语言中的一个严重问题，因为有状态的对象可以透明地在多个客户端之间共享。在Java中，此类对象可以提供单独的互斥锁，但代价是性能下降和死锁的风险。
 
-\subsection{Nondeterminism}
+    在函数式编程中，我们显式地处理状态操作：我们将状态作为附加参数传递，并返回与返回值配对的修改后的状态。我们将一个有状态的计算\hask{a -> b}替换为：
+    \begin{haskell}
+    (a, s) -> (b, s)
+    \end{haskell}
+    其中\hask{s}是状态的类型。像以前一样，我们可以将这样的函数柯里化，以将其转换为以下形式：
+    \begin{haskell}
+        a -> (s -> (b, s))
+    \end{haskell}
+    该返回类型可以封装在以下函子中：
+    \begin{haskell}
+        newtype State s a = State (s -> (a, s))
+    \end{haskell}
+    调用这样的函数的调用者应该通过提供初始状态并调用帮助函数，即解释器\hask{runState}，来检索结果和修改后的状态：
+    \begin{haskell}
+        runState :: State s a -> s -> (a, s)
+        runState (State h) s = h s
+    \end{haskell}
+    注意，模块化构造器解包，\hask{runState}是完全合法的函数应用。
 
-Imagine performing a quantum experiment that measures the spin of an electron. Half of the time the spin will be up, and half of the time it will be down. The result is non-deterministic. One way to describe it is to use the many-worlds interpretation: when we perform the experiment, the Universe splits into two universes, one for each result.  
+    \subsection{Nondeterminism（非确定性）}
 
-What does it mean for a function to be non-deterministic? It means that it will return different results every time it's called. We can model this behavior using the many-worlds interpretation: we let the function return \emph{all possible results} at once. In practice, we'll settle for a (possibly infinite) list of results:
+    想象一下进行量子实验，测量电子的自旋。半数时间自旋向上，半数时间自旋向下。结果是不确定的。一种描述方式是使用多世界解释：当我们进行实验时，宇宙分裂成两个宇宙，每个结果对应一个。
 
-We replace a non-deterministic computation \hask{ a -> b } with a pure function returning a functorful of results---this time it's the list functor:
-\begin{haskell}
-a -> [b]
-\end{haskell}
-Again, it's up to the caller to decide what to do with these results.
-
-\subsection{Input/Output}
-
-This is the trickiest side effect because it involves interacting with the external world. Obviously, we cannot model the whole world inside a computer program. So, in order to keep the program pure, the interaction has to happen outside of it. The trick is to let the program generate a script. This script is then passed to the runtime to be executed. The runtime is the effectful virtual machine that runs the program. 
-
-This script itself sits inside the opaque, predefined \hask{IO} functor. The values hidden in this functor are not accessible to the program: there is no \hask{runIO} function. Instead, the \hask{IO} value produced by the program is executed, at least conceptually, \emph{after} the program is finished. 
-
-In reality, because of Haskell's laziness, the execution of I/O is interleaved with the rest of the program.  Pure functions that comprise the bulk of your program are evaluated on demand---the demand being driven by the execution of the \hask{IO} script. If it weren't for I/O, nothing would ever be evaluated.
-
-The \hask{IO} object that is produced by a Haskell program is called \hask{main} and its type signature is:
-\begin{haskell}
-main :: IO ()
-\end{haskell}
-It's the \hask{IO} functor containing the unit---meaning: there is no useful value other than the input/output script.
-
-We'll talk about how \hask{IO} actions are created soon.
-
-\subsection{Continuation}
-
-We've seen that, as a consequence of the Yoneda lemma, we can replace a value of type \hask{a} with a function that takes a handler for that value. This handler is called a continuation. Calling a handler is considered a side effect of a computation. In terms of pure functions, we encode it as:
-\begin{haskell}
-a -> Cont r b
-\end{haskell}
-where \hask{Cont r} is the following functor:
-\begin{haskell}
-newtype Cont r a = Cont ((a -> r) -> r)
-\end{haskell}
-It's the responsibility of the caller of this function to provide the continuation, a function \hask{k :: a -> r}, and retrieve the result:
-\begin{haskell}
-runCont :: Cont r a -> (a -> r) -> r
-runCont (Cont f) k = f k
-\end{haskell}
-
-This is the \hask{Functor} instance for \hask{Cont r}:
-\begin{haskell}
-instance Functor (Cont r) where
-  -- f :: a -> b
-  -- k :: b -> r
-  fmap f c = Cont (\k -> runCont c (k . f))
-\end{haskell}
-Notice that this is a covariant functor because the type \hask{a} is in a doubly negative position.
-
-In a cartesian closed category, continuations are generated by the endofunctor:
-\[ K_r a = r^{r^a} \]
-
-\section{Composing Effects}
-
-Now that we know how to make one giant leap using a function that produces both a value and a side effect, the next problem is to figure out how to decompose this leap into smaller human-sized steps. Or, conversely, how to combine such smaller steps into one larger step. 
-
-The way effectful computations are composed in imperative languages is to use regular function composition for the values and let the side effects combine themselves willy-nilly. 
-
-When we represent effectful computations as pure functions, we are faced with the problem of composing two functions of the form
-\begin{haskell}
-g :: a -> f b
-h :: b -> f c
-\end{haskell}
-In all cases of interest the type constructor \hask{f} happens to be a \hask{Functor}, so we'll assume that in what follows.
-
-The naive approach would be to unpack the result of the first function, pass the value to the next function, then compose the effects of both functions on the side, and combine them with the result of the second function. This is not always possible, even for cases that we have studied so far, much less for an arbitrary type constructor.
-
-For the sake of the argument, it's instructive to see how we could do it for the \hask{Maybe} functor. If the first function returns \hask{Just}, we pattern match it to extract the contents and call the next function with it.
-
-But if the first function returns \hask{Nothing}, we have no value with which to call the second function. We have to short-circuit it, and return \hask{Nothing} directly. So composition is possible, but it means modifying flow of control by skipping the second call based on the side effect of the first call. 
-
-For some functors the composition of side effects is possible, for others it's not. How can we characterize those ``good'' functors?
-
-For a functor to encode composable side effects we must at least be able to implement the following polymorphic higher-order function: 
-\begin{haskell}
-composeWithEffects :: Functor f => 
-       (b -> f c) -> (a -> f b) -> (a -> f c)
-\end{haskell}
-This is very similar to regular function composition:
-\begin{haskell}
-(.) :: (b -> c) -> (a -> b) -> (a -> c)
-\end{haskell}
-so it's natural to ask if there is a category in which the former defines a composition of arrows. Let's see what more is needed to construct such a category.
-
-Objects in this new category are the same Haskell types as before. But an arrow $a \twoheadrightarrow b$, is implemented as a Haskell function:
-\begin{haskell}
-g :: a -> f b
-\end{haskell}
-Our \hask{composeWithEffects} can then be used to implement the composition of such arrows. 
-
-To have a category, we require that this composition be associative. We also need an identity arrow for every object \hask{a}. This is an arrow $a \twoheadrightarrow a$, so it corresponds to a Haskell function:
-\begin{haskell}
-idWithEffects :: a -> f a
-\end{haskell}
-It must behave like identity with respect to \hask{composeWithEffects}.
-
-Another way of looking at this arrow is that it lets you add a trivial effect to any value of type \hask{a}. It's the effect that combined with any other effect does nothing to it.
-
-We have just defined a monad! After some renaming and rearranging, we can write it as a typeclass:
-\begin{haskell}
-class Functor m => Monad m where
-  (<=<) :: (b -> m c) -> (a -> m b) -> (a -> m c)
-  return :: a -> m a
-\end{haskell}
-The infix operator \hask{<=<} replaces the function \hask{composeWithEffects}. The \hask{return} function is the identity arrow in our new category. (This is not the definition of the monad you'll find in the Haskell's \hask{Prelude} but, as we'll see soon, it's equivalent to it.)
-
-As an exercise, let's define the \hask{Monad} instance for \hask{Maybe}. The ``fish'' operator \hask{<=<} composes two functions:
-\begin{haskell}
-f :: a -> Maybe b
-g :: b -> Maybe c
-\end{haskell}
-into one function of the type \hask{a -> Maybe c}. The unit of this composition, \hask{return}, encloses a value in the \hask{Just} constructor.
-\begin{haskell}
-instance Monad Maybe where
-  g <=< f = \a -> case f a of
-                    Nothing -> Nothing
-                    Just b -> g b
-  return = Just  
-\end{haskell}
-
-You can easily convince yourself that category laws are satisfied. In particular \hask{ return <=< g } is the same as \hask{g} and \hask{ f <=< return } is the same as \hask{f}. The proof of associativity is also pretty straightforward: If any of the functions returns \hask{Nothing}, the result is \hask{Nothing}; otherwise it's just a straightforward function composition, which is associative.
-
-The category that we have just defined is called the \index{Kleisli category}\emph{Kleisli category} for the monad \hask{m}. The functions \hask{a -> m b} are called the \index{Kleisli arrow}\emph{Kleisli arrows}. They compose using \hask{<=<} and the identity arrow is called \hask{return}.
-
-All functors from the previous section are \hask{Monad} instances. If you look at them as type constructors, or even functors, it's hard to see any similarities between them. The thing they have in common is that they can be used to implement \emph{composable} Kleisli arrows. 
-
-As Lao Tze would say: Composition is something that happens \emph{between} things. While focusing our attention on things, we often lose sight of what's in the gaps. 
-
-\section{Alternative Definitions}
-
-The definition of a monad using Kleisli arrows has the advantage that the monad laws are simply the associativity and the unit laws of a category. There are two other equivalent definitions of a monad, one preferred by mathematicians, and one by programmers. 
-
-First, let's notice that, when implementing the fish operator, we are given two functions as arguments. The only thing a function is useful for is to be applied to an argument. When we apply the first function \hask{ f :: a -> m b } we get a value of the type \hask{ m b}. At this point we would be stuck, if it weren't for the fact that \hask{m} is a functor. Functoriality lets us apply the second function \hask{ g :: b -> m c } to \hask{ m b}. Indeed the lifting of \hask{g} by \hask{m} is of the type:
-\begin{haskell}
-m b -> m (m c)
-\end{haskell}
-This is almost the result we are looking for, if we could only flatten \hask{m(m c)} to \hask{m c}. This flattening is called \hask{join}. In other words, if we are given:
-\begin{haskell}
-join ::  m (m a) -> m a
-\end{haskell}
-we can implement \hask{<=<}:
-\begin{haskell}
-g <=< f = \a -> join (fmap g (f a))
-\end{haskell}
-or, using point free notation:
-\begin{haskell}
-g <=< f = join . fmap g . f
-\end{haskell}
-
-Conversely, \hask{join} can be implemented in terms of \hask{<=<}:
-\begin{haskell}
-join = id <=< id
-\end{haskell}
-The latter may not be immediately obvious, until you realize that the rightmost \hask{id} is applided to \hask{m (m a)}, and the leftmost is applied to \hask{m a}. We interpret a Haskell function:
-\begin{haskell}
-m (m a) -> m (m a)
-\end{haskell}
-as an arrow in the Kleisli category $ m (m a) \twoheadrightarrow m a$. Similarly, the function:
-\begin{haskell}
-m a -> m a
-\end{haskell}
-implements a Kleisli arrow $m a \twoheadrightarrow a$. Their Kleisli composition produces a Kleisli arrow $m (m a) \twoheadrightarrow a$ or a Haskell function:
-\begin{haskell}
-m (m a) -> m a
-\end{haskell}
-
-This leads us to the equivalent definition of a monad in terms of \hask{join} and \hask{return}:
-\begin{haskell}
-class Functor m => Monad m where
-  join :: m (m a) -> m a
-  return :: a -> m a
-\end{haskell}
-
-This is still not the definition you will find in the standard Haskell \hask{Prelude}. Since the fish operator is a generalization of the dot operator, using it is equivalent to point-free programming. It lets us compose arrows without naming intermediate values. Although some consider point-free programs more elegant, most programmers find them difficult to follow. 
-
-But function composition is really done in two steps: We apply the first function, then apply the second function to the result. Explicitly naming the intermediate result is often helpful in understanding what's going on.
-
-To do the same with Kleisli arrows, we have to know how to apply the second Kleisli arrow to a named monadic value---the result of the first Kleisli arrow. The function that does that is called \emph{bind} and is written as an infix operator:
-\begin{haskell}
-(>>=) :: m a -> (a -> m b) -> m b
-\end{haskell}
-Obviously, we can implement Kleisli composition in terms of bind:
-
-\begin{haskell}
-g <=< f = \a -> (f a) >>= g
-\end{haskell}
-
-Conversely, bind can be implemented in terms of the Kleisli arrow:
-\begin{haskell}
-ma >>= k = (k <=< id) ma
-\end{haskell}
-
-This leads us to the following definition:
-\begin{haskell}
-class Monad m where
-  (>>=) :: m a -> (a -> m b) -> m b
-  return :: a -> m a 
-\end{haskell}
-This is almost the definition you'll find in the \hask{Prelude}, except for the additional constraint. This constraint states the fact that every instance of \hask{Monad} is also an instance of \hask{Applicative}. We will postpone the discussion of applicatives to the section on monoidal functors.
-
-We can also implement \hask{join} using bind:
-\begin{haskell}
-join  :: (Monad m) => m (m a) -> m a
-join mma =  mma >>= id
-\end{haskell}
-The Haskell function \hask{id} goes from \hask{m a} to \hask{m a} or, as a Kleisli arrow, $m a \twoheadrightarrow a$.
-
-Interestingly, a \hask{Monad} defined using bind is automatically a functor. The lifting function for it is called \hask{liftM}
-\begin{haskell}
-liftM :: Monad m => (a -> b) -> (m a -> m b)
-liftM f ma = ma >>= (return . f)
-\end{haskell}
-
-\section{Monad Instances}
-
-We are now ready to define monad instances for the functors we used for side effects. This will allow us to compose side effects.
-
-\subsection{Partiality}
-We've already seen the version of the \hask{Maybe} monad implemented using Kleisli composition. Here's the more familiar implementation using bind:
-\begin{haskell}
-instance Monad Maybe where
-  Nothing >>= k = Nothing
-  (Just a) >>= k = k a
-  return = Just
-\end{haskell}
-Adding a trivial effect to any value means enclosing it in \hask{Just}.
-\subsection{Logging}
-In order to compose functions that produce logs, we need a way to combine individual log entries. This is why the writer monad:
-\begin{haskell}
-newtype Writer w a = Writer (a, w)
-\end{haskell}
-requires the type of the log to be an instance of \hask{Monoid}. This allows us to append logs, and also to create a trivial effect: an empty log.
-\begin{haskell}
-instance Monoid w => Monad (Writer w) where
-  (Writer (a, w)) >>= k = let (Writer (b, w')) = k a
-                          in Writer (b, mappend w w')
-  return a = Writer (a, mempty)
-\end{haskell}
-The \index{\hask{let}}\hask{let} clause is used for introducing local bindings. Here, the result of applying \hask{k} is pattern matched, and the local variables \hask{b} and \hask{w'} are initialized. The \hask{let}/\hask{in} construct is an expression whose value is given by the content of the \hask{in} clause.
-
-\subsection{Environment}
-
-The reader monad is a thin encapsulation of a function from the environment to the return type:
-\begin{haskell}
-newtype Reader e a = Reader (e -> a)
-\end{haskell}
-Here's the \hask{Monad} instance:
-\begin{haskell}
-instance Monad (Reader e) where
-  ma >>= k = Reader (\e -> let a = runReader ma e
-                           in runReader (k a) e)
-  return a = Reader (\e -> a)
-\end{haskell}
-The implementation of bind for the reader monad creates a function that takes the environment as its argument. This environment is used twice, first to run \hask{ma} to get the value of \hask{a}, and then to evaluate the value produced by \hask{k a}.
-
-The implementation of \hask{return} ignores the environment.
-
-\begin{exercise}
-Define the \hask{Functor} and the \hask{Monad} instance for the following data type:
-\begin{haskell}
-newtype E e a = E (e -> Maybe a)
-\end{haskell}
-Hint: You may use this handy function:
-\begin{haskell}
-runE :: E e a -> e -> Maybe a
-runE (E f) e = f e
-\end{haskell}
-\end{exercise}
-
-
-\subsection{State}
-Like reader, the state monad is a function type:
-\begin{haskell}
-newtype State s a = State (s -> (a, s))
-\end{haskell}
-Its bind is similar, except that the result of \hask{k} acting on  \hask{a} has to be run with the modified state \hask{s'}.
-\begin{haskell}
-instance Monad (State s) where
-  st >>= k = State (\s -> let (a, s') = runState st s
-                          in runState (k a) s')
-                          
-  return a = State (\s -> (a, s))
-\end{haskell}
-
-Applying bind to identity gives us the definition of \hask{join}:
-\begin{haskell}
-join :: State s (State s a) -> State s a
-join mma = State (\s -> let (ma, s') = runState mma s
-                        in runState ma s')
-\end{haskell}
-Notice that we are essentially passing the result of the first \hask{runState} to the second \hask{runState}, except that we have to uncurry the second one so it can accept a pair:
-                             
-\begin{haskell}
-join mma = State (\s -> (uncurry runState) (runState mma s))
-\end{haskell}
-In this form, it's easy to convert it to point-free notation:
-\begin{haskell}
-join mma = State (uncurry runState . runState mma)
-\end{haskell}
-
-There are two basic Kleisli arrows (the first one, conceptually, coming from the terminal object \hask{()}) with which we can construct an arbitrary stateful computation. The first one retrieves the current state:
-\begin{haskell}
-get :: State s s
-get = State (\s -> (s, s))
-\end{haskell}
-and the second one modifies it:
-\begin{haskell}
-set :: s -> State s ()
-set s = State (\_ -> ((), s))
-\end{haskell}
-A lot of monads come with their own libraries of predefined basic Kleisli arrows.
-\subsection{Nondeterminism}
-
-For the list monad, let's consider how we would implement \hask{join}. It must turn a list of lists into a single list. This can be done by concatenating all the inner lists using the library function \hask{concat}. From there, we can derive the implementation of bind.
-\begin{haskell}
-instance Monad [] where
-  as >>= k = concat (fmap k as)
-  return a = [a]
-\end{haskell}
-Here, \hask{return} constructs a singleton list. Thus a trivial version of nondeterminism is determinism.
-
-What imperative languages do using nested loops we can do in Haskell using the list monad. Think of \hask{as} in bind as aggregating the result of running the inner loop and \hask{k} as the code that runs in the outer loop. 
-
-In many ways, Haskell's list behaves more like what is called an \index{iterator}\emph{iterator} or a \emph{generator} in imperative languages. Because of laziness, the elements of the list are rarely stored in memory all at once, so you may conceptualize a Haskell list as a pointer to the head and a recipe for advancing it forward towards the tail. Or you may think of a list as a coroutine that produces, on demand, elements of a sequence.
-
-\subsection{Continuation}
-
-The implementation of bind for the continuation monad:
-
-\begin{haskell}
-newtype Cont r a = Cont ((a -> r) -> r)
-\end{haskell}
-requires some backward thinking, because of the inherent inversion of control---the ``don't call us, we'll call you'' principle. 
-
-The result of bind is of the type \hask{Cont r b}. To construct it, we need a function that takes, as an argument \hask{k :: b -> r}:
-\begin{haskell}
-ma >>= fk = Cont (\k -> ...)
-\end{haskell}
-We have two ingredients at our disposal: 
-\begin{haskell}
-ma :: Cont r a
-fk :: a -> Cont r b
-\end{haskell}
-We'd like to run \hask{ma}, and for that we need a continuation that would accept an \hask{a}.
-\begin{haskell}
-runCont ma (\a -> ...)
-\end{haskell}
-Once we have an \hask{a}, we can execute our \hask{fk}. The result is of the type \hask{Cont r b}, so we can run it with our continuation \hask{k :: b -> r}. 
-\begin{haskell}
-runCont (fk a) k
-\end{haskell}
-
-Taken together, this convoluted process produces the following implementation:
-\begin{haskell}
-instance Monad (Cont r) where
-  ma >>= fk = Cont (\k -> runCont ma (\a -> runCont (fk a) k))
-  return a = Cont (\k -> k a)
-\end{haskell}
-As I mentioned earlier, composing continuations is not for the faint of heart. However, it has to be implemented only once---in the definition of the continuation monad. From there on, the \hask{do} notation will make the rest relatively easy.
-
-\subsection{Input/Output}
-
-The \hask{IO} monad's implementation is baked into the language. The basic I/O primitives are available through the library. They are either in the form of Kleisli arrows, or \hask{IO} objects (conceptually, Kleisli arrows from the terminal object \hask{()}). 
-
-For instance, the following object contains a command to read a line from the standard input:
-\begin{haskell}
-getLine :: IO String
-\end{haskell}
-There is no way to extract the string from it, since it's not there yet; but the program can process it through a further series of Kleisli arrows. 
-
-The \hask{IO} monad is the ultimate procrastinator: the composition of its Kleisli arrows piles up task after task to be executed later by the Haskell runtime.
-
-To output a string followed by a newline, you can use this Kleisli arrow:
-\begin{haskell}
-putStrLn :: String -> IO ()
-\end{haskell}
-Combining the two, you may construct a simple \hask{main} object:
-\begin{haskell}
-main :: IO ()
-main = getLine >>= putStrLn
-\end{haskell}
-which echoes a string you type.
-
-\section{Do Notation}
-
-It's worth repeating that the sole purpose of monads in programming is to let us decompose one big Kleisli arrow into multiple smaller ones. 
-
-This can be either done directly, in a point-free style, using Kleisli composition \hask{<=<}; or by naming intermediate values and binding them to Kleisli arrows using \hask{>>=}. 
-
-Some Kleisli arrows are defined in libraries, others are reusable enough to warrant out-of-line implementation but, in practice, the majority are implemented as single-shot inline lambdas.
-
-Here's a simple example:
-\begin{haskell}
-main :: IO ()
-main = 
-  getLine >>= \s1 ->
-    getLine >>= \s2 ->
-      putStrLn ("Hello " ++ s1 ++ " " ++ s2)
-\end{haskell}
-which uses an ad-hoc Kleisli arrow of the type \hask{String->IO ()} defined by the lambda expression:
-\begin{haskell}
-\s1 ->
-    getLine >>= \s2 ->
-      putStrLn ("Hello " ++ s1 ++ " " ++ s2)
-\end{haskell}
-The body of this lambda is further decomposed using another ad-hoc Kleisli arrow:
-\begin{haskell}
-\s2 -> putStrLn ("Hello " ++ s1 ++ " " ++ s2)
-\end{haskell}
-
-Such constructs are so common that there is special syntax called the \hask{do} notation that cuts through a lot of boilerplate. The above code, for instance, can be written as:
-\begin{haskell}
-main = do
-  s1 <- getLine
-  s2 <- getLine
-  putStrLn ("Hello " ++ s1 ++ " " ++ s2)
-\end{haskell}
-The compiler will automatically convert it to a series of nested lambdas. The line \hask{ s1<-getLine } is usually read as: ``\hask{s1} \emph{gets} the result of \hask{getLine}.''
-
-Here's another example: a function that uses the list monad to generate all possible pairs of elements taken from two lists.
-\begin{haskell}
-pairs :: [a] -> [b] -> [(a, b)]
-pairs as bs = do
-  a <- as
-  b <- bs
-  return (a, b)
-\end{haskell}
-Notice that the last line in a \hask{do} block must produce a monadic value---here this is accomplished using \hask{return}.
-
-Most imperative languages lack the abstraction power to generically define a monad, and instead they attempt to hard-code some of the more common monads. For instance, they implement exceptions as an alternative to the \hask{Either} monad, or concurrent tasks as an alternative to the continuation monad. Some, like C++, introduce coroutines that mimic Haskell's \hask{do} notation. 
-
-\begin{exercise}
-Implement the following function that works for any monad:
-\begin{haskell}
-ap :: Monad m => m (a -> b) -> m a -> m b
-\end{haskell}
-Hint: Use \hask{do} notation to extract the function and the argument. Use \hask{return} to return the result.
-\end{exercise}
-
-\begin{exercise}
-Rewrite the \hask{pairs} function using the bind operators and lambdas.
-\end{exercise}
-
-\section{Continuation Passing Style}
-
-I mentioned before that the \hask{do} notation provides the syntactic sugar that makes working with continuations more natural. One of the most important applications of continuations is in transforming programs to use CPS (continuation passing style). The CPS transformation is common in compiler construction. Another very important application of CPS is in converting recursion to iteration. 
-
-The common problem with deeply recursive programs is that they may blow the runtime stack. A function call usually starts by pushing function arguments, local variables, and the return address on the stack. Thus deeply nested recursive calls may quickly exhaust the (usually fixed-size) runtime stack resulting in a runtime error. This is the main reason why imperative languages prefer looping to recursion, and why most programmers learn about loops before they study recursion. However, even in imperative languages, when it comes to traversing recursive data structures, such as linked lists or trees, recursive algorithms are more natural.
-
-The problem with using loops, though, is that they require mutation. There is usually some kind of a counter or a pointer that is advanced and checked with each turn of the loop. This is why purely functional languages that shun mutation must use recursion in place of loops. But since looping is more efficient and it doesn't consume the runtime stack, the compiler tries to covert recursive calls to loops. In Haskell all tail-recursive functions are turned into loops. 
-
-\subsection{Tail recursion and CPS}
-
-\index{tail recursion}Tail recursion means that the recursive call happens at the very end of the function. The function doesn't perform any additional operations on the result of the tail call. For instance this program is not tail recursive, because it has to add \hask{i} to the result of the recursive call:
-\begin{haskell}
-sum1 :: [Int] -> Int
-sum1 [] = 0
-sum1 (i : is) = i + sum1 is
-\end{haskell}
-In contrast, the following implementation is tail recursive because the result of the recursive call to \hask{go} is returned without further modification:
-\begin{haskell}
-sum2 = go 0 
-  where go n [] = n
+    函数的不确定性意味着它每次调用都会返回不同的结果。我们可以使用多世界解释来模拟这种行为：我们让函数一次返回\emph{所有可能的结果}。实际上，我们会选择一个（可能是无限的）结果列表：
+
+    我们用纯函数替换一个非确定性计算\hask{a -> b}，该函数返回一个充满结果的函子——这次是列表函子：
+    \begin{haskell}
+        a -> [b]
+    \end{haskell}
+    同样，调用者决定如何处理这些结果。
+
+    \subsection{Input/Output（输入/输出）}
+
+    这是最棘手的副作用，因为它涉及与外部世界的交互。显然，我们无法在计算机程序中模拟整个世界。因此，为了保持程序的纯粹性，交互必须在程序外部发生。技巧是让程序生成一个脚本。然后将该脚本传递给运行时以执行。运行时是运行程序的有副作用的虚拟机。
+
+    这个脚本本身位于不透明的、预定义的\hask{IO}函子中。程序无法访问此函子中的值：没有\hask{runIO}函数。相反，程序生成的\hask{IO}值在程序结束后执行，至少概念上是如此。
+
+    实际上，由于Haskell的惰性求值，I/O的执行与程序的其余部分交织在一起。构成程序主体的纯函数根据需要进行求值——需求由\hask{IO}脚本的执行驱动。如果不是因为I/O，什么都不会被求值。
+
+    Haskell程序生成的\hask{IO}对象称为\hask{main}，其类型签名为：
+    \begin{haskell}
+        main :: IO ()
+    \end{haskell}
+    这是包含单位的\hask{IO}函子——意味着：除了输入/输出脚本之外没有其他有用的值。
+
+    我们很快会讨论如何创建\hask{IO}操作。
+
+    \subsection{Continuation（续延）}
+
+    我们已经看到，作为Yoneda引理的结果，我们可以将类型为\hask{a}的值替换为一个处理该值的函数。该处理器称为续延。调用处理器被视为计算的副作用。在纯函数的上下文中，我们将其编码为：
+    \begin{haskell}
+        a -> Cont r b
+    \end{haskell}
+    其中\hask{Cont r}是以下函子：
+    \begin{haskell}
+        newtype Cont r a = Cont ((a -> r) -> r)
+    \end{haskell}
+    调用此函数的调用者负责提供续延，即函数\hask{k :: a -> r}，并检索结果：
+    \begin{haskell}
+        runCont :: Cont r a -> (a -> r) -> r
+        runCont (Cont f) k = f k
+    \end{haskell}
+
+    这是\hask{Cont r}的\hask{Functor}实例：
+    \begin{haskell}
+        instance Functor (Cont r) where
+        -- f :: a -> b
+        -- k :: b -> r
+        fmap f c = Cont (\k -> runCont c (k . f))
+    \end{haskell}
+    请注意，这是一个协变函子，因为类型\hask{a}处于双重否定位置。
+
+    在笛卡尔闭范畴中，续延由自函子生成：
+    \[ K_r a = r^{r^a} \]
+
+    \section{Composing Effects（组合副作用）}
+
+    现在我们知道如何使用一个既产生值又产生副作用的函数进行一次巨大飞跃，接下来的问题是弄清楚如何将这个飞跃分解为较小的适合人类的步骤。或者，换句话说，如何将这些较小的步骤组合成一个更大的步骤。
+
+    命令式语言中副作用计算的组合方式是使用常规函数组合来处理值，并让副作用随意组合。
+
+    当我们将带有副作用的计算表示为纯函数时，我们面临的问题是如何组合两个形式为\hask{g :: a -> f b}和\hask{h :: b -> f c}的函数。
+
+    在所有感兴趣的情况下，类型构造器\hask{f}恰好是一个\hask{Functor}，因此在接下来的讨论中我们将假设这一点。
+
+    一种天真的方法是解包第一个函数的结果，将该值传递给下一个函数，然后在旁边组合这两个函数的副作用，并将它们与第二个函数的结果结合起来。即使是我们到目前为止研究的情况，这也不是总能实现的，更不用说对于一个任意的类型构造器。
+
+    为了进行讨论，看看我们如何对\hask{Maybe}函子实现这一点是有启发性的。如果第一个函数返回\hask{Just}，我们通过模式匹配提取内容并将其传递给下一个函数。
+
+    但是，如果第一个函数返回\hask{Nothing}，我们就没有值来调用第二个函数。我们必须短路它，并直接返回\hask{Nothing}。因此，组合是可能的，但这意味着通过根据第一个调用的副作用跳过第二个调用来修改控制流。
+
+    对于某些函子，副作用的组合是可能的，而对于其他函子则不是。我们如何描述这些“好”的函子？
+
+    要使一个函子编码可组合的副作用，我们至少必须能够实现以下多态高阶函数：
+    \begin{haskell}
+        composeWithEffects :: Functor f =>
+        (b -> f c) -> (a -> f b) -> (a -> f c)
+    \end{haskell}
+    这非常类似于常规函数组合：
+    \begin{haskell}
+    (.) :: (b -> c) -> (a -> b) -> (a -> c)
+    \end{haskell}
+    因此自然会问，在什么范畴中，前者定义了箭头的组合。让我们看看构造这样一个范畴还需要什么。
+
+    这个新范畴中的对象与以前一样是Haskell类型。但是箭头$a \twoheadrightarrow b$是由一个Haskell函数实现的：
+    \begin{haskell}
+        g :: a -> f b
+    \end{haskell}
+    然后我们可以使用\hask{composeWithEffects}来实现这些箭头的组合。
+
+    为了构造一个范畴，我们要求这个组合是结合的。我们还需要每个对象\hask{a}的恒等箭头。这是箭头$a \twoheadrightarrow a$，因此它对应于一个Haskell函数：
+    \begin{haskell}
+        idWithEffects :: a -> f a
+    \end{haskell}
+    它必须相对于\hask{composeWithEffects}的行为像恒等箭头。
+
+    从另一种角度来看，这个箭头允许你向任何类型为\hask{a}的值添加一个琐碎的副作用。这是一个组合在一起时对任何其他副作用都不起作用的副作用。
+
+    我们刚刚定义了一个单子！经过一些重命名和重新排列，我们可以将其写为一个类型类：
+    \begin{haskell}
+        class Functor m => Monad m where
+        (<=<) :: (b -> m c) -> (a -> m b) -> (a -> m c)
+        return :: a -> m a
+    \end{haskell}
+    中缀操作符\hask{<=<}取代了\hask{composeWithEffects}函数。函数\hask{return}是我们新范畴中的恒等箭头。（这不是你会在Haskell的\hask{Prelude}中找到的单子的定义，但正如我们很快会看到的那样，它与之等价。）
+
+    作为练习，让我们定义\hask{Maybe}的\hask{Monad}实例。`鱼`操作符\hask{<=<}将两个函数：
+    \begin{haskell}
+        f :: a -> Maybe b
+        g :: b -> Maybe c
+    \end{haskell}
+    组合成一个类型为\hask{a -> Maybe c}的函数。这个组合的单位，\hask{return}，将一个值封装在\hask{Just}构造器中。
+    \begin{haskell}
+        instance Monad Maybe where
+        g <=< f = \a -> case f a of
+        Nothing -> Nothing
+        Just b -> g b
+        return = Just
+    \end{haskell}
+
+    你可以很容易地说服自己，范畴定律是满足的。特别是\hask{return <=< g}与\hask{g}相同，\hask{f <=< return}与\hask{f}相同。结合律的证明也很简单：如果任何一个函数返回\hask{Nothing}，结果就是\hask{Nothing}；否则，这只是一个简单的函数组合，而函数组合是结合的。
+
+    我们刚刚定义的这个范畴称为\index{Kleisli category}\emph{Kleisli范畴}，适用于单子\hask{m}。函数\hask{a -> m b}称为\index{Kleisli arrow}\emph{Kleisli箭头}。它们使用\hask{<=<}组合，恒等箭头称为\hask{return}。
+
+    前一节中的所有函子都是\hask{Monad}实例。如果你将它们视为类型构造器，甚至函子，很难看到它们之间的相似之处。它们的共同点是它们可以用来实现\emph{可组合}的Kleisli箭头。
+
+    正如老子所说：组合发生在\emph{事物之间}。当我们专注于事物时，我们常常会忽略事物之间的空隙。
+
+    \section{Alternative Definitions（替代定义）}
+
+    使用Kleisli箭头定义单子的优点在于，单子定律只是范畴的结合律和单位律。还有两种等价的单子定义，一种是数学家喜欢的，另一种是程序员喜欢的。
+
+    首先，让我们注意到，在实现鱼操作符时，我们会得到两个函数作为参数。函数唯一有用的地方就是可以应用到一个参数上。当我们应用第一个函数\hask{f :: a -> m b}时，我们得到一个类型为\hask{m b}的值。这时我们可能会陷入困境，但好在\hask{m}是一个函子。函子的特性使我们能够将第二个函数\hask{g :: b -> m c}应用到\hask{m b}上。实际上，\hask{g}的提升由\hask{m}处理，类型为：
+    \begin{haskell}
+        m b -> m (m c)
+    \end{haskell}
+    这几乎是我们要找的结果，如果我们能够将\hask{m(m c)}压平为\hask{m c}。这种压平操作称为\hask{join}。换句话说，如果我们得到了：
+    \begin{haskell}
+        join ::  m (m a) -> m a
+    \end{haskell}
+    我们就可以实现\hask{<=<}：
+    \begin{haskell}
+        g <=< f = \a -> join (fmap g (f a))
+    \end{haskell}
+    or, using point free notation:
+    \begin{haskell}
+        g <=< f = join . fmap g . f
+    \end{haskell}
+
+    反过来，我们也可以通过\hask{<=<}来实现\hask{join}：
+    \begin{haskell}
+        join = id <=< id
+    \end{haskell}
+    后者可能不太容易理解，直到你意识到最右边的\hask{id}应用于\hask{m (m a)}，而最左边的\hask{id}应用于\hask{m a}。我们将Haskell函数：
+    \begin{haskell}
+        m (m a) -> m (m a)
+    \end{haskell}
+    解释为Kleisli范畴中的箭头$ m (m a) \twoheadrightarrow m a$。类似地，函数：
+    \begin{haskell}
+        m a -> m a
+    \end{haskell}
+    实现了Kleisli箭头$m a \twoheadrightarrow a$。它们的Kleisli组合产生了一个Kleisli箭头$m (m a) \twoheadrightarrow a$，即一个Haskell函数：
+    \begin{haskell}
+        m (m a) -> m a
+    \end{haskell}
+
+    这引导我们得出了一个等价的定义，即使用\hask{join}和\hask{return}来定义单子：
+    \begin{haskell}
+        class Functor m => Monad m where
+        join :: m (m a) -> m a
+        return :: a -> m a
+    \end{haskell}
+
+    这仍然不是你在标准Haskell的\hask{Prelude}中会看到的定义。由于鱼操作符\hask{<=<}是点操作符的推广，使用它相当于无点编程。它让我们在不命名中间值的情况下组合箭头。虽然有些人认为无点编程更优雅，但大多数程序员发现它们难以理解。
+
+    然而，函数组合实际上是分两个步骤进行的：我们应用第一个函数，然后将第二个函数应用于结果。显式地命名中间结果通常有助于理解发生了什么。
+
+    要对Kleisli箭头执行相同操作，我们必须知道如何将第二个Kleisli箭头应用于命名的单子值——第一个Kleisli箭头的结果。执行此操作的函数称为\emph{bind}，并作为一个中缀操作符表示：
+    \begin{haskell}
+    (>>=) :: m a -> (a -> m b) -> m b
+    \end{haskell}
+    显然，我们可以用\hask{bind}来实现Kleisli组合：
+
+    \begin{haskell}
+        g <=< f = \a -> (f a) >>= g
+    \end{haskell}
+
+    反过来，也可以用Kleisli箭头来实现\hask{bind}：
+    \begin{haskell}
+        ma >>= k = (k <=< id) ma
+    \end{haskell}
+
+    这引导我们得出以下定义：
+    \begin{haskell}
+        class Monad m where
+        (>>=) :: m a -> (a -> m b) -> m b
+        return :: a -> m a
+    \end{haskell}
+    这几乎就是你会在\hask{Prelude}中看到的定义，除了一个附加的约束。这个约束声明了每个\hask{Monad}实例也是\hask{Applicative}实例。我们将在讨论单子函子时推迟讨论Applicative。
+
+    我们也可以使用\hask{bind}实现\hask{join}：
+    \begin{haskell}
+        join  :: (Monad m) => m (m a) -> m a
+        join mma =  mma >>= id
+    \end{haskell}
+    Haskell函数\hask{id}从\hask{m a}到\hask{m a}，或作为一个Kleisli箭头，$m a \twoheadrightarrow a$。
+
+    有趣的是，用\hask{bind}定义的\hask{Monad}自动成为一个函子。它的提升函数称为\hask{liftM}：
+    \begin{haskell}
+        liftM :: Monad m => (a -> b) -> (m a -> m b)
+        liftM f ma = ma >>= (return . f)
+    \end{haskell}
+
+    \section{Monad Instances（单子实例）}
+
+    我们现在已经准备好为我们用于副作用的函子定义单子实例了。这将允许我们组合副作用。
+
+    \subsection{Partiality（部分性）}
+    我们已经看到通过Kleisli组合实现的\hask{Maybe}单子版本。这里是更常见的使用\hask{bind}的实现：
+    \begin{haskell}
+        instance Monad Maybe where
+        Nothing >>= k = Nothing
+        (Just a) >>= k = k a
+        return = Just
+    \end{haskell}
+    将琐碎的副作用添加到任何值意味着将其封装在\hask{Just}中。
+
+    \subsection{Logging（记录）}
+    为了组合生成日志的函数，我们需要一种方法来组合单个日志条目。这就是为什么记录器单子：
+    \begin{haskell}
+        newtype Writer w a = Writer (a, w)
+    \end{haskell}
+    要求日志的类型是\hask{Monoid}的实例。这允许我们追加日志，并创建一个琐碎的副作用：一个空日志。
+    \begin{haskell}
+        instance Monoid w => Monad (Writer w) where
+        (Writer (a, w)) >>= k = let (Writer (b, w')) = k a
+        in Writer (b, mappend w w')
+        return a = Writer (a, mempty)
+    \end{haskell}
+    \index{\hask{let}}\hask{let}子句用于引入局部绑定。在这里，应用\hask{k}的结果进行模式匹配，局部变量\hask{b}和\hask{w'}被初始化。\hask{let}/\hask{in}结构是一个表达式，其值由\hask{in}子句的内容给出。
+
+    \subsection{Environment（环境）}
+
+    读者单子是从环境到返回类型的函数的一个薄封装：
+    \begin{haskell}
+        newtype Reader e a = Reader (e -> a)
+    \end{haskell}
+    这里是\hask{Monad}实例：
+    \begin{haskell}
+        instance Monad (Reader e) where
+        ma >>= k = Reader (\e -> let a = runReader ma e
+        in runReader (k a) e)
+        return a = Reader (\e -> a)
+    \end{haskell}
+    读取器单子的\hask{bind}的实现创建了一个函数，该函数接受环境作为参数。这个环境被使用两次，第一次是运行\hask{ma}来获取\hask{a}的值，然后用\hask{k a}生成的值进行求值。
+
+    \hask{return}的实现忽略了环境。
+
+    \begin{exercise}
+        定义以下数据类型的\hask{Functor}和\hask{Monad}实例：
+        \begin{haskell}
+            newtype E e a = E (e -> Maybe a)
+        \end{haskell}
+        提示：你可以使用这个方便的函数：
+        \begin{haskell}
+            runE :: E e a -> e -> Maybe a
+            runE (E f) e = f e
+        \end{haskell}
+    \end{exercise}
+
+    \subsection{State（状态）}
+    像读取器一样，状态单子也是一个函数类型：
+    \begin{haskell}
+        newtype State s a = State (s -> (a, s))
+    \end{haskell}
+    它的\hask{bind}类似，除了\hask{k}作用于\hask{a}的结果必须用修改后的状态\hask{s'}运行。
+    \begin{haskell}
+        instance Monad (State s) where
+        st >>= k = State (\s -> let (a, s') = runState st s
+        in runState (k a) s')
+
+        return a = State (\s -> (a, s))
+    \end{haskell}
+
+    将\hask{bind}应用于恒等式给出了\hask{join}的定义：
+    \begin{haskell}
+        join :: State s (State s a) -> State s a
+        join mma = State (\s -> let (ma, s') = runState mma s
+        in runState ma s')
+    \end{haskell}
+    注意，我们本质上是将第一个\hask{runState}的结果传递给第二个\hask{runState}，只是我们必须解构第二个以便它可以接受一个对偶：
+    \begin{haskell}
+        join mma = State (\s -> (uncurry runState) (runState mma s))
+    \end{haskell}
+    在这种形式下，它很容易转换为无点记法：
+    \begin{haskell}
+        join mma = State (uncurry runState . runState mma)
+    \end{haskell}
+
+    有两个基本的Kleisli箭头（第一个，概念上，来自终端对象\hask{()}），我们可以用它们构造任意的有状态计算。第一个检索当前状态：
+    \begin{haskell}
+        get :: State s s
+        get = State (\s -> (s, s))
+    \end{haskell}
+    第二个修改它：
+    \begin{haskell}
+        set :: s -> State s ()
+        set s = State (\_ -> ((), s))
+    \end{haskell}
+    许多单子带有它们自己的预定义的基本Kleisli箭头库。
+
+    \subsection{Nondeterminism（非确定性）}
+
+    对于列表单子，让我们考虑如何实现\hask{join}。它必须将一个列表的列表转换为单个列表。这可以通过使用库函数\hask{concat}连接所有内部列表来完成。从那里，我们可以推导出\hask{bind}的实现。
+    \begin{haskell}
+        instance Monad [] where
+        as >>= k = concat (fmap k as)
+        return a = [a]
+    \end{haskell}
+    在这里，\hask{return}构造了一个单例列表。因此，非确定性的琐碎版本就是确定性。
+
+    命令式语言中使用嵌套循环做的事情，我们可以在Haskell中使用列表单子来做。将\hask{as}看作是绑定内循环运行的结果，并将\hask{k}视为外循环中运行的代码。
+
+    在许多方面，Haskell的列表更像是在命令式语言中称为\index{iterator}\emph{迭代器}或\emph{生成器}的东西。由于惰性求值，列表的元素很少同时存储在内存中，因此你可以将Haskell列表概念化为一个指向头部的指针和一个推进到尾部的配方。或者你可以将列表看作是一个协程，它按需生成序列的元素。
+
+    \subsection{Continuation（续延）}
+
+    续延单子的\hask{bind}实现：
+
+    \begin{haskell}
+        newtype Cont r a = Cont ((a -> r) -> r)
+    \end{haskell}
+    需要一些逆向思维，因为控制的固有反转——“不要打电话给我们，我们会打电话给你”的原则。
+
+    \hask{bind}的结果类型为\hask{Cont r b}。为了构造它，我们需要一个函数，该函数接受\hask{k :: b -> r}作为参数：
+    \begin{haskell}
+        ma >>= fk = Cont (\k -> ...)
+    \end{haskell}
+    我们有两个可供使用的成分：
+    \begin{haskell}
+        ma :: Cont r a
+        fk :: a -> Cont r b
+    \end{haskell}
+    我们希望运行\hask{ma}，为此我们需要一个接受\hask{a}的续延。
+    \begin{haskell}
+        runCont ma (\a -> ...)
+    \end{haskell}
+    一旦我们有了\hask{a}，我们就可以执行我们的\hask{fk}。结果类型为\hask{Cont r b}，因此我们可以用我们的续延\hask{k :: b -> r}来运行它。
+    \begin{haskell}
+        runCont (fk a) k
+    \end{haskell}
+
+    总的来说，这个复杂的过程产生了以下实现：
+    \begin{haskell}
+        instance Monad (Cont r) where
+        ma >>= fk = Cont (\k -> runCont ma (\a -> runCont (fk a) k))
+        return a = Cont (\k -> k a)
+    \end{haskell}
+    正如我之前提到的，组合续延不是心脏虚弱者能干的事情。然而，它只需要实现一次——在续延单子的定义中。从那以后，\hask{do}记法会使其余部分相对简单。
+
+    \subsection{Input/Output（输入/输出）}
+
+    \hask{IO}单子的实现嵌入在语言中。基本的I/O原语通过库提供。它们以Kleisli箭头或\hask{IO}对象的形式存在（概念上，Kleisli箭头来自终端对象\hask{()}）。
+
+    例如，以下对象包含从标准输入读取一行的命令：
+    \begin{haskell}
+        getLine :: IO String
+    \end{haskell}
+    没有办法从中提取字符串，因为它还不存在；但程序可以通过进一步的Kleisli箭头处理它。
+
+    \hask{IO}单子是终极的拖延症患者：其Kleisli箭头的组合堆积了一个又一个任务，等待由Haskell运行时执行。
+
+    要输出一个字符串并在其后加上换行符，你可以使用这个Kleisli箭头：
+    \begin{haskell}
+        putStrLn :: String -> IO ()
+    \end{haskell}
+    结合这两者，你可以构造一个简单的\hask{main}对象：
+    \begin{haskell}
+        main :: IO ()
+        main = getLine >>= putStrLn
+    \end{haskell}
+    它会回显你输入的字符串。
+
+    \section{Do Notation（do记法）}
+
+    值得重复一遍，单子在编程中的唯一目的是让我们将一个大的Kleisli箭头分解为多个较小的箭头。
+
+    这可以直接通过无点风格使用Kleisli组合\hask{<=<}来完成，或者通过命名中间值并将它们绑定到Kleisli箭头上使用\hask{>>=}来完成。
+
+    一些Kleisli箭头在库中定义，另一些是足够可重用的以保证脱线实现，但在实践中，大多数是作为单次内联lambda表达式实现的。
+
+    这里有一个简单的例子：
+    \begin{haskell}
+        main :: IO ()
+        main =
+        getLine >>= \s1 ->
+        getLine >>= \s2 ->
+        putStrLn ("Hello " ++ s1 ++ " " ++ s2)
+    \end{haskell}
+    它使用了一个类型为\hask{String->IO ()}的即席Kleisli箭头，由lambda表达式定义：
+    \begin{haskell}
+        \s1 ->
+        getLine >>= \s2 ->
+        putStrLn ("Hello " ++ s1 ++ " " ++ s2)
+    \end{haskell}
+    此lambda表达式的主体进一步通过另一个即席Kleisli箭头分解：
+    \begin{haskell}
+        \s2 -> putStrLn ("Hello " ++ s1 ++ " " ++ s2)
+    \end{haskell}
+
+    这种构造非常常见，因此有一种称为\hask{do}记法的特殊语法，可以减少很多样板代码。例如，上面的代码可以写成：
+    \begin{haskell}
+        main = do
+        s1 <- getLine
+        s2 <- getLine
+        putStrLn ("Hello " ++ s1 ++ " " ++ s2)
+    \end{haskell}
+    编译器会自动将其转换为一系列嵌套的lambda表达式。通常，行\hask{s1<-getLine}被读取为：“\hask{s1} \emph{获取}了\hask{getLine}的结果。”
+
+    这里是另一个例子：一个使用列表单子生成从两个列表中取出所有可能的元素对的函数。
+    \begin{haskell}
+        pairs :: [a] -> [b] -> [(a, b)]
+        pairs as bs = do
+        a <- as
+        b <- bs
+        return (a, b)
+    \end{haskell}
+    注意\hask{do}块中的最后一行必须生成一个单子值——这里通过使用\hask{return}来实现。
+
+    大多数命令式语言缺乏泛型定义单子的抽象能力，因此它们试图硬编码一些更常见的单子。例如，它们实现了异常作为\hask{Either}单子的替代，或者并发任务作为续延单子的替代。一些语言，如C++，引入了模仿Haskell的\hask{do}记法的协程。
+
+    \begin{exercise}
+        实现一个适用于任何单子的函数：
+        \begin{haskell}
+            ap :: Monad m => m (a -> b) -> m a -> m b
+        \end{haskell}
+        提示：使用\hask{do}记法提取函数和参数。使用\hask{return}返回结果。
+    \end{exercise}
+
+    \begin{exercise}
+        使用\hask{bind}操作符和lambda重写\hask{pairs}函数。
+    \end{exercise}
+
+    \section{Continuation Passing Style（续延传递风格）}
+
+    我之前提到过，\hask{do} 语法糖使得使用续延（continuations）更加自然。续延最重要的应用之一就是将程序转换为 CPS（Continuation Passing Style，续延传递风格）。CPS 转换在编译器构造中非常常见。另一个非常重要的应用是将递归转换为迭代。
+
+    深度递归程序的常见问题是它们可能会耗尽运行时堆栈。函数调用通常会通过在堆栈上推入函数参数、本地变量以及返回地址开始。因此，深度嵌套的递归调用可能会迅速耗尽（通常是固定大小的）运行时堆栈，导致运行时错误。这是为什么命令式语言更喜欢使用循环而非递归，以及为什么大多数程序员在学习递归之前先学习循环的原因。然而，即使在命令式语言中，当涉及到遍历递归数据结构（如链表或树）时，递归算法也是更自然的选择。
+
+    然而，使用循环的问题在于它们需要使用变异（mutation）。通常会有某种计数器或指针在每次循环时进行递增和检查。这就是为什么纯函数式语言（如 Haskell）避免使用变异，并使用递归代替循环的原因。但由于循环更加高效且不会消耗运行时堆栈，编译器会尝试将递归调用转换为循环。在 Haskell 中，所有尾递归函数都会被转换为循环。
+
+    \subsection{Tail recursion and CPS（尾递归与CPS）}
+
+    尾递归（Tail recursion）意味着递归调用发生在函数的最末尾。函数不会对尾调用的结果执行任何附加操作。例如，下面的程序不是尾递归的，因为它需要将 \hask{i} 加到递归调用的结果上：
+
+    \begin{haskell}
+        sum1 :: [Int] -> Int
+        sum1 [] = 0
+        sum1 (i : is) = i + sum1 is
+    \end{haskell}
+
+    相反，下面的实现是尾递归的，因为递归调用 \hask{go} 的结果被直接返回而没有进一步的修改：
+
+    \begin{haskell}
+        sum2 = go 0
+        where go n [] = n
         go n (i : is) = go (n + i) is
-\end{haskell}
-The compiler can easily turn the latter into a loop. Instead of making the recursive call, it will overwrite the value of the first argument \hask{n} with \hask{n + i}, overwrite the pointer to the head of the list with the pointer to its tail, and then jump to the beginning of the function. 
+    \end{haskell}
 
-Note however that it doesn't mean that the Haskell compiler won't be able to cleverly optimize the first implementation. It just means that the second implementation, which is tail recursive, is \emph{guaranteed} to be turned into a loop.
+    编译器可以轻松地将后者转换为循环。它不会进行递归调用，而是会用 \hask{n + i} 覆盖第一个参数 \hask{n} 的值，用指向列表头部的指针覆盖指向其尾部的指针，然后跳转到函数的开始处。
 
-In fact, it's always possible to turn recursion into tail recursion by performing the CPS transformation. This is because a continuation encapsulates \emph{the rest of the computation}, so it's always the last call in a function. 
+    然而需要注意的是，这并不意味着 Haskell 编译器不会巧妙地优化第一个实现。它只意味着第二个实现是尾递归的，因此\emph{保证}会被转换为循环。
 
-To see how it works in practice, consider a simple tree traversal. Let's define a tree that stores strings in both nodes and leaves:
-\begin{haskell}
-data Tree = Leaf String 
-          | Node Tree String Tree
-\end{haskell}
-To concatenate these strings we use the traversal that first recurses into the left subtree, and then into the right subtree:
-\begin{haskell}
-show :: Tree -> String
-show (Node lft s rgt) =
-  let ls = show lft
-      rs = show rgt
-  in ls ++ s ++ rs
-\end{haskell}
-This is definitely not a tail recursive function, and it's not obvious how to turn it into one. However, we can almost mechanically rewrite it using the continuation monad:
-\begin{haskell}
-showk :: Tree -> Cont r String
-showk (Leaf s) = return s
-showk (Node lft s rgt) = do
-  ls <- showk lft
-  rs <- showk rgt
-  return (ls ++ s ++ rs)
- \end{haskell}
-We can run the result with the trivial continuation \hask{id}:
-\begin{haskell}
-show :: Tree -> String
-show t = runCont (showk t) id
-\end{haskell}
+    实际上，通过执行 CPS 转换，总是可以将递归转换为尾递归。这是因为续延封装了\emph{计算的剩余部分}，因此它总是函数中的最后一个调用。
 
-This implementation is automatically tail recursive. We can see it clearly by desugaring the do notation:
-\begin{haskell}
-showk :: Tree -> (String -> r) -> r
-showk (Leaf s) k = k s
-showk (Node lft s rgt) k =
-  showk lft (\ls -> 
-    showk rgt (\rs -> 
-      k (ls ++ s ++ rs)))
-\end{haskell}
-Let's analyze this code. The function calls itself, passing the left subtree \hask{lft} and the following continuation:
-\begin{haskell}
-\ls -> 
-    showk rgt (\rs -> 
-      k (ls ++ s ++ rs))
-\end{haskell}
-This lambda in turn calls \hask{showk} with the right subtree \hask{rgt} and another continuation:
-\begin{haskell}
-\rs -> k (ls ++ s ++ rs)
-\end{haskell}
-This innermost lambda that has access to all three strings: left, middle, and right. It concatenates them and calls the outermost continuation \hask{k} with the result.
+    要在实践中了解其工作原理，请考虑一个简单的树遍历。我们定义一个存储字符串的树，其中节点和叶子都存储字符串：
 
-In each case, the recursive call to \hask{showk} is the last call, and its result is immediately returned. Moreover, the type of the result is the generic type \hask{r}, which in itself guarantees that we can't perform any operations on it. When we finally run the result of \hask{showk}, we pass it the identity (instantiated for the \hask{String} type):
-\begin{haskell}
-show :: Tree -> String
-show t = runCont (showk t) id
-\end{haskell}
+    \begin{haskell}
+        data Tree = Leaf String
+        | Node Tree String Tree
+    \end{haskell}
 
-\subsection{Using named functions}
+    为了将这些字符串连接起来，我们使用遍历，首先递归进入左子树，然后进入右子树：
 
-But suppose that our programming language doesn't support anonymous functions. Is it possible to replace the lambdas with named functions? We've done this before when we discussed the adjoint functor theorem. We notice that the lambdas generated by the continuation monad are closures---they capture some values from their environment. If we want to replace them with named functions, we'll have to pass the environment explicitly. 
+    \begin{haskell}
+        show :: Tree -> String
+        show (Node lft s rgt) =
+        let ls = show lft
+        rs = show rgt
+        in ls ++ s ++ rs
+    \end{haskell}
 
-We replace the first lambda with the call to the function named \hask{next}, and pass it the necessary environment in the form or a tuple of three values \hask{(s, rgt, k)}:
-\begin{haskell}
-showk :: Tree -> (String -> r) -> r
-showk (Leaf s) k = k s
-showk (Node lft s rgt) k =
-  showk lft (next (s, rgt, k))
-\end{haskell}
-The three values are the string from the current node of the tree, the right subtree, and the outer continuation. 
+    这显然不是一个尾递归函数，而且如何将其转换为尾递归也并不明显。然而，我们几乎可以机械地使用 continuation monad（续延单子）重写它：
 
-The function \hask{next} makes the recursive call to \hask{showk} passing to it the right subtree and a continuation named \hask{conc}:
-\begin{haskell}
-next :: (String, Tree, String -> r) -> String -> r
-next (s, rgt, k) ls = showk rgt (conc (ls, s, k))
-\end{haskell}
-Again, \hask{conc} explicitly captures the environment containing two strings and the outer continuation. It performs the concatenation and calls the outer continuation with the result:
-\begin{haskell}
-conc :: (String, String, String -> r) -> String -> r
-conc (ls, s, k) rs = k (ls ++ s ++ rs)
-\end{haskell}
-Finally, we define the trivial continuation:
-\begin{haskell}
-done :: String -> String
-done s = s
-\end{haskell}
-that we use to extract the final result:
-\begin{haskell}
-show t = showk t done
-\end{haskell}
+    \begin{haskell}
+        showk :: Tree -> Cont r String
+        showk (Leaf s) = return s
+        showk (Node lft s rgt) = do
+        ls <- showk lft
+        rs <- showk rgt
+        return (ls ++ s ++ rs)
+    \end{haskell}
 
-\subsection{Defunctionalization}
+    我们可以使用 trivial continuation \hask{id} 来运行结果：
 
-Continuation passing style requires the use of higher order functions. If this is a problem, e.g., when implementing distributed systems, we can always use the adjoint functor theorem to defunctionalize our program. 
+    \begin{haskell}
+        show :: Tree -> String
+        show t = runCont (showk t) id
+    \end{haskell}
 
-The first step is to create the sum of all relevant environments, including the empty one we used in \hask{done}:
-\begin{haskell}
-data Kont = Done 
-          | Next String Tree Kont 
-          | Conc String String Kont
-\end{haskell}
-Notice that this data structure can be reinterpreted as a list or a stack. It can be seen as a list of elements of the following sum type:
-\begin{haskell}
-data Sum = Next' String Tree  | Conc' String String 
-\end{haskell}
-This list is our version of the runtime stack necessary to implement a recursive algorithm. 
+    此实现自动为尾递归。通过展开 do 语法糖，我们可以清楚地看到这一点：
 
-Since we are only interested in producing a string as the final result, we're going to approximate the \hask{String -> String} function type. This is the approximate counit of the adjunction that defines it (see the adjoint functor theorem):
-\begin{haskell}
-apply :: (Kont, String) -> String
-apply (Done, s) = s
-apply (Next s rgt k, ls) = showk rgt (Conc ls s k)
-apply (Conc ls s k, rs) = apply (k, ls ++ s ++ rs)
-\end{haskell}
+    \begin{haskell}
+        showk :: Tree -> (String -> r) -> r
+        showk (Leaf s) k = k s
+        showk (Node lft s rgt) k =
+        showk lft (\ls ->
+        showk rgt (\rs ->
+        k (ls ++ s ++ rs)))
+    \end{haskell}
 
-The \hask{showk} function can be now implemented without recourse to higher order functions:
-\begin{haskell}
-showk :: Tree -> Kont -> String
-showk (Leaf s) k = apply (k, s)
-showk (Node lft s rgt) k = showk lft (Next s rgt k)
-\end{haskell}
-To extract the result, we call it with \hask{Done}:
-\begin{haskell}
-showTree t = showk t Done
-\end{haskell}
+    让我们分析一下这段代码。函数调用自己，传递左子树 \hask{lft} 以及以下 continuation（续延）：
 
-\section{Monads Categorically}
+    \begin{haskell}
+        \ls ->
+        showk rgt (\rs ->
+        k (ls ++ s ++ rs))
+    \end{haskell}
 
-In category theory monads first arose in the study of algebras. In particular, the bind operator can be used to implement the very important operation of substitution. 
+    这个 lambda 进一步调用 \hask{showk}，传递右子树 \hask{rgt} 以及另一个 continuation：
 
-\subsection{Substitution}
+    \begin{haskell}
+        \rs -> k (ls ++ s ++ rs)
+    \end{haskell}
 
-Consider this simple expression type. It's parameterized by the type \hask{x} that we can use for naming our variables:
-\begin{haskell}
-data Ex x = Val Int 
-          | Var x 
-          | Plus (Ex x) (Ex x) 
- deriving (Functor, Show)
-\end{haskell}
-We can, for instance, construct an expression $(2 + a) + b$:
-\begin{haskell}
-ex :: Ex Char
-ex = Plus (Plus (Val 2) (Var 'a')) (Var 'b')
-\end{haskell}
-We can implement the \hask{Monad} instance for \hask{Ex}:
-\begin{haskell}
-instance Monad Ex where
-  Val n >>= k = Val n
-  Var x >>= k = k x
-  Plus e1 e2 >>= k = 
-    let x = e1 >>= k
+    这个最内层的 lambda 具有访问所有三个字符串（左、中、右）的权限。它们连接后，将结果传递给最外层的 continuation \hask{k}。
+
+    在每种情况下，对 \hask{showk} 的递归调用都是最后的调用，其结果会立即返回。此外，结果的类型是泛型类型 \hask{r}，这本身就保证了我们无法对其执行任何操作。当我们最终运行 \hask{showk} 的结果时，我们将 \hask{id} 传递给它（实例化为 \hask{String} 类型）：
+
+    \begin{haskell}
+        show :: Tree -> String
+        show t = runCont (showk t) id
+    \end{haskell}
+
+    \subsection{Using named functions（使用命名函数）}
+
+    假设我们的编程语言不支持匿名函数。是否有可能用命名函数替代 lambda？当我们讨论伴随函子定理（adjoint functor theorem）时，我们之前已经做过类似的工作。我们注意到由 continuation monad 生成的 lambda 是闭包——它们从环境中捕获一些值。如果我们想用命名函数替换它们，就必须显式地传递环境。
+
+    我们用对名为 \hask{next} 的函数的调用替换第一个 lambda，并以包含三个值 \hask{(s, rgt, k)} 的元组的形式传递必要的环境：
+
+    \begin{haskell}
+        showk :: Tree -> (String -> r) -> r
+        showk (Leaf s) k = k s
+        showk (Node lft s rgt) k =
+        showk lft (next (s, rgt, k))
+    \end{haskell}
+
+    这三个值分别是树当前节点中的字符串、右子树和外部 continuation。
+
+    函数 \hask{next} 对 \hask{showk} 进行递归调用，传递给它右子树以及名为 \hask{conc} 的 continuation：
+
+    \begin{haskell}
+        next :: (String, Tree, String -> r) -> String -> r
+        next (s, rgt, k) ls = showk rgt (conc (ls, s, k))
+    \end{haskell}
+
+    同样，\hask{conc} 显式捕获包含两个字符串和外部 continuation 的环境。它执行字符串的连接并将结果传递给外部 continuation：
+
+    \begin{haskell}
+        conc :: (String, String, String -> r) -> String -> r
+        conc (ls, s, k) rs = k (ls ++ s ++ rs)
+    \end{haskell}
+
+    最后，我们定义 trivial continuation：
+
+    \begin{haskell}
+        done :: String -> String
+        done s = s
+    \end{haskell}
+
+    用来提取最终结果：
+
+    \begin{haskell}
+        show t = showk t done
+    \end{haskell}
+
+    \subsection{Defunctionalization（去函数化）}
+
+    CPS（续延传递风格）需要使用高阶函数。如果这是个问题，例如在实现分布式系统时，我们可以始终使用伴随函子定理来去函数化我们的程序。
+
+    第一步是创建所有相关环境的总和，包括我们在 \hask{done} 中使用的空环境：
+
+    \begin{haskell}
+        data Kont = Done
+        | Next String Tree Kont
+        | Conc String String Kont
+    \end{haskell}
+
+    请注意，该数据结构可以重新解释为列表或栈。它可以看作是以下求和类型的元素列表：
+
+    \begin{haskell}
+        data Sum = Next' String Tree  | Conc' String String
+    \end{haskell}
+
+    该列表是我们实现递归算法所需的运行时堆栈的版本。
+
+    因为我们只关心生成字符串作为最终结果，所以我们要近似 \hask{String -> String} 函数类型。此函数类型是定义它的伴随关系的近似余单元（counit）（参见伴随函子定理）：
+
+    \begin{haskell}
+        apply :: (Kont, String) -> String
+        apply (Done, s) = s
+        apply (Next s rgt k, ls) = showk rgt (Conc ls s k)
+        apply (Conc ls s k, rs) = apply (k, ls ++ s ++ rs)
+    \end{haskell}
+
+    现在可以在不使用高阶函数的情况下实现 \hask{showk} 函数：
+
+    \begin{haskell}
+        showk :: Tree -> Kont -> String
+        showk (Leaf s) k = apply (k, s)
+        showk (Node lft s rgt) k = showk lft (Next s rgt k)
+    \end{haskell}
+
+    要提取结果，我们调用它并传递 \hask{Done}：
+
+    \begin{haskell}
+        showTree t = showk t Done
+    \end{haskell}
+
+    \section{Monads Categorically（范畴论中的Monad）}
+
+    在范畴论中，Monad 首先出现在代数的研究中。特别地，bind 运算符可用于实现非常重要的替换操作。
+
+    \subsection{Substitution（替换）}
+
+    考虑这个简单的表达式类型。它由类型 \hask{x} 参数化，我们可以用它来命名变量：
+
+    \begin{haskell}
+        data Ex x = Val Int
+        | Var x
+        | Plus (Ex x) (Ex x)
+        deriving (Functor, Show)
+    \end{haskell}
+
+    例如，我们可以构造一个表达式 $(2 + a) + b$：
+
+    \begin{haskell}
+        ex :: Ex Char
+        ex = Plus (Plus (Val 2) (Var 'a')) (Var 'b')
+    \end{haskell}
+
+    我们可以为 \hask{Ex} 实现 \hask{Monad} 实例：
+
+    \begin{haskell}
+        instance Monad Ex where
+        Val n >>= k = Val n
+        Var x >>= k = k x
+        Plus e1 e2 >>= k =
+        let x = e1 >>= k
         y = e2 >>= k
-    in (Plus x y)
-    
-  return x = Var x 
-\end{haskell}
+        in (Plus x y)
 
-Now suppose that you want to make a substitution by replacing the variable $a$ with $x_1 + 2$ and $b$ with $x_2$ (for simplicity, let's not worry about other letters of the alphabet). This substitution is represented by the Kleisli arrow \hask{sub}:
+        return x = Var x
+    \end{haskell}
+
+    现在假设你想通过将变量 $a$ 替换为 $x_1 + 2$，将变量 $b$ 替换为 $x_2$ 来进行替换（为简化起见，我们不考虑其他字母）。此替换由 Kleisli 箭头 \hask{sub} 表示：
+
+    \begin{haskell}
+        sub :: Char -> Ex String
+        sub 'a' = Plus (Var "x1") (Val 2)
+        sub 'b' = Var "x2"
+    \end{haskell}
+
+    如你所见，我们甚至能够将用于命名变量的类型从 \hask{Char} 更改为 \hask{String}。
+
+    当我们将此 Kleisli 箭头绑定到 \hask{ex} 时：
+
+    \begin{haskell}
+        ex' :: Ex String
+        ex' = ex >>= sub
+    \end{haskell}
+
+    我们得到的正是与表达式 $(2 + (x_1 + 2)) + x_2$ 对应的树。
+
+    \subsection{Monad as a monoid（Monad作为单子）}
+
+    让我们分析使用 \hask{join} 定义的 Monad：
+
+    \begin{haskell}
+        class Functor m => Monad m where
+        join :: m (m a) -> m a
+        return :: a -> m a
+    \end{haskell}
+
+    我们有一个 endofunctor（自函子） \hask{m} 和两个多态函数。
+
+    在范畴论中，定义 Monad 的函子通常用 $T$ 表示（可能是因为 Monad 最初被称为“三元组”）。这两个多态函数成为自然变换。第一个对应于 \hask{join}，将 $T$ 的“平方”（即 $T$ 与自身的复合）映射到 $T$：
+
+    \[ \mu \colon T \circ T \to T \]
+
+    （当然，只有\emph{自}-函子才能以这种方式平方。）
+
+    第二个对应于 \hask{return}，将恒等函子映射到 $T$：
+
+    \[ \eta \colon \text{Id} \to T \]
+
+    与我们之前在单子范畴中定义的单子相比较：
+
+    \begin{align*}
+        \mu &\colon m \otimes m \to m \\
+        \eta &\colon I \to m
+    \end{align*}
+
+    相似性是惊人的。这就是为什么我们经常称自然变换 $\mu$ 为\emph{monadic multiplication}（单子乘法）。但是在哪个范畴中，函子的复合可以视为张量积呢？
+
+    进入 endofunctor 的范畴。该范畴中的对象是 endofunctor，而箭头是自然变换。
+
+    但该范畴还有更多的结构。我们知道，任何两个 endofunctor 都可以复合。如果我们想将 endofunctor 视为对象，该复合如何解释？一种将两个对象结合并产生第三个对象的操作类似于张量积。张量积唯一的条件是它在两个参数中都是函子性的。也就是说，给定一对箭头：
+
+    \begin{align*}
+        \alpha &\colon T \to T' \\
+        \beta &\colon S \to S'
+    \end{align*}
+
+    我们可以将其提升到张量积的映射：
+
+    \[ \alpha \otimes \beta \colon T \otimes S \to T' \otimes S' \]
+
+    在 endofunctor 的范畴中，箭头是自然变换，所以，如果我们将 $\otimes$ 替换为 $\circ$，则提升是复合映射：
+
+    \[ \alpha \circ \beta \colon T \circ T' \to S \circ S' \]
+
+    但这只是自然变换的水平复合（现在你明白为什么它用圆圈表示了）。
+
+    这个 monoidal category（单子范畴）中的单位对象是恒等 endofunctor，并且单位律“在鼻子上”成立，意味着
+
+    \[ \text{Id} \circ T = T = T \circ \text{Id} \]
+
+    我们不需要任何 unitor。我们也不需要任何 associator，因为函子复合是自动关联的。
+
+    单位对象和associator均为恒等态射的monoidal category被称为\index{strict monoidal category}\emph{严格monoidal category}。
+
+    然而需要注意的是，复合不是对称的，因此这不是对称monoidal category。
+
+    总而言之，一个monad是endofunctor的monoidal category中的一个monoid。
+
+    一个monad $(T, \eta, \mu)$由endofunctor范畴中的一个对象组成——即endofunctor $T$；和两个箭头——即自然变换：
+
+    \begin{align*}
+        \eta &\colon \text{Id} \to T \\
+        \mu &\colon T \circ T \to T
+    \end{align*}
+
+    为了成为一个monoid，这些箭头必须满足monoidal laws。以下是单位律（unitor替换为严格等式）：
+
+    \[
+        \begin{tikzcd}
+            \text{Id} \circ T
+            \arrow[rr, "\eta \circ T"]
+            \arrow[rrd, "="']
+            & & T \circ T
+            \arrow[d, "\mu"]
+            && T \circ \text{Id}
+            \arrow[ll, "T \circ \eta"']
+            \arrow[lld, "="]
+            \\
+            && T
+        \end{tikzcd}
+    \]
+
+    这是结合律：
+
+    \[
+        \begin{tikzcd}
+        (T \circ T) \circ T
+        \arrow[rr, "="]
+        \arrow[d, "\mu \circ T"]
+        &&
+        T \circ (T \circ T)
+        \arrow[d, "T \circ \mu"]
+        \\
+        T \circ T
+        \arrow[dr, "\mu"]
+        & & T \circ T
+        \arrow[dl, "\mu"']
+        \\
+        &  T
+        \end{tikzcd}
+    \]
+
+    我们使用 whiskering notation（掺合记法）来表示 $\mu \circ T$ 和 $T \circ \mu$ 的水平复合。
+
+    这些是使用 $\mu$ 和 $\eta$ 表示的 monad laws。它们可以直接翻译为 \hask{join} 和 \hask{return} 的 laws。它们也等价于使用箭头 $a \to T b$ 构建的 Kleisli 范畴的 laws。
+
+    \section{Free Monads（自由Monad）}
+
+    Monad 允许我们指定可能产生副作用的操作序列。这种序列不仅告诉计算机做什么，还告诉它如何去做。但有时需要更多的灵活性：我们希望将“做什么”与“如何做”分开。自由 Monad 允许我们生成操作序列而无需承诺特定的 Monad 来执行它。这类似于定义自由 Monoid（列表），它让我们推迟选择应用的代数；或者在将其编译为可执行代码之前创建一个抽象语法树（AST）。
+
+    自由构造被定义为遗忘函子的左伴随。因此，我们首先需要定义遗忘 Monad 的含义。由于 Monad 是一个带有额外结构的自函子，我们想遗忘这个结构。我们取一个 Monad $(T, \eta, \mu)$，并仅保留 $T$。但为了将这种映射定义为一个函子，我们首先需要定义 Monad 的范畴。
+
+    \subsection{Category of monads（Monads的范畴）}
+
+    $\mathbf{Mon}(\cat C)$ 范畴中的对象是 Monad $(T, \eta, \mu)$。我们可以定义两个 Monad $(T, \eta, \mu)$ 和 $(T', \eta', \mu')$ 之间的箭头为两个自函子之间的自然变换：
+
+    \[ \lambda \colon T \to T' \]
+
+    然而，由于 Monad 是带有结构的自函子，我们希望这些自然变换能够保留结构。单位的保留意味着以下图表必须交换：
+
+    \[
+        \begin{tikzcd}
+            &\text{Id}
+            \arrow[ld, "\eta"']
+            \arrow[rd, "\eta'"]
+            \\
+            T
+            \arrow[rr, "\lambda"]
+            && T'
+        \end{tikzcd}
+    \]
+
+    乘法的保留意味着以下图表必须交换：
+
+    \[
+        \begin{tikzcd}
+            T \circ T
+            \arrow[r, "\lambda \circ \lambda"]
+            \arrow[d, "\mu"]
+            & T' \circ T'
+            \arrow[d, "\mu'"]
+            \\
+            T
+            \arrow[r, "\lambda"]
+            & T'
+        \end{tikzcd}
+    \]
+
+    从另一个角度来看，$\mathbf{Mon}(\cat C)$ 是 monoidal category $([\cat C, \cat C], \circ, \text{Id})$ 中 monoid 的范畴。
+
+    \subsection{Free monad（自由Monad）}
+
+    既然我们有了 Monad 的范畴，我们就可以定义遗忘函子：
+
+    \[ U \colon \mathbf{Mon}(\cat C) \to [\cat C, \cat C] \]
+
+    它将每个三元组 $(T, \eta, \mu)$ 映射为 $T$，并将每个 Monad 态射映射为底层自然变换。
+
+    我们希望自由 Monad 由此遗忘函子的左伴随生成。问题是这个左伴随并不总是存在。通常，这是与规模问题有关：Monad 往往会导致规模爆炸。最终，自由 Monad 对于一些，但不是所有的自函子存在。因此，我们不能通过伴随关系定义自由 Monad。幸运的是，在大多数感兴趣的情况下，自由 Monad 可以定义为代数的固定点。
+
+    这个构造类似于我们如何将自由 Monoid 定义为列表函子的初始代数：
+
+    \begin{haskell}
+        data ListF a x = NilF | ConsF a x
+    \end{haskell}
+
+    或更一般的形式：
+
+    \[ F_a x = I + a \otimes x \]
+
+    然而这一次，定义 Monad 作为 monoid 的 monoidal category 是 endofunctor 的范畴 $([\cat C, \cat C], \circ, \text{Id})$。在这个范畴中的自由 Monoid 是高阶“列表”函子的初始代数，它将函子映射为函子：
+
+    \[ \Phi_F G = \text{Id} + F \circ G \]
+
+    这里，两个函子的\index{coproduct of functors}coproduct 是按点定义的。在对象上的定义：
+
+    \[ (F + G) a = F a + G a \]
+
+    在箭头上的定义：
+
+    \[ (F + G) f = F f + G f \]
+
+    （我们使用 coproduct 的函子性形成两个态射的 coproduct。我们假设 $\cat C$ 是余笛卡尔的，即所有 coproduct 都存在。）
+
+    初始代数是该运算符的（最小）固定点，或递归方程的解：
+
+    \[ L_F \cong \text{Id} + F \circ L_F \]
+
+    此公式在两个函子之间建立了自然同构。从右到左，$\text{Id} + F \circ L_F \to L_F$，我们有一个从和的映射，相当于一对自然变换：
+
+    \begin{align*}
+        \text{Id} \to L_F
+        \\
+        F \circ L_F \to L_F
+    \end{align*}
+
+    当翻译成 Haskell 时，这些变换的组件变成了两个构造函数。我们定义以下由函子 \hask{f} 参数化的递归数据类型：
+
+    \begin{haskell}
+        data FreeMonad f a where
+        Pure :: a -> FreeMonad f a
+        Free :: f (FreeMonad f a) -> FreeMonad f a
+    \end{haskell}
+
+    如果我们将函子 \hask{f} 视为值的容器，构造函数 \hask{Free} 会取一个 \hask{(FreeMonad f a)} 的函子并将其存储起来。因此，类型 \hask{FreeMonad f a} 的任意值是一个树，其中每个节点都是分支的函子，每个叶子包含一个类型为 \hask{a} 的值。
+
+    由于此定义是递归的，因此它的 \hask{Functor} 实例也是递归的：
+
+    \begin{haskell}
+        instance Functor f => Functor (FreeMonad f) where
+        fmap g (Pure a) = Pure (g a)
+        fmap g (Free ffa) = Free (fmap (fmap g) ffa)
+    \end{haskell}
+
+    这里，外层 \hask{fmap} 使用 \hask{f} 的 \hask{Functor} 实例，而内层的 \hask{(fmap g)} 递归到分支。
+
+    很容易看出 \hask{FreeMonad} 是一个 \hask{Monad}。monadic unit \hask{eta} 只是恒等函子的一个简单封装：
+
+    \begin{haskell}
+        eta :: a -> FreeMonad f a
+        eta a = Pure a
+    \end{haskell}
+
+    monadic multiplication 或 \hask{join} 是递归定义的：
+
+    \begin{haskell}
+        mu :: Functor f => FreeMonad f (FreeMonad f a) -> FreeMonad f a
+        mu (Pure fa) = fa
+        mu (Free ffa) = Free (fmap mu ffa)
+    \end{haskell}
+
+    因此，\hask{FreeMonad f} 的 \hask{Monad} 实例为：
+
+    \begin{haskell}
+        instance Functor f => Monad (FreeMonad f) where
+        return a = eta a
+        m >>= k = mu (fmap k m)
+    \end{haskell}
+
+    我们也可以直接定义 bind：
+
+    \begin{haskell}
+    (Pure a)   >>= k = k a
+    (Free ffa) >>= k = Free (fmap (>>= k) ffa)
+    \end{haskell}
+
+    自由 Monad 累积 monadic 动作在树状结构中，而不承诺任何特定的评估策略。这个树可以使用代数“解释”。但这次它是 endofunctor 范畴中的代数，因此它的载体是一个 endofunctor $G$，结构映射 $\alpha$ 是自然变换 $\Phi_F G \to G$：
+
+    \[ \alpha \colon \text{Id} + F \circ G \to G\]
+
+    此自然变换作为一个从和的映射，相当于一对自然变换：
+
+    \begin{align*}
+        \lambda &\colon \text{Id} \to G
+        \\
+        \rho &\colon F \circ G \to G
+    \end{align*}
+
+    我们可以将其翻译为 Haskell 中的一对多态函数：
+
+    \begin{haskell}
+        type MAlg f g a = (a -> g a, f (g a) -> g a)
+    \end{haskell}
+
+    由于自由 Monad 是初始代数，因此存在唯一的映射——catamorphism，从它到任何其他代数。回忆一下我们是如何为常规代数定义 catamorphism 的：
+
+    \begin{haskell}
+        cata :: Functor f => Algebra f a -> Fix f -> a
+        cata alg = alg . fmap (cata alg) . out
+    \end{haskell}
+
+    \hask{out} 部分解包固定点的内容。这里我们可以通过对自由 Monad 的两个构造函数进行模式匹配来实现这一点。如果它是一个叶子，我们将 $\lambda$ 应用于它。如果它是一个节点，我们递归处理其内容，并将结果应用于 $\rho$：
+
+    \begin{haskell}
+        mcata :: Functor f => MAlg f g a -> FreeMonad f a -> g a
+        mcata (l, r) (Pure a) = l a
+        mcata (l, r) (Free ffa) =
+        r (fmap (mcata (l, r)) ffa)
+    \end{haskell}
+
+    许多树状 Monad 实际上是简单函子的自由 Monad。
+
+    \begin{exercise}
+        一个（非空）rose tree 定义为：
+
+        \begin{haskell}
+            data Rose a = Leaf a | Rose [Rose a]
+            deriving Functor
+        \end{haskell}
+
+        实现 \hask{Rose a} 和 \hask{FreeMonad [] a} 之间的相互转换。
+    \end{exercise}
+
+    \begin{exercise}
+        实现二叉树和 \hask{FreeMonad Bin a} 之间的相互转换，其中：
+
+        \begin{haskell}
+            data Bin a = Bin a a
+        \end{haskell}
+    \end{exercise}
+
+    \begin{exercise}
+        找到一个函子，其自由 Monad 等价于列表 Monad \hask{[a]}。
+    \end{exercise}
+
+    \subsection{Stack calculator example（堆栈计算器示例）}
+
+    作为一个示例，我们来看看一个实现为嵌入式领域特定语言（EDSL）的堆栈计算器。我们将使用自由 Monad 来累积用此语言编写的简单命令。
+
+    命令由函子 \hask{StackF} 定义。将参数 \hask{k} 视为 continuation。
+
+    \begin{haskell}
+        data StackF k  = Push Int k
+        | Top (Int -> k)
+        | Pop k
+        | Add k
+        deriving Functor
+    \end{haskell}
+
+    例如，\hask{Push} 旨在将整数压入堆栈，然后调用 continuation \hask{k}。
+
+    此函子的自由 Monad 可以被视为一棵树，大多数分支只有一个子节点，因此形成列表。例外是 \hask{Top} 节点，它有许多子节点，每个子节点对应于一个 \hask{Int} 值。
+
+    这是该函子的自由 Monad：
+
+    \begin{haskell}
+        type FreeStack = FreeMonad StackF
+    \end{haskell}
+
+    为了创建特定领域的程序，我们将定义一些辅助函数。有一个泛型函数将一个函子的值提升为自由 Monad：
+
+    \begin{haskell}
+        liftF :: (Functor f) => f r -> FreeMonad f r
+        liftF fr = Free (fmap (Pure) fr)
+    \end{haskell}
+
+    我们还需要一系列“智能构造函数”，它们是自由 Monad 的 Kleisli 箭头：
+
+    \begin{haskell}
+        push :: Int -> FreeStack ()
+        push n = liftF (Push n ())
+
+        pop :: FreeStack ()
+        pop = liftF (Pop ())
+
+        top :: FreeStack Int
+        top = liftF (Top id)
+
+        add :: FreeStack ()
+        add = liftF (Add ())
+    \end{haskell}
+
+    由于自由 Monad 是 Monad，因此我们可以方便地使用 \hask{do} 语法结合 Kleisli 箭头。例如，这里有一个玩具程序，它将两个数字相加并返回它们的和：
+
+    \begin{haskell}
+        calc :: FreeStack Int
+        calc = do
+        push 3
+        push 4
+        add
+        x <- top
+        pop
+        return x
+    \end{haskell}
+
+    为了执行该程序，我们需要定义一个代数，其载体是一个 endofunctor。由于我们要实现一个基于堆栈的计算器，我们将使用状态函子的一个版本。其状态是一个整数列表。状态函子定义为一个函数类型；在这里，它是一个接受列表并返回新列表与类型参数 \hask{k} 的函数：
+
+    \begin{haskell}
+        data StackAction k = St ([Int] -> ([Int], k))
+        deriving Functor
+    \end{haskell}
+
+    要运行该动作，我们将函数应用于堆栈：
+
+    \begin{haskell}
+        runAction :: StackAction k -> [Int] -> ([Int], k)
+        runAction (St act) ns = act ns
+    \end{haskell}
+
+    我们将代数定义为自由 Monad 的两个构造函数（\hask{Pure} 和 \hask{Free}）对应的一对多态函数：
+
+    \begin{haskell}
+        runAlg :: MAlg StackF StackAction a
+        runAlg = (stop, go)
+    \end{haskell}
+
+    第一个函数终止程序的执行并返回一个值：
+
+    \begin{haskell}
+        stop :: a -> StackAction a
+        stop a = St (\xs -> (xs, a))
+    \end{haskell}
+
+    第二个函数对命令的类型进行模式匹配。每个命令携带一个 continuation。这个 continuation 必须与一个（可能已修改的）堆栈一起运行。每个命令以不同的方式修改堆栈：
+
+    \begin{haskell}
+        go :: StackF (StackAction k) -> StackAction k
+        go (Pop k)    = St (\ns -> runAction k (tail ns))
+        go (Top ik)   = St (\ns -> runAction (ik (head ns)) ns)
+        go (Push n k) = St (\ns -> runAction k (n: ns))
+        go (Add k)    = St (\ns -> runAction k
+        ((head ns + head (tail ns)): tail (tail ns)))
+    \end{haskell}
+
+    例如，\hask{Pop} 丢弃堆栈的顶部。 \hask{Top} 从堆栈顶部获取一个整数，并用它选择要执行的分支。它通过将函数 \hask{ik} 应用于该整数来实现这一点。 \hask{Add} 将堆栈顶部的两个数字相加并将结果压入堆栈。
+
+    注意，我们定义的代数不涉及递归。从操作中分离递归是自由 Monad 方法的优势之一。相反，递归被一次编码在 catamorphism 中。
+
+    这是一个可以用来运行我们的玩具程序的函数：
+
+    \begin{haskell}
+        run :: FreeMonad StackF k -> ([Int], k)
+        run prog = runAction (mcata runAlg prog) []
+    \end{haskell}
+
+    显然，使用部分函数 \hask{head} 和 \hask{tail} 使我们的解释器变得脆弱。格式不正确的程序会导致运行时错误。更健壮的实现将使用允许错误传播的代数。
+
+    使用自由 Monad 的另一个优势是相同的程序可以使用不同的代数进行解释。
+
+    \begin{exercise}
+        实现一个“漂亮打印机”来显示使用我们的自由 Monad 构建的程序。提示：实现使用 \hask{Const} 函子作为载体的代数：
+
+        \begin{haskell}
+            showAlg :: MAlg StackF (Const String) a
+        \end{haskell}
+    \end{exercise}
+    \section{单胚函子 (Monoidal Functors)}
+
+    我们已经看到了几个单胚范畴 (monoidal categories) 的例子。这类范畴具有某种二元运算，例如笛卡尔积、和、复合（在自函子的范畴中），等等。它们还具有一个特殊的对象，作为该二元运算的单位元。在严格单胚范畴 (strict monoidal categories) 中，单位和结合律是严格满足的，而在其他情况下，它们则是满足同构条件。
+
+    每当我们有某种结构的多个实例时，我们可能会问自己：是否有一个关于这些东西的整体范畴？在这种情况下：单胚范畴是否构成了自己的一个范畴？为了使这成为可能，我们需要定义单胚范畴之间的箭头。
+
+    一个\emph{单胚函子 (monoidal functor)} $F$ 从单胚范畴 $(\mathcal{C}, \otimes, i)$ 映射到另一个单胚范畴 $(\mathcal{D}, \oplus, j)$ 时，会将张量积 (tensor product) 映射到张量积，将单位元映射到单位元——所有这些都是在同构条件下进行的：
+    \begin{align*}
+        F a \oplus F b &\cong F (a \otimes b) \\
+        j &\cong F i
+    \end{align*}
+    这里，左侧是目标范畴中的张量积和单位元，右侧是源范畴中的对应物。
+
+    如果所讨论的两个单胚范畴不是严格的，即单位和结合律仅在同构条件下满足，则还需要额外的相容性条件，以确保单位元和结合元被正确映射。
+
+    以单胚函子为箭头的单胚范畴构成的范畴称为$\mathbf{MonCat}$。实际上，它是一个2-范畴，因为可以定义在单胚函子之间的结构保持自然变换。
+
+    \subsection{松弛单胚函子 (Lax Monoidal Functors)}
+
+    单胚范畴的一个好处是它们允许我们定义单子 (monoids)。你可以轻易地发现，单胚函子将单子映射到单子。但实际上，你并不需要单胚函子的全部功能来实现这一点。让我们考虑为了将单子映射到单子，函数子需要满足的最低要求。
+
+    让我们从单胚范畴 $(\mathcal{C}, \otimes, i)$ 中的一个单子 $(m, \mu, \eta)$ 开始。考虑一个将 $m$ 映射到 $F m$ 的函子 $F$。我们希望 $F m$ 在目标单胚范畴 $(\mathcal{D}, \oplus, j)$ 中也是一个单子。为此，我们需要找到两个映射：
+    \begin{align*}
+        \eta' &\colon j \to F m \\
+        \mu' &\colon F m \oplus F m \to F m
+    \end{align*}
+    并使其满足单胚律。
+
+    因为 $m$ 是一个单子，我们有可用的原始映射的提升：
+    \begin{align*}
+        F \eta &\colon F i \to F m \\
+        F \mu &\colon F (m \otimes m) \to F m
+    \end{align*}
+
+    为了实现 $\eta'$ 和 $\mu'$，我们还需要两个额外的箭头：
+    \begin{align*}
+        j &\to F i \\
+        F m \oplus F m &\to F (m \otimes m)
+    \end{align*}
+    一个单胚函子会提供这样的箭头。然而，为了我们要完成的工作，这些箭头并不需要是可逆的。
+
+    一个\emph{松弛单胚函子 (lax monoidal functor)} 是一个配备有态射 $\phi_i$ 和自然变换 $\phi_{ab}$ 的函子：
+    \begin{align*}
+        \phi_i &\colon j \to F i \\
+        \phi_{a b} &\colon F a \oplus F b \to F (a \otimes b)
+    \end{align*}
+    它们满足适当的单位性和结合性条件。
+
+    这样的函子将单子 $(m, \mu, \eta)$ 映射到单子 $(F m, \mu', \eta')$，其中：
+    \begin{align*}
+        \eta' &= F \eta \circ \phi_i \\
+        \mu' &= F \mu \circ \phi_{a b}
+    \end{align*}
+
+    松弛单胚函子的最简单例子是一个保留通常笛卡尔积的自函子。我们可以在 Haskell 中将其定义为一个类型类：
+
+    \begin{haskell}
+        class Monoidal f where
+        unit  :: f ()
+        (>*<) :: f a -> f b -> f (a, b)
+    \end{haskell}
+    与 $\phi_{a b}$ 对应的我们有一个中缀运算符，根据 Haskell 的惯例，它以柯里化形式编写。
+
+    \begin{exercise}
+        实现列表函子的 \hask{Monoidal} 实例。
+    \end{exercise}
+
+    \subsection{函子强度 (Functorial Strength)}
+
+    还有另一种方式，函子可以与单胚结构进行交互，这在编程时显而易见。我们理所当然地认为函数能够访问环境。这样的函数被称为闭包 (closures)。
+
+    例如，这里有一个从环境中捕获变量 \hask{a} 并将其与其参数配对的函数：
+    \begin{haskell}
+        \x -> (a, x)
+    \end{haskell}
+    这个定义在孤立情况下没有意义，但在环境中包含变量 \hask{a} 时，它是有意义的，例如：
+    \begin{haskell}
+        pairWith :: Int -> (String -> (Int, String))
+        pairWith a = \x -> (a, x)
+    \end{haskell}
+    通过调用 \hask{pairWith 5} 返回的函数``闭合''了环境中的5。
+
+    现在考虑以下修改，它返回一个包含闭包的单例列表：
+    \begin{haskell}
+        pairWith' :: Int -> [String -> (Int, String)]
+        pairWith' a = [\x -> (a, x)]
+    \end{haskell}
+    作为程序员，你会很惊讶如果这不工作。但我们在这里所做的是非常微妙的：我们将环境``偷渡''到列表函子之下。根据我们的λ演算 (lambda calculus) 模型，一个闭包是从环境和函数参数的积中得到的一个态射。这里的lambda实际上是一个 \hask{(Int, String)} 类型的函数，它在一个列表函子内部定义，但它捕获了定义在列表之外的值 \hask{a}。
+
+    让我们能够将环境偷渡到函子之下的属性称为\index{strength, functorial}\emph{函子强度 (functorial strength)} 或者\emph{张量强度 (tensorial strength)}，可以在 Haskell 中实现为：
+    \begin{haskell}
+        strength :: Functor f => (e, f a) -> f (e, a)
+        strength (e, as) = fmap (e, ) as
+    \end{haskell}
+    符号 \hask{(e, )} 被称为\index{tuple section}\emph{元组截断 (tuple section)}，相当于对对构造器 (pair constructor) 的偏应用：\hask{(,) e}。
+
+    在范畴论中，一个自函子 $F$ 的强度定义为一个将张量积 (tensor product) 偷渡到函子中的自然变换：
+    \[ \sigma \colon a \otimes F(b) \to F (a \otimes b) \]
+    还有一些附加条件，以确保它与单胚范畴中的单位元和结合元良好地配合。
+
+    我们能够为任意函子实现 \hask{strength}，这意味着在 Haskell 中，每个函子都是强的。这就是为什么我们在函子内部访问环境时不必担心。
+
+    更重要的是，在 Haskell 中，每个 monad 由于是函子，因此也是强的。这也是为什么每个 monad 都自动是 \hask{Monoidal} 的。
+    \begin{haskell}
+        instance Monad m => Monoidal m where
+        unit = return ()
+        ma >*< mb = do
+        a <- ma
+        b <- mb
+        return (a, b)
+    \end{haskell}
+    如果你将这段代码解糖 (desugar) 以使用 monadic 绑定和 lambda，你会注意到最终的 \hask{return} 需要访问定义在外部环境中的 \hask{a} 和 \hask{b}。如果没有 monad 是强的，这将是不可能的。
+
+    然而，在范畴论中，并非每个单胚范畴中的自函子都是强的。现在的神秘咒语是，我们所工作的范畴是自丰 (self-enriched) 的，并且在 Haskell 中定义的每个自函子都是丰的 (enriched)。我们将在讨论丰范畴 (enriched categories) 时回到这一点。在 Haskell 中，强度归结为我们总是可以对部分应用的对构造器 \hask{(a, )} 进行 \hask{fmap}。
+
+    \subsection{应用函子 (Applicative Functors)}
+
+    在编程中，应用函子的想法源自以下问题：一个函子让我们可以提升一个变量的函数。我们如何提升一个有两个或多个变量的函数？
+
+    通过类似于 \hask{fmap} 的方式，我们想要有一个函数：
+    \begin{haskell}
+        liftA2 :: (a -> b -> c) -> f a -> f b -> f c
+    \end{haskell}
+
+    一个有两个参数的函数——在这里是其柯里化形式——是一个返回函数的单参数函数。所以，假设 \hask{f} 是一个函子，我们可以对 \hask{liftA2} 的第一个参数进行 \hask{fmap}，其类型为：
+    \begin{haskell}
+        a -> (b -> c)
+    \end{haskell}
+    应用于第二个参数 \hask{(f a)} 来得到：
+    \begin{haskell}
+        f (b -> c)
+    \end{haskell}
+    问题是，我们不知道如何将 \hask{f (b -> c)} 应用于剩下的参数 \hask{(f b)}。
+
+    允许我们这么做的函子类称为 \hask{Applicative}。事实证明，一旦我们知道如何提升一个二参数函数，我们就可以提升任意数量的参数函数，除了零个参数。一个零参数函数只是一个值，所以提升它意味着实现一个函数：
+    \begin{haskell}
+        pure :: a -> f a
+    \end{haskell}
+    这里是 Haskell 的定义：
+    \begin{haskell}
+        class Functor f => Applicative f where
+        pure  :: a -> f a
+        (<*>) :: f (a -> b) -> f a -> f b
+    \end{haskell}
+    将函数应用于带参数的函子定义为一个中缀运算符 \hask{<*>}，通常称为``splat''。
+
+    还有一个 \hask{fmap} 的中缀版本：
+    \begin{haskell}
+        (<$>) :: Functor f => (a -> b) -> f a -> f b
+    \end{haskell}
+    可以用它来实现这个简洁的 \hask{liftA2}：
+    \begin{haskell}
+        liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
+        liftA2 g as bs = g <$> as <*> bs
+\end{haskell}
+两个运算符都绑定到左侧，这使得这个语法模仿了常规函数应用。
+
+应用函子还必须满足一组定律：
 \begin{haskell}
-sub :: Char -> Ex String
-sub 'a' = Plus (Var "x1") (Val 2)
-sub 'b' = Var "x2"
+pure id <*> v = v                            -- 恒等性 (Identity)
+pure f <*> pure x = pure (f x)               -- 同态性 (Homomorphism)
+u <*> pure y = pure ($ y) <*> u              -- 交换性 (Interchange)
+pure (.) <*> u <*> v <*> w = u <*> (v <*> w) -- 组合性 (Composition)
 \end{haskell}
-As you can see, we were even able to change the type used for naming variables from \hask{Char} to \hask{String}.
-
-When we bind this Kleisli arrow to \hask{ex}:
-\begin{haskell}
-ex' :: Ex String
-ex' = ex >>= sub
-\end{haskell}
-we get, as expected, a tree corresponding to $(2 + (x_1 + 2)) + x_2$.
-
-\subsection{Monad as a monoid}
-
-Let's analyze the definition of a monad that uses \hask{join}:
-\begin{haskell}
-class Functor m => Monad m where
-  join :: m (m a) -> m a
-  return :: a -> m a
-\end{haskell}
-We have an endofunctor \hask{m} and two polymorphic functions. 
-
-In category theory, the functor that defines the monad is traditionally denoted by $T$ (probably because monads were initially called ``triples''). The two polymorphic functions become natural transformations. The first one, corresponding to \hask{join}, maps the ``square'' of $T$ (a composition of $T$ with itself) to $T$:
-\[ \mu \colon T \circ T \to T \]
-(Of course, only \emph{endo}-functors can be squared this way.) 
-
-The second, corresponding to \hask{return}, maps the identity functor to $T$:
-\[ \eta \colon \text{Id} \to T \]
-
-Compare this with our earlier definition of a monoid in a monoidal category:
-\begin{align*}
-\mu &\colon m \otimes m \to m \\
-\eta &\colon I \to m
-\end{align*}
-The similarity is striking. This is why we often call the natural transformation $\mu$ the \emph{monadic multiplication}. But in what category can the composition of functors be considered a tensor product? 
-
-Enter the category of endofunctors. Objects in this category are endofunctors and arrows are natural transformations. 
-
-But there's more structure to that category. We know that any two endofunctors can be composed. How can we interpret this composition if we want to treat endofunctors as objects? An operation that takes two objects and produces a third object looks like a tensor product.  The only condition imposed on a tensor product is that it's functorial in both arguments. That is, given a pair of arrows:
-\begin{align*}
- \alpha &\colon T \to T' \\
- \beta &\colon S \to S' 
-\end{align*}
- we can lift it to the mapping of the tensor product:
- \[ \alpha \otimes \beta \colon T \otimes S \to T' \otimes S' \]
- 
- In the category of endofunctors, the arrows are natural transformations so, if we replace $\otimes$ with $\circ$, the lifting is the mapping:
-\[ \alpha \circ \beta \colon T \circ T' \to S \circ S' \]
-But this is just horizontal composition of natural transformations (now you understand why it's denoted by a circle).
-
-The unit object in this monoidal category is the identity endofunctor, and unit laws are satisfied ``on the nose,'' meaning
-\[ \text{Id} \circ T = T = T \circ \text{Id}\]
-We don't need any unitors. We don't need any associators either, since functor composition is automatically associative. 
-
-A monoidal category in which unitors and associators are identity morphisms is called a \index{strict monoidal category}\emph{strict} monoidal category.
-
-Notice, however, that composition is not symmetric, so this is not a symmetric monoidal category.
-
-So, all said, a monad is a monoid in the monoidal category of endofunctors. 
-
-A monad $(T, \eta, \mu)$ consists of an object in the category of endofunctors---meaning an endofunctor $T$; and two arrows---meaning natural transformations:
-\begin{align*}
- \eta &\colon \text{Id} \to T \\
- \mu &\colon T \circ T \to T 
-\end{align*}
-For this to be a monoid, these arrows must satisfy monoidal laws. Here are the unit laws (with unitors replaced by strict equalities):
-\[
- \begin{tikzcd}
-\text{Id} \circ T
- \arrow[rr, "\eta \circ T"]
- \arrow[rrd, "="']
-& & T \circ T
- \arrow[d, "\mu"]
-&& T \circ \text{Id}
- \arrow[ll, "T \circ \eta"']
- \arrow[lld, "="]
- \\
- && T
-  \end{tikzcd}
-\]
-and this is the associativity law:
-\[
- \begin{tikzcd}
- (T \circ T) \circ T 
- \arrow[rr, "="]
- \arrow[d, "\mu \circ T"]
- &&
- T \circ (T \circ T)
- \arrow[d, "T \circ \mu"]
- \\
- T \circ T 
- \arrow[dr, "\mu"]
-& & T \circ T
- \arrow[dl, "\mu"']
- \\
-&  T
- \end{tikzcd}
-\]
-We used the whiskering notation for horizontal composition of $\mu \circ T$ and $T \circ \mu$.
-
-These are the monad laws in terms of $\mu$ and $\eta$. They can be directly translated to the laws for \hask{join} and \hask{return}. They are also equivalent to the laws of the Kleisli category built from arrows $a \to T b$.
-
-\section{Free Monads}
-
-A monad lets us specify a sequence of actions that may produce side effects. Such a sequence tells the computer both what to do and how to do it. But sometimes more flexibility is required: We'd like to separate the ``what'' from the ``how." A free monad lets us produce the sequence without committing to a particular monad for its execution. This is analogous to defining a free monoid (a list), which lets us postpone the choice of the algebra to apply to it; or to creating an AST (abstract syntax tree) before compiling it to executable code.
-
-Free constructions are defined as left adjoints to forgetful functors. So first we have to define what it means to forget to be a monad. Since a monad is an endofunctor equipped with additional structure, we'd like to forget this structure. We take a monad $(T, \eta, \mu)$ and keep only $T$. But in order to define such a mapping as a functor, we first need to define the category of monads.
-
-\subsection{Category of monads}
-
-The objects in the category of monads $\mathbf{Mon}(\cat C)$ are monads $(T, \eta, \mu)$. We can define an arrow between two monads $(T, \eta, \mu)$ and $(T', \eta', \mu')$ as a natural transformation between the two endofunctors:
-\[ \lambda \colon T \to T' \]
-However, since monads are endofunctors \emph{with structure}, we want these natural transformations to preserve the structure. Preservation of unit means that the following diagram must commute:
-\[
- \begin{tikzcd}
-&\text{Id}
- \arrow[ld, "\eta"']
- \arrow[rd, "\eta'"]
- \\
- T
- \arrow[rr, "\lambda"]
- && T'
- \end{tikzcd}
-\]
-Preservation of multiplication means that the following diagram must commute:
-\[
- \begin{tikzcd}
- T \circ T
- \arrow[r, "\lambda \circ \lambda"]
- \arrow[d, "\mu"]
- & T' \circ T'
- \arrow[d, "\mu'"]
- \\
- T
- \arrow[r, "\lambda"]
- & T'
- \end{tikzcd}
-\]
-
-Another way of looking at $\mathbf{Mon}(\cat C)$ is that it's a category of monoids in the monoidal category $([\cat C, \cat C], \circ, \text{Id})$. 
-
-\subsection{Free monad}
-
-Now that we have a category of monads, we can define the forgetful functor:
-\[ U \colon \mathbf{Mon}(\cat C) \to [\cat C, \cat C] \]
-that maps every triple $(T, \eta, \mu)$ to $T$ and every monad morphism to the underlying natural transformation.
-
-We would like a free monad to be generated by a left adjoint to this forgetful functor. The problem is that this left adjoint doesn't always exist. As usual, this is related to size issues: monads tend to blow things up. The bottom line is that free monads exist for some, but not all, endofunctors. Therefore we can't define a free monad through an adjunction. Fortunately, in most cases of interest, a free monad can be defined as a fixed point of an algebra. 
-
-The construction is analogous to how we defined a free monoid as an initial algebra for the list functor:
-\begin{haskell}
-data ListF a x = NilF | ConsF a x
-\end{haskell}
-or the more general:
-\[ F_a x = I + a \otimes x \]
-This time, however, the monoidal category in which a monad is defined as a monoid is the category of endofunctors $([\cat C, \cat C], \circ, \text{Id})$. A free monoid in this category is the initial algebra for the higher order ``list'' functor that maps functors to functors:
-\[ \Phi_F G = \text{Id} + F \circ G \]
-
-Here, the \index{coproduct of functors}coproduct of two functors is defined point-wise. On objects:
-\[ (F + G) a = F a + G a \]
-and on arrows:
-\[ (F + G) f = F f + G f \]
-(We form a coproduct of two morphisms using the functoriality of the coproduct. We assume that $\cat C$ is co-cartesian, that is all coproducts exist.)
-
-The initial algebra is the (least) fixed point of this operator, or the solution to the recursive equation:
-\[ L_F \cong \text{Id} + F \circ L_F \]
-This formula establishes a natural isomorphism between two functors. Going from right to left, $\text{Id} + F \circ L_F \to L_F$, we have a mapping out of the sum, which is equivalent to a pair of natural transformations:
-\begin{align*}
-\text{Id} \to L_F
-\\
-F \circ L_F \to L_F
-\end{align*}
-
-When translating this to Haskell, the components of these transformations become two constructors. We define the following recursive data type parameterized by a functor \hask{f}:
-\begin{haskell}
-data FreeMonad f a where
-   Pure :: a -> FreeMonad f a
-   Free :: f (FreeMonad f a) -> FreeMonad f a
-\end{haskell}
-
-If we think of the functor \hask{f} as a container of values, the constructor \hask{Free} takes a functorful of \hask{(FreeMonad f a)} and stashes it away. An arbitrary value of the type \hask{FreeMonad f a} is therefore a tree in which every node is a functorful of branches, and each leaf contains a value of the type \hask{a}.
-
-Because this definition is recursive, the \hask{Functor} instance for it is also recursive:
-\begin{haskell}
-instance Functor f => Functor (FreeMonad f) where
-  fmap g (Pure a) = Pure (g a)
-  fmap g (Free ffa) = Free (fmap (fmap g) ffa)
-\end{haskell}
-Here, the outer \hask{fmap} uses the \hask{Functor} instance of \hask{f}, while the inner \hask{(fmap g)} recurses into the branches.
-
-It's easy to show that \hask{FreeMonad} is a \hask{Monad}. The monadic unit \hask{eta} is just a thin encapsulation of the identity functor:
-\begin{haskell}
-eta :: a -> FreeMonad f a
-eta a = Pure a
-\end{haskell}
-
-Monadic multiplication, or \hask{join}, is defined recursively:
-\begin{haskell}
-mu :: Functor f => FreeMonad f (FreeMonad f a) -> FreeMonad f a
-mu (Pure fa) = fa
-mu (Free ffa) = Free (fmap mu ffa)
-\end{haskell}
-
-The \hask{Monad} instance for \hask{FreeMonad f} is therefore:
-\begin{haskell}
-instance Functor f => Monad (FreeMonad f) where
-  return a = eta a
-  m >>= k = mu (fmap k m)
-\end{haskell}
-
-We can also define bind directly:
-\begin{haskell}
-  (Pure a)   >>= k = k a
-  (Free ffa) >>= k = Free (fmap (>>= k) ffa)
-\end{haskell}
-
-A free monad accumulates monadic actions in a tree-like structure without committing to any particular evaluation strategy. This tree can be ``interpreted'' using an algebra. But this time it's an algebra in the category of endofunctors, so its carrier is an endofunctor $G$ and the structure map $\alpha$ is a natural transformation $\Phi_F G \to G$:
-\[ \alpha \colon \text{Id} + F \circ G \to G\]
-This natural transformation, being a mapping out of a sum, is equivalent to a pair of natural transformations :
-\begin{align*}
-\lambda &\colon \text{Id} \to G
-\\
-\rho &\colon F \circ G \to G
-\end{align*}
-
-We can translate it to Haskell as a pair of polymorphic functions:
-\begin{haskell}
-type MAlg f g a = (a -> g a, f (g a) -> g a)
-\end{haskell}
-
-Since the free monad is the initial algebra, there is a unique mapping---the catamorphism---from it to any other algebra. Recall how we defined a catamorphism for a regular algebra:
-\begin{haskell}
-cata :: Functor f => Algebra f a -> Fix f -> a
-cata alg = alg . fmap (cata alg) . out
-\end{haskell}
-The \hask{out} part unwraps the contents of the fixed point. Here we can do this by pattern-matching on the two constructors of the free monad. If it's a leaf, we apply our $\lambda$ to it. If it's a node, we recursively process its contents, and apply our $\rho$ to the result:
-\begin{haskell}
-mcata :: Functor f => MAlg f g a -> FreeMonad f a -> g a
-mcata (l, r) (Pure a) = l a
-mcata (l, r) (Free ffa) = 
-  r (fmap (mcata (l, r)) ffa)
-\end{haskell}
-
-Many tree-like monads are in fact free monads for simple functors.
 
 \begin{exercise}
-A (non-empty) rose tree is defined as:
-\begin{haskell}
-data Rose a = Leaf a | Rose [Rose a]
-  deriving Functor
-\end{haskell}
-Implement conversions back and forth between \hask{Rose a} and  \hask{FreeMonad [] a}.
+实现 $\emph{\hask{liftA3}}$，一个使用应用函子提升一个三参数函数的函数。
 \end{exercise}
 
-\begin{exercise}
-Implement conversions between a binary tree and \hask{FreeMonad Bin a}, where:
-\begin{haskell}
-data Bin a = Bin a a
-\end{haskell}
-\end{exercise}
-
-\begin{exercise}
-Find a functor whose free monad is equivalent to the list monad \hask{[a]}.
-\end{exercise}
-
-
-\subsection{Stack calculator example}
-As an example, let's consider a stack calculator implemented as an embedded domain-specific language, EDSL. We'll use the free monad to accumulate simple commands written in this language. 
-
-The commands are defined by the functor \hask{StackF}. Think of the parameter  \hask{k} as the continuation. 
-\begin{haskell}
-data StackF k  = Push Int k
-               | Top (Int -> k)
-               | Pop k            
-               | Add k
-               deriving Functor
-\end{haskell}
-For instance, \hask{Push} is supposed to push an integer on the stack and then call the continuation \hask{k}.
-
-The free monad for this functor can be thought of as a tree, with most branches having just one child, thus forming lists. The exception is the \hask{Top} node, which has many children, one per every value of \hask{Int}.
-
-Here's the free monad for this functor:
-\begin{haskell}
-type FreeStack = FreeMonad StackF
-\end{haskell}
-
-In order to create domain-specific programs we'll define a few helper functions. There is a generic one that lifts a functorful of values to a free monad:
-\begin{haskell} 
-liftF :: (Functor f) => f r -> FreeMonad f r
-liftF fr = Free (fmap (Pure) fr)
-\end{haskell}
-We also need a series of ``smart constructors,'' which are Kleisli arrows for our free monad:
-\begin{haskell}
-push :: Int -> FreeStack ()
-push n = liftF (Push n ())
-
-pop :: FreeStack ()
-pop = liftF (Pop ())
-
-top :: FreeStack Int
-top = liftF (Top id)
-
-add :: FreeStack ()
-add = liftF (Add ())
-\end{haskell}
-
-Since a free monad is a monad, we can conveniently combine Kleisli arrows using the \hask{do} notation. For instance, here's a toy program that adds two numbers and returns their sum:
-\begin{haskell}
-calc :: FreeStack Int
-calc = do
-  push 3
-  push 4
-  add
-  x <- top
-  pop
-  return x
-\end{haskell}
-
-In order to execute this program, we need to define an algebra whose carrier is an endofunctor. Since we want to implement a stack-based calculator, we'll use a version of the state functor. Its state is a stack---a list of integers. The state functor is defined as a function type; here it's a function that takes a list and returns a new list coupled with the type parameter \hask{k}:
-\begin{haskell}
-data StackAction k = St ([Int] -> ([Int], k))
-  deriving Functor
-\end{haskell}
-
-To run the action, we apply the function to the stack:
-\begin{haskell}
-runAction :: StackAction k -> [Int] -> ([Int], k)
-runAction (St act) ns = act ns
-\end{haskell}
-
-We define the algebra as a pair of polymorphic functions corresponding to the two constructors of the free monad, \hask{Pure} and \hask{Free}:
-\begin{haskell}
-runAlg :: MAlg StackF StackAction a
-runAlg = (stop, go)
-\end{haskell}
-The first function terminates the execution of the program and returns a value:
-\begin{haskell}
-stop :: a -> StackAction a
-stop a = St (\xs -> (xs, a))
-\end{haskell}
-The second function pattern matches on the type of the command. Each command carries with it a continuation. This continuation has to be run with a (potentially modified) stack. Each command modifies the stack in a different way:
-\begin{haskell}
-go :: StackF (StackAction k) -> StackAction k
-go (Pop k)    = St (\ns -> runAction k (tail ns))
-go (Top ik)   = St (\ns -> runAction (ik (head ns)) ns)
-go (Push n k) = St (\ns -> runAction k (n: ns))
-go (Add k)    = St (\ns -> runAction k 
-                   ((head ns + head (tail ns)): tail (tail ns)))
-\end{haskell}
-For instance, \hask{Pop} discards the top of the stack. \hask{Top} takes an integer from top of the stack and uses it to pick the branch to be executed. It does it by applying the function \hask{ik} to the integer. \hask{Add} adds the two numbers at the top of the stack and pushes the result. 
-
-Notice that the algebra we have defined does not involve recursion. Separating recursion from the actions is one of the advantages of the free monad approach. The recursion is instead encoded once and for all in the catamorphism. 
-
-Here's the function that can be used to run our toy program:
-\begin{haskell}
-run :: FreeMonad StackF k -> ([Int], k)
-run prog = runAction (mcata runAlg prog) [] 
-\end{haskell}
-
-Obviously, the use of partial functions \hask{head} and \hask{tail} makes our interpreter fragile. A badly formed program will cause a runtime error. A more robust implementation would use an algebra that allows for error propagation.
-
-The other advantage of using free monads is that the same program may be interpreted using different algebras.
-
-\begin{exercise}
-Implement a ``pretty printer'' that displays the program constructed using our free monad. Hint: Implement the algebra that uses the \hask{Const} functor as the carrier:
-\begin{haskell}
-showAlg :: MAlg StackF (Const String) a
-\end{haskell}
-\end{exercise}
-
-\section{Monoidal Functors}
-
-We've seen several examples of monoidal cateogries. Such categories are equipped with some kind of binary operation, e.g., a cartesian product, a sum, composition (in the category of endofunctors), etc. They also have a special object that serves as the unit with respect to that binary operation. Unit and associativity laws are satisfied either on the nose (in strict monoidal categories) or up to isomorphism.
-
-Every time we have more than one instance of some structure, we may ask ourselves the question: is there a whole category of such things? In this case: do monoidal categories form their own category? For this to work we would have to define arrows between monoidal categories.
-
-A \emph{monoidal functor} $F$ from a monoidal category $(\mathcal{C}, \otimes, i)$ to another monoidal category $(\mathcal{D}, \oplus, j)$ maps tensor product to tensor product and unit to unit---all up to isomorphism:
-\begin{align*}
-F a \oplus F b &\cong F (a \otimes b) \\
-j &\cong F i 
-\end{align*}
-Here, on the left-hand side we have the tensor product and the unit in the target category, and on the right their counterparts in the source category. 
-
-If the two monoidal categories in question are not strict, that is the unit and associativity laws are satisfied only up to isomorphism, there are additional coherency conditions that ensure that unitors are mapped to unitors and associators are mapped to associators.
-
-The category of monoidal categories with monoidal functors as arrows is called $\mathbf{MonCat}$. In fact it's a 2-category, since one can define structure-preserving natural transformations between monoidal functors.
-
-\subsection{Lax monoidal functors}
-
-One of the perks of monoidal categories is that they allow us to define monoids. You can easily convince yourself that monoidal functors map monoids to monoids. It turns out that you don't need the full power of monoidal functors to accomplish that. Let's consider what the minimal requirements are  for a functor to map monoids to monoids. 
-
-Let's start with a monoid $(m, \mu, \eta)$ in the monoidal category $(\mathcal{C}, \otimes, i)$. Consider a functor $F$ that maps $m$ to $F m$. We want $F m$ to be a monoid in the target monoidal category $(\mathcal{D}, \oplus, j)$. For that we need to find two mappings:
-\begin{align*}
-\eta' &\colon j \to F m \\
- \mu' &\colon F m \oplus F m \to F m 
-\end{align*}
-satisfying monoidal laws.
-
-Since $m$ is a monoid, we do have at our disposal the liftings of the original mappings:
-\begin{align*}
- F \eta &\colon F i \to F m \\
- F \mu &\colon F (m \otimes m) \to F m
-\end{align*}
-
-What we are missing, in order to implement $\eta'$ and $\mu'$, are two additional arrows:
-\begin{align*}
-j &\to F i\\
- F m \oplus F m &\to F (m \otimes m)
- \end{align*}
-A monoidal functor would provide such arrows. However, for what we're trying it accomplish, we don't need these arrows to be invertible. 
-
-A \emph{lax monoidal functor} is a functor equipped with a morphism $\phi_i$ and a natural transformation $\phi_{ab}$:
-\begin{align*}
-\phi_i &\colon j \to F i \\
-\phi_{a b} &\colon F a \oplus F b \to F (a \otimes b)
-\end{align*}
-satisfying the appropriate unitality and associativity conditions.
-
-Such a functor maps a monoid $(m, \mu, \eta)$ to a monoid $(F m, \mu', \eta')$ with:
-\begin{align*}
-\eta' &= F \eta \circ \phi_i \\
-\mu' &= F \mu \circ \phi_{a b}
-\end{align*}
-
-The simplest example of a lax monoidal functor is an endofunctor that preserves the usual cartesian product. We can define it in Haskell as a typeclass:
-
-\begin{haskell}
-class Monoidal f where
-  unit  :: f ()
-  (>*<) :: f a -> f b -> f (a, b)
-\end{haskell}
-Corresponding to $\phi_{a b}$ we have an infix operator which, according to Haskell conventions, is written in its curried form.
-
-\begin{exercise}
-Implement the \hask{Monoidal} instance for the list functor.
-\end{exercise}
-
-\subsection{Functorial strength}
-
-There is another way a functor may interact with monoidal structure, one that hides in plain sight when we do programming. We take it for granted that functions have access to the environment. Such functions are called closures. 
-
-For instance, here's a function that captures a variable \hask{a} from the environment and pairs it with its argument:
-\begin{haskell}
-\x -> (a, x)
-\end{haskell}
-This definition makes no sense in isolation, but it does when the environment contains the variable \hask{a}, e.g.,
-\begin{haskell}
-pairWith :: Int -> (String -> (Int, String))
-pairWith a = \x -> (a, x)
-\end{haskell}
-The function returned by calling \hask{pairWith 5} ``closes over'' the 5 from its environment.
-
-Now consider the following modification, which returns a singleton list that contains the closure:
-\begin{haskell}
-pairWith' :: Int -> [String -> (Int, String)]
-pairWith' a = [\x -> (a, x)]
-\end{haskell}
-As a programmer you'd be very surprised if this didn't work. But what we do here is highly nontrivial: we are smuggling the environment \emph{under} the list functor. According to our model of lambda calculus, a closure is a morphism from the product of the environment and the function argument. Here the lambda, which is really a function of \hask{(Int, String)}, is defined inside a list functor, but it captures the value \hask{a} that is defined \emph{outside} the list.
-
-The property that lets us smuggle the environment under a functor is called \index{strength, functorial}\emph{functorial strength} or \emph{tensorial strength} and can be implemented in Haskell as:
-\begin{haskell}
-strength :: Functor f => (e, f a) -> f (e, a)
-strength (e, as) = fmap (e, ) as
-\end{haskell}
-The notation \hask{(e, )} is called a \index{tuple section}\emph{tuple section} and is equivalent to the partial application of the pair constructor: \hask{(,) e}.
-
-In category theory, strength for an endofunctor $F$ is defined as a natural transformation that smuggles a tensor product into a functor:
-\[ \sigma \colon a \otimes F(b) \to F (a \otimes b) \]
-There are some additional conditions which ensure that it works nicely with the unitors and the associator of the monoidal category in question.
-
-The fact that we were able to implement \hask{strength} for an arbitrary functor means that, in Haskell, every functor is strong. This is the reason why we don't have to worry about accessing the environment from inside a functor. 
-
-Even more importantly, every monad in Haskell is strong by virtue of being a functor. This is also why every monad is automatically \hask{Monoidal}. 
-\begin{haskell}
-instance Monad m => Monoidal m where
-  unit = return ()
-  ma >*< mb = do
-    a <- ma
-    b <- mb
-    return (a, b)
-\end{haskell}
-If you desugar this code to use monadic bind and lambdas, you'll notice that the final \hask{return} needs access to both \hask{a} and \hask{b}, which are defined in outer environments. This would be impossible without a monad being strong.
-
-In category theory, though, not every endofunctor in a monoidal category is strong. For now, the magic incantation is that the category we're working with is self-enriched, and every endofunctor defined in Haskell is enriched. We'll come back to it when we talk about enriched categories. In Haskell, strength boils down to the fact that we can always \hask{fmap} a partially applied pair constructor \hask{(a, )}.
-
-\subsection{Applicative functors}
-
-In programming, the idea of applicative functors arose from the following question: A functor lets us lift a function of one variable. How can we lift a function of two or more variables? 
-
-By analogy with \hask{fmap}, we'd like to have a function:
-\begin{haskell}
-liftA2 :: (a -> b -> c) -> f a -> f b -> f c
-\end{haskell}
-
-A function of two arguments---here, in its curried form---is a function of one argument returning a function. So, assuming that \hask{f} is a functor, we can \hask{fmap} the first argument of \hask{liftA2}, which has the type:
-\begin{haskell}
-a -> (b -> c)
-\end{haskell}
-over the second argument \hask{(f a)} to get:
-\begin{haskell}
-f (b -> c)
-\end{haskell}
-The problem is, we don't know how to apply \hask{f (b -> c)} to the remaining argument \hask{(f b)}. 
-
-The class of functors that let us do that is called \hask{Applicative}. It turns out that, once we know how to lift a two-argument function, we can lift functions of any number of arguments, except zero. A zero-argument function is just a value, so lifting it means implementing a function:
-\begin{haskell}
-pure :: a -> f a
-\end{haskell}
-Here's the Haskell definition:
-\begin{haskell}
-class Functor f => Applicative f where
-    pure  :: a -> f a
-    (<*>) :: f (a -> b) -> f a -> f b
-\end{haskell}
-The application of a functorful of functions to a functorful of arguments is defined as an infix operator \hask{<*>} that is customarily called ``splat.''
-
-There is also an infix version of \hask{fmap}:
-\begin{haskell}
-(<$>) :: Functor f => (a -> b) -> f a -> f b
-\end{haskell}
-which can be used in this terse implementation of \hask{liftA2}:
-\begin{haskell}
-liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
-liftA2 g as bs = g <$> as <*> bs
-\end{haskell}
-Both operators bind to the left, which makes this syntax mimic regular function application.
-
-An applicative functor must also satisfy a set of laws:
-\begin{haskell}
-pure id <*> v = v                            -- Identity
-pure f <*> pure x = pure (f x)               -- Homomorphism
-u <*> pure y = pure ($ y) <*> u              -- Interchange
-pure (.) <*> u <*> v <*> w = u <*> (v <*> w) -- Composition
-\end{haskell}
-
-\begin{exercise}
-Implement $\emph{\hask{liftA3}}$, a function that lifts a 3-argument function using an applicative functor.
-\end{exercise}
-
-\subsection{Closed functors}
-If you squint at the definition of the splat operator:
+\subsection{闭函子 (Closed Functors)}
+如果你细看 splat 运算符的定义：
 \begin{haskell}
 (<*>) :: f (a -> b) -> (f a -> f b)
 \end{haskell}
-you may see it as mapping function objects to function objects. 
+你可能会将它看作是从函数对象映射到函数对象。
 
-This becomes clearer if you consider a functor between two categories, both of them closed. You may start with a function object $b^a$ in the source category and apply the functor $F$ to it:
+当你考虑一个在两个闭范畴之间的函子时，这一点变得更加清晰。你可以从源范畴中的一个函数对象 $b^a$ 开始，并将函子 $F$ 应用于它：
 \[ F (b^a) \]
-Alternatively, you may map the two objects $a$ and $b$ and construct a function object between them in the target category:
+或者，你可以将这两个对象 $a$ 和 $b$ 进行映射，并在目标范畴中构造它们之间的一个函数对象：
 \[ (F b)^{F a} \]
-If we demand that the two ways be isomorphic, we get a definition of a strict \emph{closed functor}. But, as was the case with monoidal functors, we are more interested in the lax version, which is equipped with a one-way natural transformation:
+如果我们要求这两种方式是同构的，我们就得到了一个严格的\emph{闭函子 (closed functor)}的定义。但正如单胚函子的情况一样，我们对松弛版本更感兴趣，它配备了一个单向的自然变换：
 \[ F (b^a) \to (F b)^{F a} \]
-If $F$ is an endofunctor, this translates directly into the definition of the splat operator. 
+如果 $F$ 是一个自函子，这直接转换为 splat 运算符的定义。
 
-The full definition of a lax closed functor includes the mapping of the monoidal unit and some coherence conditions. All said, an applicative functor is a lax closed functor.
+松弛闭函子的完整定义包括单胚单位的映射和一些相容性条件。总的来说，一个应用函子是一个松弛闭函子。
 
-In a closed cartesian category, the exponential is related to the cartesian product through the currying adjunction. It's no surprise then, that in such a category lax monoidal and lax closed (applicative) endofunctors are the same. 
+在一个闭笛卡尔范畴 (closed cartesian category) 中，指数与笛卡尔积通过柯里化伴随 (currying adjunction) 相关联。因此，在这样的范畴中，松弛单胚和松弛闭（应用）自函子是相同的。
 
-We can easily express this in Haskell:
+我们可以在 Haskell 中轻松表达这一点：
 \begin{haskell}
 instance (Functor f, Monoidal f) => Applicative f where
-  pure a = fmap (const a) unit
-  fs <*> as = fmap apply (fs >*< as)
+pure a = fmap (const a) unit
+fs <*> as = fmap apply (fs >*< as)
 \end{haskell}
-where \hask{const} is a function that ignores its second argument:
+其中 \hask{const} 是一个忽略其第二个参数的函数：
 \begin{haskell}
 const :: a -> b -> a
 const a b = a
 \end{haskell}
-and \hask{apply} is the uncurried function application:
+而 \hask{apply} 是非柯里化的函数应用：
 \begin{haskell}
 apply :: (a -> b, a) -> b
 apply (f, a) = f a
 \end{haskell}
-And the other way around we have:
+反过来，我们有：
 \begin{haskell}
 instance Applicative f => Monoidal f where
-  unit = pure ()
-  as >*< bs = (,) <$> as <*> bs
+unit = pure ()
+as >*< bs = (,) <$> as <*> bs
 \end{haskell}
-In the latter, we used the pair constructor \hask{(,)} as a two-argument function.
+在后者中，我们使用了对构造器 \hask{(,)} 作为一个双参数函数。
 
-\subsection{Monads and applicatives}
+\subsection{Monad 和 Applicative}
 
-Since in a cartesian closed category every monad\footnote{Again, the correct incantation is ``every enriched monad''} is lax monoidal, it is automatically applicative. We can show it directly by implementing \hask{ap}, which has the same type signature as the splat operator:
+由于在笛卡尔闭范畴中，每个 monad\footnote{正确的咒语是“每个丰 monad (enriched monad)”}都是松弛单胚的，因此它自动是 applicative 的。我们可以直接通过实现 \hask{ap} 来显示这一点，后者具有与 splat 运算符相同的类型签名：
 \begin{haskell}
 ap :: (Monad m) => m (a -> b) -> m a -> m b
-ap fs as = do 
-    f <- fs
-    a <- as
-    return (f a) 
+ap fs as = do
+f <- fs
+a <- as
+return (f a)
 \end{haskell}
 
-This connection is expressed in the Haskell definition of a \hask{Monad} by having \hask{Applicative} as its superclass:
+这一联系在 Haskell 的 \hask{Monad} 定义中通过将 \hask{Applicative} 作为其超类来表示：
 \begin{haskell}
 class Applicative m => Monad m where
-    (>>=)       :: forall a b. m a -> (a -> m b) -> m b
-    return      :: a -> m a
-    return      = pure
+(>>=)       :: forall a b. m a -> (a -> m b) -> m b
+return      :: a -> m a
+return      = pure
 \end{haskell}
-Notice the default implementation of \hask{return} as \hask{pure}. 
+注意到 \hask{return} 作为 \hask{pure} 的默认实现。
 
-The converse is not true: not every \hask{Applicative} is a \hask{Monad}. The standard counterexample is the \hask{Applicative} instance for a list functor that uses zipping:
+反过来并不成立：并非每个 \hask{Applicative} 都是一个 \hask{Monad}。标准的反例是列表函子的 \hask{Applicative} 实例，它使用拉链 (zipping)：
 \begin{haskell}
 instance Applicative [] where
-  pure = repeat
-  fs <*> as = zipWith apply fs as
+pure = repeat
+fs <*> as = zipWith apply fs as
 \end{haskell}
-Of course, the list functor is also a monad, so there is another \hask{Applicative} instance based on that. Its splat operator applies every function to every argument.
+当然，列表函子也是一个 monad，所以基于此还有另一个 \hask{Applicative} 实例。它的 splat 运算符将每个函数应用于每个参数。
 
-In programming, monad is more powerful than applicative. That's because monadic code lets you examine the contents of a monadic value and branch depending on it. This is true even for the \hask{IO} monad which otherwise provides no means of extracting the value. In this example we are branching on the contents of an \hask{IO} object:
+在编程中，monad 比 applicative 更强大。这是因为 monadic 代码让你可以检查一个 monadic 值的内容并根据它进行分支。即使对于 \hask{IO} monad 也是如此，后者否则并不提供提取值的方法。在这个例子中，我们根据一个 \hask{IO} 对象的内容进行分支：
 \begin{haskell}
 main :: IO ()
 main = do
-  s <- getLine
-  if s == "yes"
-  then putStrLn "Thank you!"
-  else putStrLn "Next time."
+s <- getLine
+if s == "yes"
+then putStrLn "Thank you!"
+else putStrLn "Next time."
 \end{haskell}
-Of course, the inspection of the value is postponed until the runtime interpreter of \hask{IO} gets hold of this code. 
+当然，值的检查被推迟到 \hask{IO} 的运行时解释器获取这段代码时才进行。
 
-Applicative composition using the splat operator doesn't allow for one part of the computation to inspect the result of the other. This a limitation that can be turned into an advantage. The absence of dependencies makes it possible to run the computations in parallel.  Haskell's parallel libraries use applicative programming extensively.
+使用 splat 运算符的 Applicative 组合不允许计算的一部分检查另一部分的结果。这种限制可以转化为优势。没有依赖关系的情况下，可以并行运行计算。Haskell 的并行库广泛使用了应用式编程。
 
-On the other hand, monads let us use the very convenient \hask{do} syntax, which is arguably more readable than the applicative syntax. Fortunately, there is a language extension \hask{ApplicativeDo}, which instructs the compiler to selectively use applicative constructs in interpreting \hask{do} blocks, whenever there are no dependencies.
+另一方面，monads 允许我们使用非常方便的 \hask{do} 语法，这比应用语法更具可读性。幸运的是，有一个语言扩展 \hask{ApplicativeDo}，它指示编译器在解释 \hask{do} 块时选择性地使用应用结构，前提是没有依赖关系。
 
 \begin{exercise}
-Verify \hask{Applicative} laws for the zip instance of the list functor.
+验证列表函子的 zip 实例的 \hask{Applicative} 定律。
 \end{exercise}
 
 

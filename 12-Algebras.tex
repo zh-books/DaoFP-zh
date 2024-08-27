@@ -1,794 +1,790 @@
 \documentclass[DaoFP]{subfiles}
 \begin{document}
-\setcounter{chapter}{11}
+ \setcounter{chapter}{11}
 
-\chapter{Algebras}
+ \chapter{Algebras 代数}
 
-The essence of algebra is the formal manipulation of expressions. But what are expressions, and how do we manipulate them?
+ 代数的本质是对表达式进行形式化操作。那么，什么是表达式，我们如何操作它们呢？
 
-The first things to observe about algebraic expressions like $2 (x + y)$ or $a x^2 + b x + c$ is that there are infinitely many of them. There is a finite number of rules for making them, but these rules can be used in infinitely many combinations. This suggests that the rules are used \emph{recursively}. 
+ 首先需要注意的是，像 $2 (x + y)$ 或 $a x^2 + b x + c$ 这样的代数表达式是无穷多的。虽然有有限的规则来生成它们，但这些规则可以以无穷多种组合使用。这表明这些规则是\emph{递归地}使用的。
 
+ 在编程中，表达式几乎与（解析）树同义。考虑以下一个算术表达式的简单示例：
+ \begin{haskell}
+  data Expr = Val Int
+  | Plus Expr Expr
+ \end{haskell}
+ 这是构建树的一个配方。我们从使用 \hask{Val} 构造函数的小树开始。然后我们将这些幼苗植入节点，依此类推。
+ \begin{haskell}
+  e2 = Val 2
+  e3 = Val 3
+  e5 = Plus e2 e3
+  e7 = Plus e5 e2
+ \end{haskell}
 
-In programming, expressions are virtually synonymous to (parsing) trees. Consider this simple example of an arithmetic expression:
-\begin{haskell}
-data Expr = Val Int 
-          | Plus Expr Expr
-\end{haskell}
-It's a recipe for building trees. We start with little trees using the \hask{Val} constructor. We then plant these seedlings into nodes, and so on.
-\begin{haskell}
-e2 = Val 2
-e3 = Val 3
-e5 = Plus e2 e3
-e7 = Plus e5 e2
-\end{haskell}
+ 这种递归定义在编程语言中运作良好。问题在于每个新的递归数据结构都需要其自己的操作库。
 
-Such recursive definitions work perfectly well in a programming language. The problem is that every new recursive data structure would require its own library of functions that operate on it.
+ 从类型论的角度来看，我们能够定义递归类型，如自然数或列表，这是通过提供特定的引入和消除规则来实现的。我们需要的是更通用的东西，即从更简单的可插入组件生成任意递归类型的过程。
 
-From type-theory point of view, we've been able to define recursive types, such as natural numbers or lists, by providing, in each case, specific introduction and elimination rules. What we need is something more general, a procedure for generating arbitrary recursive types from simpler pluggable components. 
+ 在涉及递归数据结构时，有两个正交的关注点。一个是递归的机制，另一个是可插入的组件。
 
-There are two orthogonal concerns when it comes to recursive data structures. One is the machinery of recursion. The other is the pluggable components. 
+ 我们知道如何处理递归：我们假设我们知道如何构建小树。然后我们使用递归步骤将这些小树植入节点中，以构建更大的树。
 
-We know how to work with recursion: We assume that we know how to construct small trees. We then use the recursive step to plant those trees into nodes to make bigger trees. 
+ 范畴论告诉我们如何形式化这种不精确的描述。
 
-Category theory tells us how to formalize this imprecise description.
+ \section{Algebras from Endofunctors 从自函子构造代数}
 
-\section{Algebras from Endofunctors}
+ 将小树植入节点的想法要求我们形式化地定义拥有“空位”的数据结构——一个“容器”。这正是函子的用途。因为我们希望递归地使用这些函子，它们必须是\emph{自}函子。
 
-The idea of planting smaller trees into nodes requires that we formalize what it means to have a data structure with holes---a ``container for stuff.'' This is exactly what functors are for. Because we want to use these functors recursively, they have to be \emph{endo}-functors.
+ 例如，我们之前示例中的自函子可以通过以下数据结构定义，其中的 \hask{x} 标记了空位：
+ \begin{haskell}
+  data ExprF x = ValF Int
+  | PlusF x x
+ \end{haskell}
+ 关于所有可能的表达式形状的信息被抽象为一个函子。
 
-For instance, the endofunctor from our earlier example would be defined by the following data structure, where \hask{x}'s mark the spots:
-\begin{haskell}
-data ExprF x = ValF Int 
-             | PlusF x x
-\end{haskell}
-Information about all possible shapes of expressions is abstracted into one single functor. 
+ 定义代数的另一个重要信息是表达式求值的配方。这同样可以使用相同的自函子进行编码。
 
-The other important piece of information when defining an algebra is the recipe for evaluating expressions. This, too, can be encoded using the same endofunctor. 
+ 递归地思考，假设我们知道如何求值一个更大表达式的所有子树。那么剩下的一步就是将这些结果插入顶层节点并对其进行求值。
 
-Thinking recursively, let's assume that we know how to evaluate all subtrees of a larger expression. Then the remaining step is to plug these results into the top level node and evaluate it. 
+ 例如，假设函子中的 \hask{x} 被整数替代——即子树的求值结果。在最后一步该怎么做是很明显的。如果我们的树顶只是一个叶子 \hask{ValF}（这意味着没有子树需要求值），我们只需返回存储在其中的整数。如果它是一个 \hask{PlusF} 节点，我们将把其中的两个整数相加。这个配方可以编码为：
+ \begin{haskell}
+  eval :: ExprF Int -> Int
+  eval (ValF n)    = n
+  eval (PlusF m n) = m + n
+ \end{haskell}
 
-For instance, suppose that the \hask{x}'s in the functor were replaced by integers---the results of evaluation of the subtrees. It's pretty obvious what we should do in the last step. If the top of our tree is just a leaf \hask{ValF} (which means there were no subtrees to evaluate) we'll just return the integer stored in it. If it's a \hask{PlusF} node, we'll add the two integers in it. This recipe can be encoded as:
-\begin{haskell}
-eval :: ExprF Int -> Int
-eval (ValF n)    = n
-eval (PlusF m n) = m + n
-\end{haskell}
+ 我们基于常识做了一些看似显而易见的假设。例如，由于节点被称为 \hask{PlusF}，我们假设我们应该将两个数字相加。但乘法或减法同样适用。
 
-We have made some seemingly obvious assumptions based on common sense. For instance, since the node was called \hask{PlusF} we assumed that we should add the two numbers. But multiplication or subtraction would work equally well.
+ 由于叶子 \hask{ValF} 包含一个整数，我们假设表达式应当求值为一个整数。但也有同样合理的求值器可以将表达式转换为字符串，这个求值器使用连接而不是相加：
+ \begin{haskell}
+  pretty :: ExprF String -> String
+  pretty (ValF n)    = show n
+  pretty (PlusF s t) = s ++ " + " ++ t
+ \end{haskell}
 
-Since the leaf \hask{ValF} contained an integer, we assumed that the expression should evaluate to an integer. But there is an equally plausible evaluator that pretty-prints the expression by converting it to a string. This evaluator uses concatenation instead of addition:
-\begin{haskell}
-pretty :: ExprF String -> String
-pretty (ValF n)    = show n
-pretty (PlusF s t) = s ++ " + " ++ t
-\end{haskell}
+ 事实上，有无限多的求值器，有些合理，有些则不那么合理，但我们不应该做出判断。任何目标类型的选择和任何求值器的选择都应该同样有效。这导致了以下定义：
 
-In fact there are infinitely many evaluators, some sensible, others less so, but we shouldn't be judgmental. Any choice of the target type and any choice of the evaluator should be equally valid. This leads to the following definition:
+ 一个自函子 $F$ 的\emph{代数 (Algebra)} 是一个二元组 $(c, \alpha)$。对象 $c$ 被称为代数的\emph{载体 (Carrier)}，求值器 $\alpha \colon F c \to c$ 被称为\emph{结构映射 (Structure Map)}。
 
-An \emph{algebra} for an endofunctor $F$ is a pair $(c, \alpha)$. The object $c$ is called the \emph{carrier} of the algebra, and the evaluator $\alpha \colon F c \to c$ is called the \emph{structure map}.
+ 在 Haskell 中，给定函子 \hask{f}，我们定义：
+ \begin{haskell}
+  type Algebra f c = f c -> c
+ \end{haskell}
 
-In Haskell, given the functor \hask{f} we define:
-\begin{haskell}
-type Algebra f c = f c -> c
-\end{haskell}
+ 请注意，求值器\emph{不是}多态函数。它是为特定类型 \hask{c} 选择的特定函数。对于给定类型，可能有许多载体类型的选择，也可能有许多不同的求值器。它们都定义了独立的代数。
 
-Notice that the evaluator is \emph{not} a polymorphic function. It's a specific choice of a function for a specific type \hask{c}. There may be many choices of the carrier types and there be many different evaluators for a given type. They all define separate algebras.
+ 我们之前定义了两个 \hask{ExprF} 的代数。这个代数的载体是 \hask{Int}：
+ \begin{haskell}
+  eval :: Algebra ExprF Int
+  eval (ValF n)   = n
+  eval (PlusF m n) = m + n
+ \end{haskell}
+ 而这个代数的载体是 \hask{String}：
+ \begin{haskell}
+  pretty :: Algebra ExprF String
+  pretty (ValF n)   = show n
+  pretty (PlusF s t) = s ++ " + " ++ t
+ \end{haskell}
 
-We have previously defined two algebras for \hask{ExprF}. This one has \hask{Int} as a carrier:
-\begin{haskell}
-eval :: Algebra ExprF Int
-eval (ValF n)   = n
-eval (PlusF m n) = m + n
-\end{haskell}
-and this one has \hask{String} as a carrier:
-\begin{haskell}
-pretty :: Algebra ExprF String
-pretty (ValF n)   = show n
-pretty (PlusF s t) = s ++ " + " ++ t
-\end{haskell}
+ \section{Category of Algebras 代数的范畴}
 
-\section{Category of Algebras}
+ 给定自函子 $F$ 的代数构成一个范畴。在该范畴中的箭头是代数态射 (Algebra Morphism)，这是其载体对象之间的结构保持箭头。
 
-Algebras for a given endofunctor $F$ form a category. An arrow in that category is an algebra morphism, which is a structure-preserving arrow between their carrier objects. 
+ 在这种情况下，保持结构意味着箭头必须与两个结构映射交换。这就是函子性 (Functoriality) 发挥作用的地方。要从一个结构映射切换到另一个，我们必须能够提升在其载体之间的箭头。
 
-Preserving structure in this case means that the arrow must commute with the two structure maps. This is where functoriality comes into play. To switch from one structure map to another, we have to be able to lift an arrow that goes between their carriers. 
-
-Given an endofunctor $F$, an \emph{algebra morphism} between two algebras $(a, \alpha)$ and $(b, \beta)$ is an arrow $f \colon a \to b$ that makes this diagram commute:
-\[
- \begin{tikzcd}
- F a 
- \arrow[r, "F f"]
- \arrow[d, "\alpha"]
- & F b
-\arrow[d, "\beta"]
- \\
- a
- \arrow[r, "f"]
- & b
+ 给定一个自函子 $F$，两个代数 $(a, \alpha)$ 和 $(b, \beta)$ 之间的一个\emph{代数态射 (Algebra Morphism)} 是一个箭头 $f \colon a \to b$，使得下图交换：
+ \[
+  \begin{tikzcd}
+   F a
+   \arrow[r, "F f"]
+   \arrow[d, "\alpha"]
+   & F b
+   \arrow[d, "\beta"]
+   \\
+   a
+   \arrow[r, "f"]
+   & b
   \end{tikzcd}
-\]
-In other words, the following equation must hold:
-\[f \circ \alpha = \beta \circ F f \]
+ \]
+ 换句话说，必须满足以下等式：
+ \[f \circ \alpha = \beta \circ F f \]
 
-The composition of two algebra morphisms is again an algebra morphism, which can be seen by pasting together two such diagrams (a functor maps composition to composition). The identity arrow is also an algebra morphism, because 
-\[ id_a \circ \alpha = \alpha \circ F (id_a) \]
-(a functor maps identity to identity).
+ 两个代数态射的复合仍然是一个代数态射，这可以通过粘贴两个这样的图来验证（函子将复合映射为复合）。恒等箭头也是一个代数态射，因为
+ \[ id_a \circ \alpha = \alpha \circ F (id_a) \]
+ （函子将恒等映射为恒等）。
 
-The commuting condition in the definition of an algebra morphism is very restrictive. Consider for instance a function that maps an integer to a string. In Haskell there is a \hask{show} function (actually, a method of the \hask{Show} class) that does it. It is \emph{not} an algebra morphism from \hask{eval} to \hask{pretty}. 
+ 代数态射定义中的交换条件非常严格。例如，考虑一个将整数映射为字符串的函数。在 Haskell 中，有一个 \hask{show} 函数（实际上是 \hask{Show} 类的方法）可以做到这一点。它\emph{不是}从 \hask{eval} 到 \hask{pretty} 的代数态射。
 
-\begin{exercise}
-Show that \hask{show} is not an algebra morphism. Hint: Consider what happens to the \hask{PlusF} node.
-\end{exercise}
+ \begin{exercise}
+  证明 \hask{show} 不是一个代数态射。提示：考虑 \hask{PlusF} 节点会发生什么。
+ \end{exercise}
 
-\subsection{Initial algebra}
+ \subsection{Initial algebra 初始代数}
 
-The initial object in the category of algebras for a given functor $F$ is called the \emph{initial algebra} and, as we'll see, it plays a very important role.
+ 给定某个函子的代数范畴中的初始对象称为\emph{初始代数 (Initial Algebra)}，正如我们将看到的，它扮演着非常重要的角色。
 
-By definition, the initial algebra $(i, \iota)$ has a unique algebra morphism $f$ from it to any other algebra $(a, \alpha)$. Diagrammatically:
+ 根据定义，初始代数 $(i, \iota)$ 对于任何其他代数 $(a, \alpha)$ 都有一个唯一的代数态射 $f$。如图所示：
 
-\[
- \begin{tikzcd}
- F i 
- \arrow[r, "F f"]
- \arrow[d, "\iota"]
- & F a
-\arrow[d, "\alpha"]
- \\
- i
- \arrow[r, dashed, "f"]
- & a
+ \[
+  \begin{tikzcd}
+   F i
+   \arrow[r, "F f"]
+   \arrow[d, "\iota"]
+   & F a
+   \arrow[d, "\alpha"]
+   \\
+   i
+   \arrow[r, dashed, "f"]
+   & a
   \end{tikzcd}
-\]
- This unique morphism is called a \emph{catamorphism} for the algebra $(a, \alpha)$. It is sometimes written using \index{banana brackets}\index{$\llparenthesis \rrparenthesis$}``banana brackets'' as $\llparenthesis \alpha \rrparenthesis$.
+ \]
+ 这个唯一的态射称为该代数 $(a, \alpha)$ 的\emph{卡塔态射 (Catamorphism)}。有时它被写作\index{banana brackets}\index{$\llparenthesis \rrparenthesis$}``香蕉括号'' $\llparenthesis \alpha \rrparenthesis$。
+
+ \begin{exercise}
+  让我们为以下函子定义两个代数：
+  \begin{haskell}
+   data FloatF x = Num Float | Op x x
+  \end{haskell}
+  第一个代数：
+  \begin{haskell}
+   addAlg :: Algebra FloatF Float
+   addAlg (Num x) = log x
+   addAlg (Op x y) = x + y
+  \end{haskell}
+  第二个代数：
+  \begin{haskell}
+   mulAlg :: Algebra FloatF Float
+   mulAlg (Num x) = x
+   mulAlg (Op x y) = x * y
+  \end{haskell}
+  做出令人信服的论证，证明 \hask{log}（对数函数）是这两个代数之间的一个代数态射。（\hask{Float} 是一个内置的浮点数类型。）
+ \end{exercise}
+
+ \section{Lambek's Lemma and Fixed Points Lambek引理与不动点}
 
 
-\begin{exercise}
-Let's define two algebras for the following functor:
-\begin{haskell}
-data FloatF x = Num Float | Op x x
-\end{haskell}
-The first algebra:
-\begin{haskell}
-addAlg :: Algebra FloatF Float
-addAlg (Num x) = log x
-addAlg (Op x y) = x + y
-\end{haskell}
-The second algebra:
-\begin{haskell}
-mulAlg :: Algebra FloatF Float
-mulAlg (Num x) = x
-mulAlg (Op x y) = x * y
-\end{haskell}
-Make a convincing argument that \hask{log} (logarithm) is an algebra morphism between these two. (\hask{Float} is a built-in floating-point number type.)
-\end{exercise}
+ Lambek 引理指出，初始代数的结构映射 $\iota$ 是一个同构。
 
-\section{Lambek's Lemma and Fixed Points}
+ 原因在于代数的自相似性。你可以使用 $F$ 提升任何代数 $(a, \alpha)$，得到的新代数 $(F a, F \alpha)$ 仍然是一个代数，结构映射是 $F \alpha \colon F (F a) \to F a$。
 
-
-Lambek's lemma says that the structure map $\iota$ of the initial algebra is an isomorphism. 
-
-The reason for it is the self-similarity of algebras. You can lift any algebra $(a, \alpha)$ using $F$, and the result $(F a, F \alpha)$ is also an algebra with the structure map $F \alpha \colon F (F a) \to F a$. 
-
-In particular, if you lift the initial algebra $(i, \iota)$, you get a new algebra with the carrier $F i$ and the structure map $F \iota \colon F (F i) \to F i$. It follows then that there must be a unique algebra morphism from the initial algebra to it:
-\[
- \begin{tikzcd}
- F i 
- \arrow[r, "F h"]
- \arrow[d, "\iota"]
- & F (F i)
-\arrow[d, "F \iota"]
- \\
- i
- \arrow[r, dashed, "h"]
- & F i
+ 特别地，如果你提升初始代数 $(i, \iota)$，你将得到一个载体为 $F i$ 的新代数，结构映射为 $F \iota \colon F (F i) \to F i$。因此，必须存在一个唯一的代数态射从初始代数映射到它：
+ \[
+  \begin{tikzcd}
+   F i
+   \arrow[r, "F h"]
+   \arrow[d, "\iota"]
+   & F (F i)
+   \arrow[d, "F \iota"]
+   \\
+   i
+   \arrow[r, dashed, "h"]
+   & F i
   \end{tikzcd}
-\]
-This $h$ is the inverse of $\iota$. To see that, let's consider the composition $\iota \circ h$. It is the arrow at the bottom of the following diagram
-\[
- \begin{tikzcd}
- F i 
- \arrow[r, "F h"]
- \arrow[d, "\iota"]
- & F (F i)
-\arrow[d, "F \iota"]
-\arrow[r, "F \iota"]
-& F i
-\arrow[d, "\iota"]
- \\
- i
- \arrow[r, dashed, "h"]
- & F i
- \arrow[r, "\iota"]
- & i
+ \]
+ 这个 $h$ 是 $\iota$ 的逆元。为了看到这一点，我们考虑组合 $\iota \circ h$。它是以下图的底部箭头：
+ \[
+  \begin{tikzcd}
+   F i
+   \arrow[r, "F h"]
+   \arrow[d, "\iota"]
+   & F (F i)
+   \arrow[d, "F \iota"]
+   \arrow[r, "F \iota"]
+   & F i
+   \arrow[d, "\iota"]
+   \\
+   i
+   \arrow[r, dashed, "h"]
+   & F i
+   \arrow[r, "\iota"]
+   & i
   \end{tikzcd}
-\]
-This is a pasting of the original diagram with a trivially commuting diagram. Therefore the whole rectangle commutes. We can interpret this as $\iota \circ h$ being an algebra morphism from $(i, \iota)$ to itself. But there already is such an algebra morphism---the identity. So, by uniqueness of the mapping out from the initial algebra, these two must be equal:
-\[ \iota \circ h = id_i \] 
+ \]
+ 这是原始图与一个平凡交换的图的粘贴。因此整个矩形交换。我们可以将其解释为 $\iota \circ h$ 是 $(i, \iota)$ 到其自身的代数态射。但已经存在这样一个代数态射——即恒等态射。因此，根据从初始代数映射出的唯一性，这两个必须相等：
+ \[ \iota \circ h = id_i \]
 
-Knowing that, we can now go back to the previous diagram, which states that:
-\[ h \circ \iota = F \iota \circ F h \]
-Since $F$ is a functor, it maps composition to composition and identity to identity. Therefore the right hand side is equal to:
-\[ F (\iota \circ h) = F (id_i) = id_{F i} \]
+ 知道这一点后，我们现在可以回到前面的图，该图表示：
+ \[ h \circ \iota = F \iota \circ F h \]
+ 由于 $F$ 是一个函子，它将复合映射为复合，将恒等映射为恒等。因此右边等式等于：
+ \[ F (\iota \circ h) = F (id_i) = id_{F i} \]
 
-We have thus shown that $h$ is the inverse of $\iota$, which means that $\iota$ is an isomorphism. In other words:
-\[ F i \cong i \]
-We interpret this identity as stating that $i$ is a fixed point of $F$ (up to isomorphism). The action of $F$ on $i$ ``doesn't change it.''
+ 我们已经证明了 $h$ 是 $\iota$ 的逆元，这意味着 $\iota$ 是一个同构。换句话说：
+ \[ F i \cong i \]
+ 我们将此等式解释为表示 $i$ 是 $F$ 的不动点（同构意义上的）。$F$ 在 $i$ 上的作用“没有改变它”。
 
-There may be many fixed points, but this one is the \emph{least fixed point} because there is an algebra morphism from it to any other fixed point. The least fixed point of an endofunctor $F$ is denoted $\mu F$, so we write:
-\[ i = \mu F \]
-\subsection{Fixed point in Haskell}
-Let's consider how the definition of the fixed point works with our original example given by the endofunctor:
-\begin{haskell}
-data ExprF x = ValF Int | PlusF x x
-\end{haskell}
-Its fixed point is a data structure defined by the property that \hask{ExprF} acting on it reproduces it. If we call this fixed point \hask{Expr}, the fixed point equation becomes  (in pseudo-Haskell):
-\begin{haskell}
-Expr = ExprF Expr
-\end{haskell}
-Expanding \hask{ExprF} we get:
-\begin{haskell}
-Expr = ValF Int | PlusF Expr Expr
-\end{haskell}
-Compare this with the recursive definition (actual Haskell):
-\begin{haskell}
-data Expr = Val Int | Plus Expr Expr
-\end{haskell}
-We get a recursive data structure as a solution to the fixed-point equation.
+ 可能有许多不动点，但这个是\emph{最小不动点 (Least Fixed Point)}，因为有一个代数态射从它映射到任何其他不动点。一个自函子 $F$ 的最小不动点表示为 $\mu F$，因此我们写作：
+ \[ i = \mu F \]
+ \subsection{Fixed point in Haskell Haskell 中的不动点}
+ 让我们考虑不动点的定义如何作用于我们最初的例子，该例子由自函子定义：
+ \begin{haskell}
+  data ExprF x = ValF Int | PlusF x x
+ \end{haskell}
+ 它的不动点是一个数据结构，其定义属性是 \hask{ExprF} 作用于它会重现它。如果我们称这个不动点为 \hask{Expr}，那么不动点方程变为（伪 Haskell 代码）：
+ \begin{haskell}
+  Expr = ExprF Expr
+ \end{haskell}
+ 展开 \hask{ExprF} 我们得到：
+ \begin{haskell}
+  Expr = ValF Int | PlusF Expr Expr
+ \end{haskell}
+ 将其与递归定义（实际 Haskell 代码）比较：
+ \begin{haskell}
+  data Expr = Val Int | Plus Expr Expr
+ \end{haskell}
+ 我们得到了一个递归数据结构作为不动点方程的解。
 
-In Haskell, we can define a fixed point data structure for any functor (or even just a type constructor). As we'll see later, this doesn't always give us the carrier of the initial algebra. It only works for those functors that have the ``leaf'' component.
+ 在 Haskell 中，我们可以为任何函子（或仅仅是类型构造函数）定义一个不动点数据结构。正如我们稍后将看到的，这并不总是给我们初始代数的载体。它只适用于具有“叶子”组件的函子。
 
-Let's call \hask{Fix f} the fixed point of a functor \hask{f}. Symbolically, the fixed-point equation can be written as:
-\[f ( \text{Fix} f) \cong  \text{Fix} f \]
-or, in code,
-\begin{haskell}
-data Fix f where
+ 我们称 \hask{Fix f} 为函子 \hask{f} 的不动点。象征性地，不动点方程可以写作：
+ \[f ( \text{Fix} f) \cong  \text{Fix} f \]
+ 或代码中，
+ \begin{haskell}
+  data Fix f where
   In :: f (Fix f) -> Fix f
-\end{haskell}
-The data constructor \hask{In} is exactly the structure map of the initial algebra whose carrier is \hask{Fix f}. Its inverse is:
-\begin{haskell}
-out :: Fix f -> f (Fix f)
-out (In x) = x
-\end{haskell}
-The Haskell standard library contains a more idiomatic definition:
-\begin{haskell}
-newtype Fix f = Fix { unFix :: f (Fix f) }
-\end{haskell}
+ \end{haskell}
+ 数据构造函数 \hask{In} 正是载体为 \hask{Fix f} 的初始代数的结构映射。其逆映射为：
+ \begin{haskell}
+  out :: Fix f -> f (Fix f)
+  out (In x) = x
+ \end{haskell}
+ Haskell 标准库中包含了一个更惯用的定义：
+ \begin{haskell}
+  newtype Fix f = Fix { unFix :: f (Fix f) }
+ \end{haskell}
 
-To create terms of the type \hask{Fix f} we often use ``smart constructors.'' For instance, with the \hask{ExprF} functor, we would define:
-\begin{haskell}
-val :: Int -> Fix ExprF
-val n = In (ValF n)
+ 为了创建类型 \hask{Fix f} 的项，我们经常使用“智能构造函数 (Smart Constructors)”。例如，对于函子 \hask{ExprF}，我们会定义：
+ \begin{haskell}
+  val :: Int -> Fix ExprF
+  val n = In (ValF n)
 
-plus :: Fix ExprF -> Fix ExprF -> Fix ExprF
-plus e1 e2 = In (PlusF e1 e2)
-\end{haskell}
-and use it to generate expression trees like this one:
-\begin{haskell}
-e9 :: Fix ExprF
-e9 = plus (plus (val 2) (val 3)) (val 4)
-\end{haskell}
+  plus :: Fix ExprF -> Fix ExprF -> Fix ExprF
+  plus e1 e2 = In (PlusF e1 e2)
+ \end{haskell}
+ 并使用它生成如下的表达式树：
+ \begin{haskell}
+  e9 :: Fix ExprF
+  e9 = plus (plus (val 2) (val 3)) (val 4)
+ \end{haskell}
 
-\section{Catamorphisms}
+ \section{Catamorphisms 卡塔态射}
 
-Our goal, as programmers, is to be able to perform a computation over a recursive data structure---to ``fold'' it. We now have all the ingredients. 
+ 作为程序员，我们的目标是能够在递归数据结构上执行计算——即“折叠 (Fold)”它。我们现在已经有了所有的组成部分。
 
-The data structure is defined as a fixed point of a functor. An algebra for this functor defines the operation we want to perform. We've seen the fixed point and the algebra combined in the following diagram:
-\[
- \begin{tikzcd}
- F i 
- \arrow[r, "F f"]
- \arrow[d, "\iota"]
- & F a
-\arrow[d, "\alpha"]
- \\
- i
- \arrow[r, dashed, "f"]
- & a
+ 数据结构定义为某个函子的一个不动点。这个函子的代数定义了我们想要执行的操作。我们已经看到不动点和代数结合在以下图中：
+ \[
+  \begin{tikzcd}
+   F i
+   \arrow[r, "F f"]
+   \arrow[d, "\iota"]
+   & F a
+   \arrow[d, "\alpha"]
+   \\
+   i
+   \arrow[r, dashed, "f"]
+   & a
   \end{tikzcd}
-\]
-that defines the catamorphism $f$ for the algebra $(a, \alpha)$.
+ \]
+ 它定义了代数 $(a, \alpha)$ 的卡塔态射 $f$。
 
-The final piece of information is the Lambek's lemma, which tells us that $\iota$ could be inverted because it's an isomorphism. It means that we can read this diagram as:
-\[ f = \alpha \circ F f \circ \iota^{-1} \]
-and interpret it as a recursive definition of $f$. 
+ 最后的一条信息是 Lambek 引理，它告诉我们 $\iota$ 可以反转，因为它是一个同构。这意味着我们可以将这个图解读为：
+ \[ f = \alpha \circ F f \circ \iota^{-1} \]
+ 并将其解释为 $f$ 的递归定义。
 
-Let's redraw this diagram using Haskell notation. The catamorphism depends on the algebra so, for the algebra with the carrier \hask{a} and the evaluator \hask{alg}, we'll have the catamorphism \hask{cata alg}.
+ 让我们使用 Haskell 表示法重新绘制这个图。卡塔态射依赖于代数，所以对于载体为 \hask{a} 和求值器为 \hask{alg} 的代数，我们将有卡塔态射 \hask{cata alg}。
 
-\[
- \begin{tikzcd}
-  \hask{f (Fix f)}
- \arrow[rrrr, "\hask{fmap (cata alg)}"]
- &&&& \hask{f a}
-\arrow[d, "\hask{alg}"]
- \\
- \hask{Fix f}
- \arrow[u, "\hask{out}"]
- \arrow[rrrr, dashed, "\hask{cata alg}"]
- &&&& \hask{a}
+ \[
+  \begin{tikzcd}
+   \hask{f (Fix f)}
+   \arrow[rrrr, "\hask{fmap (cata alg)}"]
+   &&&& \hask{f a}
+   \arrow[d, "\hask{alg}"]
+   \\
+   \hask{Fix f}
+   \arrow[u, "\hask{out}"]
+   \arrow[rrrr, dashed, "\hask{cata alg}"]
+   &&&& \hask{a}
   \end{tikzcd}
-\]
-By simply following the arrows, we get this recursive definition:
-\begin{haskell}
-cata :: Functor f => Algebra f a -> Fix f -> a
-cata alg = alg . fmap (cata alg) . out
-\end{haskell}
+ \]
+ 简单地跟随箭头，我们得到这个递归定义：
+ \begin{haskell}
+  cata :: Functor f => Algebra f a -> Fix f -> a
+  cata alg = alg . fmap (cata alg) . out
+ \end{haskell}
 
-Here's what's happening: We apply this definition to some \hask{Fix f}. Every \hask{Fix f} is obtained by applying \hask{In} to a functorful of \hask{Fix f}:
-\begin{haskell}
-data Fix f where
+ 这里发生的事情是：我们将这个定义应用于某个 \hask{Fix f}。每个 \hask{Fix f} 都是通过将 \hask{In} 应用于一个函子类型的 \hask{Fix f} 获得的：
+ \begin{haskell}
+  data Fix f where
   In :: f (Fix f) -> Fix f
-\end{haskell}
-The function \hask{out} ``strips'' the data constructor \hask{In}:
-\begin{haskell}
-out :: Fix f -> f (Fix f)
-out (In x) = x
-\end{haskell}
+ \end{haskell}
+ 函数 \hask{out} “剥离”了数据构造函数 \hask{In}：
+ \begin{haskell}
+  out :: Fix f -> f (Fix f)
+  out (In x) = x
+ \end{haskell}
 
-We can now evaluate the functorful of \hask{Fix f} by \hask{fmap}'ing \hask{cata alg} over it. This is a recursive application. The idea is that the trees inside the functor are smaller than the original tree, so the recursion eventually terminates. It terminates when it hits the leaves. 
+ 我们现在可以通过 \hask{fmap} 对其应用 \hask{cata alg} 来求值函子类型的 \hask{Fix f}。这是一个递归应用。其思想是，函子内部的树比原始树小，因此递归最终会终止。它在命中叶子时终止。
 
-After this step, we are left with a functorful of values, and we apply the evaluator \hask{alg} to it, to get the final result.
+ 在此步骤之后，我们得到一个函子类型的值，我们对其应用求值器 \hask{alg}，以获得最终结果。
 
-The power of this approach is that all the recursion is encapsulated in one data type and one library function: We have the definition of \hask{Fix} and the catamorphism \hask{cata}. The client of the library provides only the \emph{non-recursive} pieces: the functor and the algebra. These are much easier to deal with. We have decomposed a complex problem into simpler components.
+ 这种方法的强大之处在于所有递归都被封装在一个数据类型和一个库函数中：我们有 \hask{Fix} 的定义和卡塔态射 \hask{cata}。库的客户只提供\emph{非递归}部分：函子和代数。这些要容易处理得多。我们已经将一个复杂问题分解为更简单的组成部分。
 
-\subsection{Examples}
+ \subsection{Examples 示例}
 
-We can immediately apply this construction to our earlier examples. You can check that:
-\begin{haskell}
-cata eval e9
-\end{haskell}
-evaluates to $9$ and
-\begin{haskell}
-cata pretty e9
-\end{haskell}
-evaluates to the string \hask{"2 + 3 + 4"}.
+ 我们可以立即将此构造应用于我们之前的示例。你可以检查：
+ \begin{haskell}
+  cata eval e9
+ \end{haskell}
+ 求值为 $9$，而
+ \begin{haskell}
+  cata pretty e9
+ \end{haskell}
+ 求值为字符串 \hask{"2 + 3 + 4"}。
 
-Sometimes we want to display the tree on multiple lines with indentation. This requires passing a depth counter to recursive calls. There is a clever trick that uses a function type as a carrier:
-\begin{haskell}
-pretty' :: Algebra ExprF (Int -> String)
-pretty' (ValF n) i = indent i ++ show n
-pretty' (PlusF f g) i = f (i + 1) ++ "\n" ++
-                        indent i ++ "+" ++ "\n" ++
-                        g (i + 1)
-\end{haskell}
-The auxiliary function \hask{indent} replicates the space character:
-\begin{haskell}
-indent n = replicate (n * 2) ' '
-\end{haskell}
-The result of:
-\begin{haskell}
-cata pretty' e9 0
-\end{haskell}
-when printed, looks like this:
-\begin{haskell}
-    2
+ 有时我们希望多行显示树并进行缩进。这需要将一个深度计数器传递给递归调用。有一个巧妙的技巧是使用函数类型作为载体：
+ \begin{haskell}
+  pretty' :: Algebra ExprF (Int -> String)
+  pretty' (ValF n) i = indent i ++ show n
+  pretty' (PlusF f g) i = f (i + 1) ++ "\n" ++
+  indent i ++ "+" ++ "\n" ++
+  g (i + 1)
+ \end{haskell}
+ 辅助函数 \hask{indent} 复制空格字符：
+ \begin{haskell}
+  indent n = replicate (n * 2) ' '
+ \end{haskell}
+ 结果：
+ \begin{haskell}
+  cata pretty' e9 0
+ \end{haskell}
+ 当打印时，看起来像这样：
+ \begin{haskell}
+  2
   +
-    3
-+
+  3
+  +
   4
-\end{haskell}
+ \end{haskell}
 
 
-Let's try defining algebras for other familiar functors. The fixed point of the \hask{Maybe} functor:
-\begin{haskell}
-data Maybe x = Nothing | Just x
-\end{haskell}
-after some renaming, is equivalent to the type of natural numbers
-\begin{haskell}
-data Nat = Z | S Nat
-\end{haskell}
-An algebra for this functor consists of a choice of the carrier \hask{a} and an evaluator:
-\begin{haskell}
-alg :: Maybe a -> a
-\end{haskell}
-The mapping out of \hask{Maybe} is determined by two things: the value corresponding to \hask{Nothing} and a function \hask{a->a} corresponding to \hask{Just}. In our discussion of the type of natural numbers we called these \hask{init} and \hask{step}. We can now see that the elimination rule for \hask{Nat} is the catamorphism for this algebra.
+ 让我们尝试为其他熟悉的函子定义代数。自函子 \hask{Maybe} 的不动点：
+ \begin{haskell}
+  data Maybe x = Nothing | Just x
+ \end{haskell}
+ 经过一些重命名后，相当于自然数类型：
+ \begin{haskell}
+  data Nat = Z | S Nat
+ \end{haskell}
+ 此函子的代数包括载体 \hask{a} 的选择和一个求值器：
+ \begin{haskell}
+  alg :: Maybe a -> a
+ \end{haskell}
+ \hask{Maybe} 的映射由两件事决定：对应于 \hask{Nothing} 的值和一个对应于 \hask{Just} 的函数 \hask{a->a}。在我们讨论自然数类型时，我们将其称为 \hask{init} 和 \hask{step}。现在我们可以看到，\hask{Nat} 的消除规则就是此代数的卡塔态射。
 
-\subsection{Lists as initial algebras}
+ \subsection{Lists as initial algebras 列表作为初始代数}
 
-The list type that we've seen previously is equivalent to a fixed point of the following functor, which is parameterized by the type of the list contents \hask{a}:
-\begin{haskell}
-data ListF a x = NilF | ConsF a x
-\end{haskell}
-An algebra for this functor is a mapping out:
-\begin{haskell}
-alg :: ListF a c -> c
-alg NifF = init
-alg (ConsF a c) = step (a, c)
-\end{haskell}
-which is determined by the value \hask{init} and the function \hask{step}:
-\begin{haskell}
-init :: c
-step :: (a, c) -> c
-\end{haskell}
-A catamorphism for such an algebra is the list recursor:
-\begin{haskell}
-recList :: c -> ((a, c) -> c) -> (List a -> c)
-\end{haskell}
-where \hask{(List a)} can be identified with the fixed point \hask{Fix (ListF a)}.
+ 我们之前见到的列表类型等价于以下函子的一个不动点，该函子由列表内容的类型 \hask{a} 参数化：
+ \begin{haskell}
+  data ListF a x = NilF | ConsF a x
+ \end{haskell}
+ 此函子的代数是一个映射：
+ \begin{haskell}
+  alg :: ListF a c -> c
+  alg NifF = init
+  alg (ConsF a c) = step (a, c)
+ \end{haskell}
+ 由值 \hask{init} 和函数 \hask{step} 确定：
+ \begin{haskell}
+  init :: c
+  step :: (a, c) -> c
+ \end{haskell}
+ 此代数的卡塔态射是列表递归器：
+ \begin{haskell}
+  recList :: c -> ((a, c) -> c) -> (List a -> c)
+ \end{haskell}
+ 其中 \hask{(List a)} 可以与不动点 \hask{Fix (ListF a)} 识别。
 
-We've seen before a recursive function that reverses a list. It was implemented by appending elements to the end of a list, which is very inefficient. It's easy to rewrite this function using a catamorphism, but the problem remains. 
+ 我们之前见过一个反转列表的递归函数。它通过将元素追加到列表末尾来实现，这非常低效。使用卡塔态射重写这个函数很容易，但问题仍然存在。
 
-Prepending elements, on the other hand, is cheap. A better algorithm would traverse the list, accumulating elements in a first-in-first-out queue, and then pop them one-by-one and prepend them to a new list. 
+ 另一方面，预置元素是廉价的。更好的算法是遍历列表，在先进先出的队列中累积元素，然后一个一个地弹出它们并将它们预置到新列表中。
 
-The queue regimen can be implemented using composition of closures: each closure is a function that remembers its environment. Here's the algebra whose carrier is a function type:
-\begin{haskell}
-revAlg :: Algebra (ListF a) ([a]->[a])
-revAlg NilF = id
-revAlg (ConsF a f) = \as -> f (a : as)
-\end{haskell}
-At each step, this algebra creates a new function. This function, when executed, will apply the previous function \hask{f} to a list, which is the result of prepending the current element \hask{a} to the function's argument \hask{as}. The resulting closure remembers the current element \hask{a} and the previous function \hask{f}.
+ 队列机制可以通过闭包组合实现：每个闭包都是一个记住其环境的函数。这里是载体为函数类型的代数：
+ \begin{haskell}
+  revAlg :: Algebra (ListF a) ([a]->[a])
+  revAlg NilF = id
+  revAlg (ConsF a f) = \as -> f (a : as)
+ \end{haskell}
+ 在每一步中，此代数创建一个新函数。这个函数在执行时会将先前的函数 \hask{f} 应用于一个列表，该列表是当前元素 \hask{a} 预置到函数的参数 \hask{as} 中的结果。生成的闭包记住当前元素 \hask{a} 和先前的函数 \hask{f}。
 
-The catamorphism for this algebra accumulates a queue of such closures. To reverse a list, we apply the result of the catamorphism for this algebra to the empty list:
-\begin{haskell}
-reverse :: Fix (ListF a) -> [a]
-reverse as = (cata revAlg as) []
-\end{haskell}
-This trick is at the core of the fold-left function, \hask{foldl}. Care should be taken when using it, because of the danger of stack overflow. 
+ 此代数的卡塔态射累积一个这样的闭包队列。要反转一个列表，我们将此代数的卡塔态射结果应用于空列表：
+ \begin{haskell}
+  reverse :: Fix (ListF a) -> [a]
+  reverse as = (cata revAlg as) []
+ \end{haskell}
+ 这种技巧是 \hask{foldl} 函数的核心。在使用它时应谨慎，因为存在堆栈溢出的危险。
 
-Lists are so common that their eliminators (called ``folds'') are included in the standard library. But there are infinitely many possible recursive data structures, each generated by its own functor, and we can use the same catamorphism on all of them.
+ 列表如此常见，以至于它们的消除器（称为“折叠”）被包含在标准库中。但可能存在无数种递归数据结构，每种结构由其自身的函子生成，并且我们可以在所有这些结构上使用相同的卡塔态射。
 
-It's worth mentioning that the list construction works in any monoidal category with coproducts. We can replace the list functor with the more general:
-\[ F x = I + a \otimes x \]
-where $I$ is the unit object and $\otimes$ is the tensor product. The solution to the fixed point equation:
-\[ L_a \cong I + a \otimes L_a \]
-can be formally written as a series:
-\[ L_a = I + a + a \otimes a + a \otimes a \otimes a + ... \]
-We interpret this as a definition of a list, which can be empty $I$, a singleton $a$, a two-element list $a \otimes a$ and so on.
+ 值得一提的是，列表构造在任何带有余积的单对象范畴中都有效。我们可以将列表函子替换为更通用的形式：
+ \[ F x = I + a \otimes x \]
+ 其中 $I$ 是单位对象，$\otimes$ 是张量积。固定点方程的解：
+ \[ L_a \cong I + a \otimes L_a \]
+ 可以形式化写作一个级数：
+ \[ L_a = I + a + a \otimes a + a \otimes a \otimes a + ... \]
+ 我们将此解释为列表的定义，其可以是空的 $I$、单个元素 $a$、两个元素的列表 $a \otimes a$ 等等。
 
-Incidentally, if you squint hard enough, this solution can be obtained by following a sequence of formal transformations:
-\begin{align*}
-L_a &\cong I + a \otimes L_a
-\\
-L_a - a \otimes L_a &\cong I
-\\
-(I - a) \otimes L_a &\cong I
-\\
-L_a &\cong I / (I - a)
-\\
-L_a &\cong I + a + a \otimes a + a \otimes a \otimes a + ...
-\end{align*}
-where the last step uses the formula for the sum of the geometric series. Admittedly, the intermediate steps make no sense, since there is no subtraction or division defined on objects, yet the final result make sense and, as we'll see later, it may be made rigorous by considering a colimit of a chain of objects.
+ 顺便提一下，如果你足够认真地观察，这个解可以通过一系列形式变换获得：
+ \begin{align*}
+  L_a &\cong I + a \otimes L_a
+  \\
+  L_a - a \otimes L_a &\cong I
+  \\
+  (I - a) \otimes L_a &\cong I
+  \\
+  L_a &\cong I / (I - a)
+  \\
+  L_a &\cong I + a + a \otimes a + a \otimes a \otimes a + ...
+ \end{align*}
+ 其中最后一步使用了几何级数和的公式。诚然，中间步骤没有意义，因为在对象上没有定义减法或除法，但最终结果是有意义的，正如我们稍后将看到的，这可以通过考虑一串对象的余极限 (Colimit) 来严格证明。
 
-\section{Initial Algebra from Universality}
+ \section{Initial Algebra from Universality 从普遍性构造初始代数}
 
-Another way of looking at the initial algebra, at least in $\mathbf{Set}$, is to view it as a collection of catamorphisms that, as a whole, hint at the existence of an underlying object. Instead of seeing $\mu F$ as a set of trees, we can look at it as a set of functions from algebras to their carriers. 
+ 在$\mathbf{Set}$（集合范畴）中，另一种看待初始代数的方法是将其视为一组卡塔态射 (Catamorphisms) 的集合，整体上暗示了一个底层对象的存在。与其将$\mu F$视为一组树，不如将其视为从代数映射到其载体的一组函数。
 
-In a way, this is just another manifestation of the Yoneda lemma: every data structure can be described either by mappings in or mappings out. The mappings in, in this case, are the constructors of the recursive data structure. The mappings out are all the catamorphisms that can be applied to it.
+ 在某种程度上，这只是Yoneda引理的另一种表现：每个数据结构都可以通过映射进来或映射出去来描述。在这种情况下，映射进来的是递归数据结构的构造函数，而映射出去的是所有可以应用于它的卡塔态射。
 
-First, let's make the polymorphism in the definition of \hask{cata} explicit:
-\begin{haskell}
-cata :: Functor f => forall a. Algebra f a -> Fix f -> a
-cata alg = alg . fmap (cata alg) . out
-\end{haskell}
-and then flip the arguments. We get:
-\begin{haskell}
-cata' :: Functor f => Fix f -> forall a. Algebra f a -> a
-cata' (In x) = \alg -> alg (fmap (flip cata' alg) x)
-\end{haskell}
-The function \index{\hask{flip}}\hask{flip} reverses the order of arguments to a function:
-\begin{haskell}
-flip :: (a -> b -> c) -> (b -> a -> c)
-flip f b a = f a b
-\end{haskell}
-This gives us a mapping from \hask{Fix f} to a set of polymorphic functions.
+ 首先，让我们明确\hask{cata}定义中的多态性：
+ \begin{haskell}
+  cata :: Functor f => forall a. Algebra f a -> Fix f -> a
+  cata alg = alg . fmap (cata alg) . out
+ \end{haskell}
+ 然后交换参数的顺序。我们得到：
+ \begin{haskell}
+  cata' :: Functor f => Fix f -> forall a. Algebra f a -> a
+  cata' (In x) = \alg -> alg (fmap (flip cata' alg) x)
+ \end{haskell}
+ 函数\index{\hask{flip}}\hask{flip}反转函数的参数顺序：
+ \begin{haskell}
+  flip :: (a -> b -> c) -> (b -> a -> c)
+  flip f b a = f a b
+ \end{haskell}
+ 这为我们提供了一个从\hask{Fix f}到一组多态函数的映射。
 
-Conversely, given a polymorphic function of the type:
-\begin{haskell}
-forall a. Algebra f a -> a
-\end{haskell}
-we can reconstruct \hask{Fix f}:
-\begin{haskell}
-uncata :: Functor f => (forall a. Algebra f a -> a) -> Fix f
-uncata alga = alga In
-\end{haskell}
-In fact, these two functions, \hask{cata'} and \hask{uncata}, are the inverse of each other, establishing the isomorphism between \hask{Fix f} and the type of polymorphic functions:
-\begin{haskell}
-data Mu f = Mu (forall a. Algebra f a -> a)
-\end{haskell}
-We can now substitute \hask{Mu f} everywhere we used  \hask{Fix f}.
+ 相反，给定一个类型为：
+ \begin{haskell}
+  forall a. Algebra f a -> a
+ \end{haskell}
+ 的多态函数，我们可以重构\hask{Fix f}：
+ \begin{haskell}
+  uncata :: Functor f => (forall a. Algebra f a -> a) -> Fix f
+  uncata alga = alga In
+ \end{haskell}
+ 事实上，这两个函数\hask{cata'}和\hask{uncata}是彼此的逆元，建立了\hask{Fix f}与多态函数类型之间的同构：
+ \begin{haskell}
+  data Mu f = Mu (forall a. Algebra f a -> a)
+ \end{haskell}
+ 我们现在可以将\hask{Mu f}替换到任何使用\hask{Fix f}的地方。
 
-Folding over \hask{Mu f} is easy, since \hask{Mu} carries in itself its own set of catamorphisms:
-\begin{haskell}
-cataMu :: Algebra f a -> (Mu f -> a)
-cataMu alg (Mu h) = h alg
-\end{haskell}
+ 在\hask{Mu f}上进行折叠 (Folding) 很容易，因为\hask{Mu}本身携带了一组卡塔态射：
+ \begin{haskell}
+  cataMu :: Algebra f a -> (Mu f -> a)
+  cataMu alg (Mu h) = h alg
+ \end{haskell}
 
-You might be wondering how one can construct terms of the type \hask{Mu f} for, let's say lists. It can be done using recursion:
-\begin{haskell}
-fromList :: forall a. [a] -> Mu (ListF a)
-fromList as = Mu h
+ 你可能想知道如何为列表之类的结构构造\hask{Mu f}类型的项。这可以通过递归完成：
+ \begin{haskell}
+  fromList :: forall a. [a] -> Mu (ListF a)
+  fromList as = Mu h
   where h :: forall x. Algebra (ListF a) x -> x
-        h alg = go as
-          where
-            go [] = alg NilF
-            go (n: ns) = alg (ConsF n (go ns))
-\end{haskell}
-To compile this code you have to use the language pragma:
-\begin{haskell}
-{-# language ScopedTypeVariables #-}
-\end{haskell}
-which puts the type variable \hask{a} in the scope of the \hask{where} clause.
+  h alg = go as
+  where
+  go [] = alg NilF
+  go (n: ns) = alg (ConsF n (go ns))
+ \end{haskell}
+ 要编译此代码，你需要使用语言指示符：
+ \begin{haskell}
+ {-# language ScopedTypeVariables #-}
+ \end{haskell}
+ 这将类型变量\hask{a}引入\hask{where}子句的作用域。
 
-\begin{exercise}
-Write a test that takes a list of integers, converts it to the \hask{Mu} form, and calculates the sum using \hask{cataMu}.
-\end{exercise}
+ \begin{exercise}
+  编写一个测试，获取一个整数列表，将其转换为\hask{Mu}形式，并使用\hask{cataMu}计算其总和。
+ \end{exercise}
 
+ \section{Initial Algebra as a Colimit 初始代数作为余极限}
 
-\section{Initial Algebra as a Colimit}
+ 通常情况下，在代数范畴中，初始对象不一定存在。但如果它存在，Lambek引理告诉我们，它是这些代数自函子的一个不动点。这个不动点的构造有点神秘，因为它涉及递归结的绑扎。
 
-In general, there is no guarantee that the initial object in the category of algebras exists. But if it exists, Lambek's lemma tells us that it's a fixed point of the endofunctor for those algebras.  The construction of this fixed point is a little mysterious, since it involves tying the recursive knot. 
+ 粗略地说，不动点是在我们无限次应用函子之后达到的。然后，再应用它一次也不会改变任何东西。无穷加一仍然是无穷。如果我们一步一步地进行，这个想法可以被精确化。为简单起见，我们考虑集合范畴中的代数，它具有所有好的性质。
 
-Loosely speaking, the fixed point is reached after we apply the functor infinitely many times. Then, applying it once more won't change anything. Infinity plus one is still infinity. This idea can be made precise if we take it one step at a time. For simplicity, let's consider algebras in the category of sets, which has all the nice properties.
+ 在我们的例子中，构建递归数据结构的实例总是从叶子开始。叶子是函子定义中不依赖于类型参数的部分：列表的\hask{NilF}，树的\hask{ValF}，\hask{Maybe}的\hask{Nothing}等。
 
-We've seen, in our examples, that building instances of recursive data structures always starts with the leaves. The leaves are the parts in the definition of the functor that don't depend on the type parameter: the \hask{NilF} of the list, the \hask{ValF} of the tree, the \hask{Nothing} of the \hask{Maybe}, etc. 
+ 如果我们将我们的函子$F$应用于初始对象——空集$0$，我们可以将它们分离出来。由于空集没有元素，类型$F 0$的实例仅为叶子。
 
-We can tease them out if we apply our functor $F$ to the initial object---the empty set $0$. Since the empty set has no elements, the instances of the type $F 0$ are leaves only. 
+ 实际上，类型\hask{Maybe Void}的唯一居住者是通过\hask{Nothing}构造的。类型\hask{ExprF Void}的唯一居住者是\hask{ValF n}，其中\hask{n}是一个\hask{Int}。
 
-Indeed, the only inhabitant of the type \hask{Maybe Void} is constructed using \hask{Nothing}. The only inhabitants of the type \hask{ExprF Void} are \hask{ValF n}, where \hask{n} is an \hask{Int}.
+ 换句话说，$F 0$是函子$F$的“叶子类型”。叶子是深度为一的树。对于\hask{Maybe}函子来说，只有一个。此函子的叶子类型是单例：
+ \begin{haskell}
+  m1 :: Maybe Void
+  m1 = Nothing
+ \end{haskell}
 
-In other words, $F 0$ is the ``type of leaves'' for the functor $F$. Leaves are trees of depth one. For the \hask{Maybe} functor there's only one. The type of leaves for this functor is a singleton:
-\begin{haskell}
-m1 :: Maybe Void
-m1 = Nothing
-\end{haskell}
+ 在第二次迭代中，我们将$F$应用于上一步中的叶子，并得到深度至多为二的树。它们的类型是$F(F 0)$。
 
-In the second iteration, we apply $F$ to the leaves from the previous step and get trees of depth at most two. Their type is $F(F 0)$. 
+ 例如，这些是类型\hask{Maybe(Maybe Void)}的所有项：
+ \begin{haskell}
+  m2, m2' :: Maybe (Maybe Void)
+  m2 = Nothing
+  m2' = Just Nothing
+ \end{haskell}
 
-For instance, these are all the terms of the type \hask{Maybe(Maybe Void)}:
-\begin{haskell}
-m2, m2' :: Maybe (Maybe Void)
-m2 = Nothing
-m2' = Just Nothing
-\end{haskell}
+ 我们可以继续这个过程，在每一步中添加更深的树。在第$n$次迭代中，类型$F^n 0$（$F$的$n$次应用于初始对象）描述了深度至多为$n$的所有树。然而，对于每个$n$，仍然有无限多的深度大于$n$的树未被覆盖。
 
-We can continue this process, adding deeper and deeper trees at each step. In the $n$-th iteration, the type $F^n 0$ ($n$-fold application of $F$ to the initial object) describes all trees of depth up to $n$. However, for every $n$, there are still infinitely many trees of depth greater than $n$ that are not covered. 
+ 如果我们知道如何定义$F^{\infty} 0$，我们将覆盖所有可能的树。我们可以尝试的下一步是将所有这些部分树相加，并构造一个无限和类型。就像我们定义两个类型的和一样，我们可以定义许多类型的和，包括无限多的类型。
 
-If we knew how to define $F^{\infty} 0$, we would have covered all possible trees. The next best thing that we could try is to add up all those partial trees and construct an infinite sum type. Just like we have defined sums of two types, we can define sums of many types, including infinitely many. 
-
-An infinite sum (a coproduct):
-$$ \sum_{n = 0}^{\infty} F^n 0$$
-is just like a finite sum, except that it has infinitely many constructors $i_n$:
-\[
- \begin{tikzcd}
- 0
- \arrow[ddrr, "i_0"']
- & F 0
-  \arrow[ddr, "i_1"]
-& F (F 0)
-  \arrow[dd, "i_2"]
- & ...
- & F^n 0
-  \arrow[ddll, red, "i_n"]
- & ...
- \\
- \\
- &&\sum_{n = 0}^{\infty} F^n 0
+ 无限和（即余积）：
+ $$ \sum_{n = 0}^{\infty} F^n 0$$
+ 就像有限和一样，只不过它有无限多个构造函数$i_n$：
+ \[
+  \begin{tikzcd}
+   0
+   \arrow[ddrr, "i_0"']
+   & F 0
+   \arrow[ddr, "i_1"]
+   & F (F 0)
+   \arrow[dd, "i_2"]
+   & ...
+   & F^n 0
+   \arrow[ddll, red, "i_n"]
+   & ...
+   \\
+   \\
+   &&\sum_{n = 0}^{\infty} F^n 0
   \end{tikzcd}
-\]
-It has the universal mapping-out property, just like the sum of two types, only with infinitely many cases. (Obviously, we can't express it in Haskell.)
+ \]
+ 它具有通用的映射属性，类似于两个类型的和，只不过有无限多个情况。（显然，我们不能在Haskell中表达它。）
 
-To construct a tree of depth $n$, we would first select it from $F^n 0$ and use the $n$-th constructor $i_n$ to inject it into the sum. 
+ 要构造深度为$n$的树，我们首先从$F^n 0$中选择它，并使用第$n$个构造函数$i_n$将其注入和中。
 
-There is just one problem: the same tree shape can also be constructed using any of the $F^m 0$, for $m > n$. 
+ 只有一个问题：相同的树形状也可以通过任何$F^m 0$（$m > n$）构造。
 
-Indeed, we've seen the leaf \hask{Nothing} appear in \hask{Maybe Void} and \hask{Maybe(Maybe Void)}. In fact it shows up in any nonzero power of \hask{Maybe} acting on \hask{Void}. 
+ 实际上，我们已经看到叶子\hask{Nothing}出现在\hask{Maybe Void}和\hask{Maybe(Maybe Void)}中。事实上，它出现在\hask{Maybe}作用于\hask{Void}的任何非零次幂中。
 
-Similarly, \hask{Just Nothing} shows up in all powers starting with two.
+ 类似地，\hask{Just Nothing}出现在从二次幂开始的所有幂中。
 
-\hask{Just(Just(Nothing))} shows up in all powers starting with three, and so on...
+ \hask{Just(Just(Nothing))}出现在从三次幂开始的所有幂中，以此类推……
 
-But there is a way to get rid of all these duplicates. The trick is to replace the sum by a colimit. Instead of a diagram consisting of discrete objects, we can construct a chain (such chains are called $\omega$-chains). Let's call this chain $\Gamma$, and its colimit $i$:
-\[i = \text{Colim} \, \Gamma \]
+ 但是有一种方法可以消除所有这些重复。诀窍是用余极限替代和。我们可以构造一个链（这些链被称为$\omega$-链）。我们称这个链为$\Gamma$，其余极限为$i$：
+ \[i = \text{Colim} \, \Gamma \]
 
-\[
- \begin{tikzcd}
- 0
- \arrow[r, "\mbox{!`}"]
- \arrow[ddrr, "i_0"']
- & F 0
-  \arrow[r, "F\mbox{!`}"]
- \arrow[ddr, "i_1"]
-& F (F 0)
-  \arrow[r, "F(F\mbox{!`})"]
-  \arrow[dd, "i_2"]
- & ...
- \arrow[r]
- & F^n 0
-  \arrow[r]
- \arrow[ddll, "i_n"]
- & ...
- \\
- \\
- &&i
+ \[
+  \begin{tikzcd}
+   0
+   \arrow[r, "\mbox{!`}"]
+   \arrow[ddrr, "i_0"']
+   & F 0
+   \arrow[r, "F\mbox{!`}"]
+   \arrow[ddr, "i_1"]
+   & F (F 0)
+   \arrow[r, "F(F\mbox{!`})"]
+   \arrow[dd, "i_2"]
+   & ...
+   \arrow[r]
+   & F^n 0
+   \arrow[r]
+   \arrow[ddll, "i_n"]
+   & ...
+   \\
+   \\
+   &&i
   \end{tikzcd}
-\]
-It's almost the same as the sum, but with additional arrows at the base of the cocone. These arrows are the cumulative liftings of the unique arrow $\mbox{!`}$ that goes from the initial object to $F 0$ (we called it \hask{absurd} in Haskell). The effect of these arrows is to collapse the set of infinitely many copies of the same tree down to just one representative. 
+ \]
+ 这几乎与和相同，只不过在余锥 (Cocone) 的基部有额外的箭头。这些箭头是唯一箭头$\mbox{!`}$的累积提升，从初始对象到$F 0$（我们在Haskell中称之为\hask{absurd}）。这些箭头的效果是将无限多个相同树的副本缩减为一个代表。
 
-To see that, consider for instance a tree of depth $3$. It can be first found as an element of $F^3 0$, that is to say, as an arrow $t \colon 1 \to F^3 0$. It is injected into the colimit $i$ as the composite $i_3 \circ t$. 
+ 例如，考虑一个深度为3的树。它可以首先作为类型$F^3 0$的元素找到，即箭头$t \colon 1 \to F^3 0$。它通过复合$i_3 \circ t$注入余极限$i$。
 
-\[
- \begin{tikzcd}
- ...
-& 1
-\arrow[d, red, "t"]
-\arrow[dr, "t'"]
- \\
- ...
- \arrow[r]
- & F^3 0 
- \arrow[r,  blue, "F^3 (\mbox{!`})"]
- \arrow[d, blue, "i_3"]
- & F^4 0
- \arrow[dl, blue, "i_4"]
- \\
- &  i
+ \[
+  \begin{tikzcd}
+   ...
+   & 1
+   \arrow[d, red, "t"]
+   \arrow[dr, "t'"]
+   \\
+   ...
+   \arrow[r]
+   & F^3 0
+   \arrow[r,  blue, "F^3 (\mbox{!`})"]
+   \arrow[d, blue, "i_3"]
+   & F^4 0
+   \arrow[dl, blue, "i_4"]
+   \\
+   &  i
   \end{tikzcd}
-\]
-The same shape of a tree is also found in $F^4 0$, as the composite $t' = F^3 (\mbox{!`}) \circ t$. It is injected into the colimit as the composite $i_4 \circ t' = i_4 \circ F^3 (\mbox{!`}) \circ t$. 
+ \]
+ 同一树形也可以在$F^4 0$中找到，作为复合$t' = F^3 (\mbox{!`}) \circ t$。它通过复合$i_4 \circ t' = i_4 \circ F^3 (\mbox{!`}) \circ t$注入余极限。
 
-This time, however, we have the commuting triangle--- the face of the cocone:
-\[i_4 \circ F^3 (\mbox{!`}) = i_3 \]
-which means that:
-\[ i_4 \circ t' =  i_4 \circ F^3 (\mbox{!`}) \circ t =  i_3 \circ t\]
-The two copies of the tree have been identified in the colimit. You can convince yourself that this procedure removes all duplicates.
+ 然而，这次我们有一个余锥的通用三角形：
+ \[i_4 \circ F^3 (\mbox{!`}) = i_3 \]
+ 这意味着：
+ \[ i_4 \circ t' =  i_4 \circ F^3 (\mbox{!`}) \circ t =  i_3 \circ t\]
+ 在余极限中，这两棵树的副本已被识别。你可以确信这个过程消除了所有重复。
 
-\subsection{The proof}
+ \subsection{The proof 证明}
 
-We can  prove directly that $i = \text{Colim}\, \Gamma$ is the initial algebra. There is however one assumption that we have to make: the functor $F$ must preserve the colimits of $\omega$-chains. The colimit of $F \Gamma$ must be equal to $F i$.
-\[ \text{Colim} (F \Gamma) \cong F i \]
-Fortunately, this assumption holds in $\mathbf{Set}$\footnote{This is the consequence of the fact that colimits in $\Set$ are built from disjoint unions of sets.}. 
+ 我们可以直接证明$i = \text{Colim}\, \Gamma$是初始代数。然而，我们必须做一个假设：函子$F$必须保留$\omega$-链的余极限。$F \Gamma$的余极限必须等于$F i$。
+ \[ \text{Colim} (F \Gamma) \cong F i \]
+ 幸运的是，这个假设在$\mathbf{Set}$中成立\footnote{这是$\Set$中的余极限由集合的不相交并集构成的结果。}。
 
-Here's the sketch of the proof: To show the isomorphism, we'll first construct an arrow $i \to F i$ and then an arrow $\iota \colon F i \to i$ in the opposite direction. We'll skip the proof that they are the inverse of each other. Then we'll show the universality of $(i, \iota)$ by constructing a catamorphism to an arbitrary algebra.
+ 这里是证明的概要：为了证明同构，我们首先构造箭头$i \to F i$，然后构造相反方向的箭头$\iota \colon F i \to i$。我们将跳过证明它们是彼此逆元的步骤。然后，我们将通过构造一个到任意代数的卡塔态射来证明$(i, \iota)$的普遍性。
 
-All subsequent proofs follow a simple pattern. We start with a universal cocone that defines a colimit. Then we construct another cocone based on the same chain. From universality, there must be a unique arrow from the colimit to the apex of this new cocone.
+ 所有后续证明都遵循一个简单的模式。我们从定义余极限的通用余锥开始。然后，我们基于相同的链构造另一个余锥。由于通用性，必须存在一个从余极限到这个新余锥顶点的唯一箭头。
 
-We use this trick to construct the mapping $i \to F i$. If we can construct a cocone from the chain $\Gamma$ to $\text{Colim} (F \Gamma)$ then, by universality, there must be an arrow from $i$ to $\text{Colim} (F \Gamma)$. The latter, by our assumption that $F$ preserves colimits, is isomorphic to $F i$. So we'll have a mapping $i \to F i$.
+ 我们使用这个技巧来构造$i \to F i$的映射。如果我们能够从链$\Gamma$构造到$\text{Colim} (F \Gamma)$的余锥，那么根据通用性，必须存在一个从$i$到$\text{Colim} (F \Gamma)$的箭头。后者，由于我们的假设$F$保留余极限，是同构于$F i$的。因此，我们将拥有一个$i \to F i$的映射。
 
-To construct this cocone, first notice that $\text{Colim} (F \Gamma$) is, by definition, the apex of a cocone $F \Gamma$. 
+ 为了构造这个余锥，首先注意到$\text{Colim} (F \Gamma)$根据定义是$F \Gamma$的余锥的顶点。
 
-\[
- \begin{tikzcd}
- F 0
- \arrow[r, blue, "F \mbox{!`}"]
- \arrow[ddrr, "j_1"']
- &  F (F 0)
-  \arrow[r, blue, "F(F  \mbox{!`})"]
- \arrow[ddr, "j_2"]
-& F^3 0
-  \arrow[r, blue, "F^3\mbox{!`}"]
-  \arrow[dd, "j_3"]
- & ...
- \arrow[r]
- & F^n 0
-  \arrow[r, blue]
- \arrow[ddll, "j_n"]
- & ...
- \\
- \\
- &&\text{Colim} (F \Gamma)
+ \[
+  \begin{tikzcd}
+   F 0
+   \arrow[r, blue, "F \mbox{!`}"]
+   \arrow[ddrr, "j_1"']
+   &  F (F 0)
+   \arrow[r, blue, "F(F  \mbox{!`})"]
+   \arrow[ddr, "j_2"]
+   & F^3 0
+   \arrow[r, blue, "F^3\mbox{!`}"]
+   \arrow[dd, "j_3"]
+   & ...
+   \arrow[r]
+   & F^n 0
+   \arrow[r, blue]
+   \arrow[ddll, "j_n"]
+   & ...
+   \\
+   \\
+   &&\text{Colim} (F \Gamma)
   \end{tikzcd}
-\]
-The diagram $F \Gamma$ is the same as $\Gamma$, except that it's missing the naked initial object at the start of the chain.
+ \]
+ 图$F \Gamma$与$\Gamma$相同，只不过它缺少了链起始处的裸初始对象。
 
-The spokes of the cocone we are looking for, from $\Gamma$ to $\text{Colim} (F \Gamma)$, are marked in red in the diagram below:
-\[
- \begin{tikzcd}
- 0
- \arrow[r, "\mbox{!`}"]
- \arrow[d, red, "\mbox{!`}"]
- & F 0
-  \arrow[r, "F\mbox{!`}"]
-  \arrow[d, red, "F\mbox{!`}"]
-& F (F 0)
-  \arrow[r, "F(F\mbox{!`})"]
-  \arrow[d, red, "F(F\mbox{!`})"]
- & ...
- \arrow[r]
- & F^{n+1} 0
-  \arrow[r]
-  \arrow[d, red]
- & ...
- \\
- F 0
- \arrow[r, blue, "F \mbox{!`}"]
- \arrow[ddrr, red, "j_1"']
- &  F (F 0)
-  \arrow[r, blue, "F(F  \mbox{!`})"]
- \arrow[ddr, red, "j_2"]
-& F^3 0
-  \arrow[r, blue, "F^3\mbox{!`}"]
-  \arrow[dd, red, "j_3"]
- & ...
- \arrow[r, blue]
- & F^n 0
-  \arrow[r, blue]
- \arrow[ddll, red, "j_n"]
- & ...
- \\
- \\
- &&\text{Colim} (F \Gamma)
+ 我们寻找的从$\Gamma$到$\text{Colim} (F \Gamma)$的余锥的辐条在下面的图中标记为红色：
+ \[
+  \begin{tikzcd}
+   0
+   \arrow[r, "\mbox{!`}"]
+   \arrow[d, red, "\mbox{!`}"]
+   & F 0
+   \arrow[r, "F\mbox{!`}"]
+   \arrow[d, red, "F\mbox{!`}"]
+   & F (F 0)
+   \arrow[r, "F(F\mbox{!`})"]
+   \arrow[d, red, "F(F\mbox{!`})"]
+   & ...
+   \arrow[r]
+   & F^{n+1} 0
+   \arrow[r]
+   \arrow[d, red]
+   & ...
+   \\
+   F 0
+   \arrow[r, blue, "F \mbox{!`}"]
+   \arrow[ddrr, red, "j_1"']
+   &  F (F 0)
+   \arrow[r, blue, "F(F  \mbox{!`})"]
+   \arrow[ddr, red, "j_2"]
+   & F^3 0
+   \arrow[r, blue, "F^3\mbox{!`}"]
+   \arrow[dd, red, "j_3"]
+   & ...
+   \arrow[r, blue]
+   & F^n 0
+   \arrow[r, blue]
+   \arrow[ddll, red, "j_n"]
+   & ...
+   \\
+   \\
+   &&\text{Colim} (F \Gamma)
   \end{tikzcd}
-\]
-Since $i = \text{Colim}\, \Gamma$ is the apex of the universal cocone based on $\Gamma$, there must be a unique mapping out of it to $\text{Colim} (F \Gamma)$ which, as we said, was equal to $F i$. This is the mapping we were looking for:
-\[ i \to F i \]
+ \]
+ 因为$i = \text{Colim}\, \Gamma$是基于$\Gamma$的通用余锥的顶点，所以必须存在一个从其映射到$\text{Colim} (F \Gamma)$的唯一映射，这就是我们所说的$F i$。这是我们寻找的映射：
+ \[ i \to F i \]
 
-Next, notice that the chain $F \Gamma$ is a sub-chain of $\Gamma$, so it can be embedded in it. It means that we can construct a cocone from $F \Gamma$ to the apex $i$ by going through (a sub-chain of) $\Gamma$ (the red arrows below). 
+ 接下来，注意链$F \Gamma$是$\Gamma$的子链，因此可以嵌入其中。这意味着我们可以通过$\Gamma$（的子链）构造一个从$F \Gamma$到顶点$i$的余锥（下图中的红色箭头）。
 
-\[
- \begin{tikzcd}
- & F 0
-  \arrow[r, blue, "F\mbox{!`}"]
-  \arrow[d, red]
-& F (F 0)
-  \arrow[r, blue, "F(F\mbox{!`})"]
-  \arrow[d, red]
- & ...
- \arrow[r, blue]
- & F^{n} 0
-  \arrow[r, blue]
-  \arrow[d, red]
- & ...
- \\
-  0
- \arrow[r, "\mbox{!`}"]
- \arrow[ddrr,  "i_0"']
- &  F 0
-  \arrow[r, "F  \mbox{!`}"]
- \arrow[ddr, red, "i_1"]
-& F^2 0
-  \arrow[r, "F^2\mbox{!`}"]
-  \arrow[dd, red, "i_2"]
- & ...
- \arrow[r]
- & F^n 0
-  \arrow[r]
- \arrow[ddll, red, "i_n"]
- & ...
- \\
- \\
- &&i
+ \[
+  \begin{tikzcd}
+   & F 0
+   \arrow[r, blue, "F\mbox{!`}"]
+   \arrow[d, red]
+   & F (F 0)
+   \arrow[r, blue, "F(F\mbox{!`})"]
+   \arrow[d, red]
+   & ...
+   \arrow[r, blue]
+   & F^{n} 0
+   \arrow[r, blue]
+   \arrow[d, red]
+   & ...
+   \\
+   0
+   \arrow[r, "\mbox{!`}"]
+   \arrow[ddrr,  "i_0"']
+   &  F 0
+   \arrow[r, "F  \mbox{!`}"]
+   \arrow[ddr, red, "i_1"]
+   & F^2 0
+   \arrow[r, "F^2\mbox{!`}"]
+   \arrow[dd, red, "i_2"]
+   & ...
+   \arrow[r]
+   & F^n 0
+   \arrow[r]
+   \arrow[ddll, red, "i_n"]
+   & ...
+   \\
+   \\
+   &&i
   \end{tikzcd}
-\]
+ \]
 
-From the universality of the $\text{Colim} (F \Gamma)$ it follows that there is a mapping out 
-\[\text{Colim} (F \Gamma) \to i \]
-and thus we have the mapping in the other direction:
-\[ \iota \colon F i \to i \]
-This shows that $i$ is a carrier of an algebra. In fact, it can be shown that the two mappings are the inverse of each other, as we would expect from the Lambek's lemma.
+ 从$\text{Colim} (F \Gamma)$的通用性可以得出存在一个映射
+ \[\text{Colim} (F \Gamma) \to i \]
+ 因此我们有了另一个方向的映射：
+ \[ \iota \colon F i \to i \]
+ 这表明$i$是代数的载体。事实上，可以证明这两个映射是彼此的逆元，正如我们从Lambek引理中所预期的那样。
 
-To show that  $(i, \iota)$ is indeed the initial algebra, we have to construct a mapping out of it to an arbitrary algebra $(a, \alpha \colon F a \to a)$. Again, we can use universality, as long as we can construct a cocone from $\Gamma$ to $a$. 
+ 为了证明$(i, \iota)$确实是初始代数，我们必须构造一个从它到任意代数$(a, \alpha \colon F a \to a)$的映射。再次，我们可以使用通用性，只要我们能够从$\Gamma$构造到$a$的余锥。
 
-\[
- \begin{tikzcd}
- 0
- \arrow[r, "\mbox{!`}"]
- \arrow[ddrr, "f_0"']
- & F 0
-  \arrow[r, "F\mbox{!`}"]
- \arrow[ddr, "f_1"]
-& F (F 0)
-  \arrow[r, "F(F\mbox{!`})"]
-  \arrow[dd, "f_2"]
- & ...
- \arrow[r]
- & F^n 0
-  \arrow[r]
- \arrow[ddll, "f_n"]
- & ...
- \\
- \\
- &&a
+ \[
+  \begin{tikzcd}
+   0
+   \arrow[r, "\mbox{!`}"]
+   \arrow[ddrr, "f_0"']
+   & F 0
+   \arrow[r, "F\mbox{!`}"]
+   \arrow[ddr, "f_1"]
+   & F (F 0)
+   \arrow[r, "F(F\mbox{!`})"]
+   \arrow[dd, "f_2"]
+   & ...
+   \arrow[r]
+   & F^n 0
+   \arrow[r]
+   \arrow[ddll, "f_n"]
+   & ...
+   \\
+   \\
+   &&a
   \end{tikzcd}
-\]
+ \]
 
+ 这个余锥的第零辐条从$0$到$a$，所以它只是$f_0 = \mbox{!`}​$。
 
-The zeroth spoke of this cocone goes from $0$ to $a$, so it's just $f_0 = \mbox{!`}$.
+ 第一个辐条$F 0 \to a$是$f_1 = \alpha \circ F f_0$，因为$F f_0 \colon F 0 \to F a$和$\alpha \colon F a \to a$。
 
-The first spoke, $F 0 \to a$, is $f_1 = \alpha \circ F f_0$, because $F f_0 \colon F 0 \to F a$ and $\alpha \colon F a \to a$.
+ 第三个辐条$F (F 0) \to a$是$f_2 = \alpha \circ F f_1$。依此类推...
 
-The third spoke, $F (F 0) \to a$ is  $f_2 = \alpha \circ F f_1$.  And so on...
+ 从$i$到$a$的唯一映射就是我们的卡塔态射。通过一些更详细的图追踪，可以证明它确实是代数态射。
 
-The unique mapping from $i$ to $a$ is then our catamorphism. With some more diagram chasing, it can be shown that it's indeed an algebra morphism. 
-
-Notice that this construction only works if we can ``prime'' the process by creating the leaves of the functor. If, on the other hand, $F 0 \cong 0$, then there are no leaves, and all further iterations will keep reproducing $0$. 
+ 请注意，这种构造仅在我们可以通过创建函子的叶子来“启动”该过程的情况下才有效。另一方面，如果$F 0 \cong 0$，那么就没有叶子，并且所有进一步的迭代将不断地生成$0$。
 
 \end{document}
